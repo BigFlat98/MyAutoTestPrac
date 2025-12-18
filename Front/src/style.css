@@ -1,0 +1,127 @@
+:root {
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-border: #000000; /* Thin black line */
+  --color-accent: #996515; /* Dark Gold */
+  --color-accent-hover: #b8860b;
+
+  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  font-family: var(--font-family);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: var(--color-text);
+  background-color: var(--color-bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: flex-start; /* Align top */
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+  padding-top: 5rem;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 2.2em;
+  line-height: 1.1;
+  font-weight: 300; /* Lighter weight for elegance */
+  letter-spacing: -0.02em;
+  margin-bottom: 2rem;
+  color: var(--color-text);
+}
+
+button {
+  border-radius: 0;
+  border: 1px solid var(--color-border);
+  padding: 0.8rem 1.5rem; /* Use rem for consistent scaling */
+  font-size: 0.9rem; /* Adjusted for visual balance */
+  line-height: 1.5; /* Match global line-height */
+  height: 3.2rem; /* Explicit height to match input */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  font-weight: 500;
+  font-family: inherit;
+  background-color: white;
+  color: var(--color-text);
+  cursor: pointer;
+  
+  /* Animation Setup */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover {
+  border-color: var(--color-accent);
+  color: white;
+  background-color: var(--color-accent);
+  letter-spacing: 2px; /* Expanding text effect */
+  transform: translateY(-2px); /* Subtle lift */
+  box-shadow: 0 4px 12px rgba(153, 101, 21, 0.2); /* Gold shadow */
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+input {
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: 0.8rem;
+  font-size: 0.9rem; /* Match button font size roughly */
+  line-height: 1.5;
+  height: 3.2rem; /* Explicit height to match button */
+  
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--color-text);
+  outline: none;
+  min-width: 250px;
+  
+  transition: all 0.3s ease;
+}
+
+input:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #666;
+}
+
+input:focus {
+  border-color: var(--color-accent);
+  background: white;
+  box-shadow: 0 0 0 1px var(--color-accent); /* Subtle spread */
+}
+
+/* Utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#app {
+  animation: fadeIn 0.8s ease-out forwards;
+}
