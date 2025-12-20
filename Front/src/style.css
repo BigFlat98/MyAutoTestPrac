@@ -1,127 +1,78 @@
-:root {
-  --color-bg: #ffffff;
-  --color-text: #1a1a1a;
-  --color-border: #000000; /* Thin black line */
-  --color-accent: #996515; /* Dark Gold */
-  --color-accent-hover: #b8860b;
+@import "tailwindcss";
 
-  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+@theme {
+  --color-luxury-gold: #996515;
+  --color-luxury-gold-hover: #b8860b;
+  --color-luxury-gold-light: rgba(153, 101, 21, 0.02);
 
-  font-family: var(--font-family);
-  line-height: 1.5;
-  font-weight: 400;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  color: var(--color-text);
-  background-color: var(--color-bg);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Custom height utility */
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: flex-start; /* Align top */
-  justify-content: center;
-  min-width: 320px;
-  min-height: 100vh;
-  padding-top: 5rem;
+@utility h-input {
+  height: 3.2rem;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  width: 100%;
+@layer base {
+  :root {
+    --color-bg: #ffffff;
+    --color-text: #1a1a1a;
+  }
+
+  body {
+    @apply m-0 flex items-start justify-center min-w-[320px] min-h-screen pt-20 bg-white text-black font-sans leading-normal antialiased;
+  }
+
+  h1 {
+    @apply text-4xl font-light leading-tight tracking-tight mb-8 text-black;
+  }
+
+  button {
+    @apply rounded-none border border-black px-6 py-3 text-sm font-medium bg-white text-black cursor-pointer uppercase tracking-widest relative overflow-hidden inline-flex items-center justify-center h-input transition-all duration-300 ease-in-out;
+  }
+
+  button:hover {
+    @apply border-luxury-gold text-white bg-luxury-gold tracking-[2px] -translate-y-0.5 shadow-lg;
+    box-shadow: 0 4px 12px rgba(153, 101, 21, 0.2);
+  }
+
+  button:active {
+    @apply translate-y-0;
+  }
+
+  input {
+    @apply border border-black rounded-none p-3 text-sm bg-white/50 text-black outline-none min-w-[250px] transition-all duration-300 ease-out h-input;
+  }
+
+  input:hover {
+    @apply bg-white/80 border-gray-600;
+  }
+
+  input:focus {
+    @apply border-luxury-gold bg-white ring-1 ring-luxury-gold;
+  }
 }
 
-* {
-  box-sizing: border-box;
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
 }
 
-h1 {
-  font-size: 2.2em;
-  line-height: 1.1;
-  font-weight: 300; /* Lighter weight for elegance */
-  letter-spacing: -0.02em;
-  margin-bottom: 2rem;
-  color: var(--color-text);
-}
-
-button {
-  border-radius: 0;
-  border: 1px solid var(--color-border);
-  padding: 0.8rem 1.5rem; /* Use rem for consistent scaling */
-  font-size: 0.9rem; /* Adjusted for visual balance */
-  line-height: 1.5; /* Match global line-height */
-  height: 3.2rem; /* Explicit height to match input */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  
-  font-weight: 500;
-  font-family: inherit;
-  background-color: white;
-  color: var(--color-text);
-  cursor: pointer;
-  
-  /* Animation Setup */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-}
-
-button:hover {
-  border-color: var(--color-accent);
-  color: white;
-  background-color: var(--color-accent);
-  letter-spacing: 2px; /* Expanding text effect */
-  transform: translateY(-2px); /* Subtle lift */
-  box-shadow: 0 4px 12px rgba(153, 101, 21, 0.2); /* Gold shadow */
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-input {
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-  padding: 0.8rem;
-  font-size: 0.9rem; /* Match button font size roughly */
-  line-height: 1.5;
-  height: 3.2rem; /* Explicit height to match button */
-  
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--color-text);
-  outline: none;
-  min-width: 250px;
-  
-  transition: all 0.3s ease;
-}
-
-input:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: #666;
-}
-
-input:focus {
-  border-color: var(--color-accent);
-  background: white;
-  box-shadow: 0 0 0 1px var(--color-accent); /* Subtle spread */
-}
-
-/* Utilities */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 #app {
   animation: fadeIn 0.8s ease-out forwards;
+  @apply w-full max-w-[1280px] mx-auto p-8 text-center;
 }

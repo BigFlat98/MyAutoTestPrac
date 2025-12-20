@@ -32,237 +32,106 @@ const sendEcho = async () => {
   }
 };
 
+const dbInput = ref("");
+const dbItems = ref([]); // 빈 배열로 초기화
+
+const fetchItems = async () => {
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/items");
+    // API가 리스트 자체를 반환하므로 response.data.items가 아니라 response.data를 써야 할 수도 있음
+    // 하지만 백엔드 응답 모델에 따라 다름. 백엔드가 [{}, {}] 형태라면 response.data가 맞음.
+    // 기존 코드: dbItems.value = response.data.items; -> 백엔드가 {"items": []} 형태였음.
+    // 방금 수정한 백엔드는 리스트를 바로 반환함: return [ItemResponse(...)]
+    // 따라서 response.data로 수정해야 함.
+    dbItems.value = response.data; 
+  } catch (error) {
+    console.error("Error fetching items:", error);
+    dbItems.value = []; // 에러 시 빈 배열 유지
+  }
+};
+
+const saveItem = async () => {
+  if (!dbInput.value) return;
+  try {
+    await axios.post("http://127.0.0.1:8000/items", {
+      content: dbInput.value,
+    });
+    dbInput.value = "";
+    await fetchItems();
+  } catch (error) {
+    console.error("Error saving item:", error);
+  }
+};
+
 onMounted(() => {
   fetchData();
+  fetchItems();
 });
 </script>
 
 <template>
-  <div class="container">
+  <div class="flex flex-col items-center gap-12 w-full max-w-[600px] mx-auto pb-20">
     <header>
-      <h1>QA Automation Workspace</h1>
+      <h1 class="border-b border-black pb-4 inline-block transition-colors duration-300 hover:text-luxury-gold">
+        QA Automation Workspace
+      </h1>
     </header>
-
-    <div class="status-bar">
-      <div class="status-item">
-        <span class="label">Backend Message</span>
-        <span class="value">{{ message || "Loading..." }}</span>
+    
+    <div class="flex justify-center items-center gap-8 border border-black py-6 px-12 w-full bg-white/80 backdrop-blur transition-all duration-500 hover:border-gray-600 hover:shadow-lg hover:-translate-y-0.5 group">
+      <div class="flex flex-col items-center gap-2 relative group/item">
+        <span class="text-xs uppercase tracking-widest text-gray-500 transition-colors duration-300 group-hover/item:text-luxury-gold">Backend Message</span>
+        <span class="font-mono text-lg transition-transform duration-300 group-hover/item:scale-110">{{ message || 'Loading...' }}</span>
       </div>
-      <div class="separator"></div>
-      <div class="status-item">
-        <span class="label">System Health</span>
-        <span class="value" :class="{ ok: healthStatus === 'ok' }">{{
-          healthStatus || "Checking..."
-        }}</span>
+      
+      <div class="w-px h-10 bg-black/30 transition-all duration-300 group-hover:h-12 group-hover:opacity-50"></div>
+      
+      <div class="flex flex-col items-center gap-2 relative group/item">
+        <span class="text-xs uppercase tracking-widest text-gray-500 transition-colors duration-300 group-hover/item:text-luxury-gold">System Health</span>
+        <span class="font-mono text-lg transition-transform duration-300 group-hover/item:scale-110" :class="{ 'text-luxury-gold': healthStatus === 'ok' }">{{ healthStatus || 'Checking...' }}</span>
       </div>
     </div>
 
-    <div class="echo-section">
-      <h2>ECHO TEST</h2>
-      <div class="input-group">
-        <input
-          v-model="inputText"
-          placeholder="Type command..."
-          @keyup.enter="sendEcho"
-        />
+    <div class="w-full flex flex-col gap-6 group/echo">
+      <h2 class="text-base font-normal tracking-[2px] text-luxury-gold m-0 text-left relative w-fit after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-px after:bg-luxury-gold after:transition-all after:duration-500 group-hover/echo:after:w-full">
+        ECHO TEST
+      </h2>
+      
+      <div class="flex gap-0">
+        <input v-model="inputText" placeholder="Type command..." @keyup.enter="sendEcho" class="flex-1 border-r-0" />
         <button @click="sendEcho">TRANSMIT</button>
       </div>
+      
+      <div class="border border-black p-6 text-left min-h-[100px] transition-all duration-500 relative overflow-hidden hover:border-gray-400 hover:shadow-inner group/response"
+           :class="{ 'border-luxury-gold bg-luxury-gold-light': echoResponse }">
+        <span class="block text-[0.7rem] text-gray-400 tracking-widest mb-2 transition-all duration-300 group-hover/response:tracking-[2px] group-hover/response:text-luxury-gold">SERVER RESPONSE</span>
+        <p class="m-0 font-mono">{{ echoResponse || 'Waiting for input...' }}</p>
+      </div>
+    </div>
 
-      <div class="response-area" :class="{ 'has-content': echoResponse }">
-        <span class="label">SERVER RESPONSE</span>
-        <p class="response-text">
-          {{ echoResponse || "Waiting for input..." }}
-        </p>
+    <!-- Data Persistence Section -->
+    <div class="w-full flex flex-col gap-6 group/db">
+      <h2 class="text-base font-normal tracking-[2px] text-luxury-gold m-0 text-left relative w-fit after:content-[''] after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-px after:bg-luxury-gold after:transition-all after:duration-500 group-hover/db:after:w-full">
+        DATA PERSISTENCE
+      </h2>
+      
+      <div class="flex gap-0">
+        <input v-model="dbInput" placeholder="Enter data to save..." @keyup.enter="saveItem" class="flex-1 border-r-0" />
+        <button @click="saveItem">SAVE TO DB</button>
+      </div>
+      
+      <div class="flex flex-col gap-2 w-full">
+        <div v-if="dbItems.length === 0" class="text-center text-gray-400 py-4 font-mono text-sm border border-dashed border-gray-300">
+          No items saved yet
+        </div>
+        <div v-for="(item, index) in dbItems" :key="index" 
+             class="border border-black p-4 text-left hover:border-luxury-gold transition-all duration-300 hover:pl-6 hover:shadow-sm bg-white">
+          <span class="font-mono">{{ item }}</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3rem;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-header h1 {
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 1rem;
-  display: inline-block;
-  transition: color 0.3s ease;
-}
-
-header h1:hover {
-  color: var(--color-accent);
-}
-
-.status-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  border: 1px solid var(--color-border);
-  padding: 1.5rem 3rem;
-  width: 100%;
-
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
-  transition: all 0.4s ease;
-}
-
-.status-bar:hover {
-  border-color: #666;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-  transform: translateY(-2px);
-}
-
-.status-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.status-item .label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #666;
-  transition: color 0.3s;
-}
-
-.status-item:hover .label {
-  color: var(--color-accent);
-}
-
-.status-item .value {
-  font-family: monospace;
-  font-size: 1.1rem;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.status-item:hover .value {
-  transform: scale(1.1);
-}
-
-.status-item .value.ok {
-  color: var(--color-accent);
-}
-
-.separator {
-  width: 1px;
-  height: 40px;
-  background-color: var(--color-border);
-  opacity: 0.3;
-  transition: height 0.3s;
-}
-
-.status-bar:hover .separator {
-  height: 50px;
-  opacity: 0.5;
-}
-
-.echo-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.echo-section h2 {
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 2px;
-  color: var(--color-accent);
-  margin: 0;
-  text-align: left;
-
-  position: relative;
-  display: inline-block;
-  width: fit-content;
-}
-
-.echo-section h2::after {
-  content: "";
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 0%;
-  height: 1px;
-  background-color: var(--color-accent);
-  transition: width 0.4s ease;
-}
-
-.echo-section:hover h2::after {
-  width: 100%;
-}
-
-.input-group {
-  display: flex;
-  gap: 0; /* Attached input and button */
-
-  /* Add focus-within effect to the whole group if desired, 
-     but currently input/button have their own styles. */
-}
-
-input {
-  flex: 1;
-  border-right: none;
-}
-
-button {
-  background-color: var(--color-text);
-  color: white;
-  border: 1px solid var(--color-text);
-}
-
-button:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
-  color: white;
-}
-
-.response-area {
-  border: 1px solid var(--color-border);
-  padding: 1.5rem;
-  text-align: left;
-  min-height: 100px;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.response-area:hover {
-  border-color: #999;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
-}
-
-.response-area.has-content {
-  border-color: var(--color-accent);
-  background-color: rgba(153, 101, 21, 0.02);
-}
-
-.response-area .label {
-  display: block;
-  font-size: 0.7rem;
-  color: #999;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-  transition: letter-spacing 0.3s;
-}
-
-.response-area:hover .label {
-  letter-spacing: 2px;
-  color: var(--color-accent);
-}
-
-.response-text {
-  margin: 0;
-  font-family: monospace;
-}
+/* Scoped styles removed in favor of Tailwind CSS utility classes in the template */
 </style>

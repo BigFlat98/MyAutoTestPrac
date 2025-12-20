@@ -1,5 +1,6 @@
-# 금일(Today) 진행 내역 요약
+# 진행 내역 요약
 
+12/18
 ## 1. 프로젝트 초기 설정
 
 - **Front (`/Front`)**:
@@ -38,3 +39,22 @@
   - **Square Edges**: 모든 버튼과 입력창의 `border-radius`는 `0`.
   - **Micro-Interactions**: Hover 시 부드러운 이동(Translate), 그림자(Shadow), 색상 전환(Transition) 필수.
   - **Sizing**: Input과 Button의 높이를 정확히 맞출 것. (현재 `3.2rem`으로 통일)
+
+
+12/20
+## 5. 데이터베이스 연동 (PostgreSQL)
+
+- **DB 선택 및 설정**:
+  - SQLite에서 PostgreSQL로 전환.
+  - `python-dotenv`를 도입하여 DB 접속 정보를 `.env` 파일로 관리.
+  - Windows 환경에서의 `asyncpg` 호환성 문제를 위해 `asyncio` 이벤트 루프 정책(`WindowsSelectorEventLoopPolicy`) 적용.
+- **백엔드 구현**:
+  - `asyncpg`를 사용한 비동기 DB 커넥션 풀(`db_pool`) 구현.
+  - `database.py`로 DB 연결 로직 모듈화 (싱글톤 패턴).
+  - `schemas.py` 생성하여 Pydantic 모델(DTO) 분리 (`ItemRequest`, `ItemResponse`).
+  - `controller` 폴더 생성 및 `APIRouter`를 사용하여 라우팅 로직 분리 (`include_router` 사용).
+  - CRUD 기능 구현: 데이터 저장(`POST /items`) 및 조회(`GET /items`).
+- **프론트엔드 연동**:
+  - `App.vue`에 데이터 저장 및 목록 조회 기능 추가.
+  - API 응답 형식(`List` vs `Dict`) 불일치로 인한 타입 에러 디버깅 및 해결.
+  - CORS 설정을 `*` (전체 허용)으로 변경하여 개발 환경 통신 문제 해결.
