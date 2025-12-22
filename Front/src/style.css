@@ -21,7 +21,7 @@
   }
 
   body {
-    @apply m-0 flex items-start justify-center min-w-[320px] min-h-screen pt-20 bg-white text-black font-sans leading-normal antialiased;
+    @apply m-0 flex items-start justify-center min-w-[320px] min-h-screen bg-white text-black font-sans leading-normal antialiased;
   }
 
   h1 {

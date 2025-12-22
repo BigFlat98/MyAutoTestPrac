@@ -17,11 +17,13 @@ async def lifespan(app: FastAPI):
 
 #router import 
 from controller.test.items import router as items_router
+from controller import dashboard
 
 app = FastAPI(lifespan=lifespan)
 
 #router 등록
 app.include_router(items_router)
+app.include_router(dashboard.router)
 
 
 # CORS definition
