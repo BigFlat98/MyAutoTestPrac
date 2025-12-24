@@ -18,6 +18,9 @@ import { RouterLink } from 'vue-router'
       <router-link to="/playground" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Playground
       </router-link>
+      <router-link to="/mustdo" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
+        Todo
+      </router-link>
     </div>
   </nav>
 </template>

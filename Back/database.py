@@ -46,10 +46,24 @@ class Database:
             # (선택) 테이블 자동 생성 로직도 여기에 둘 수 있습니다.
             async with self.pool.acquire() as conn:
                  await conn.execute('''
+                    
+                    /* Helper: Drop table for schema migration during dev */
+                    DROP TABLE IF EXISTS todos;
+
                     CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
                         content TEXT
-                    )
+                    );
+
+                    CREATE TABLE IF NOT EXISTS todos (
+                        id SERIAL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        description TEXT,
+                        due_date DATE,
+                        is_done BOOLEAN DEFAULT FALSE,
+                        author TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
                  ''')
                  
         except Exception as e:
