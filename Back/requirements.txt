@@ -4,3 +4,5 @@ python-dotenv
 asyncpg
 requests
 beautifulsoup4
+fredapi
+pandas

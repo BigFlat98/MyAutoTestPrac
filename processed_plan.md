@@ -58,3 +58,18 @@
   - `App.vue`에 데이터 저장 및 목록 조회 기능 추가.
   - API 응답 형식(`List` vs `Dict`) 불일치로 인한 타입 에러 디버깅 및 해결.
   - CORS 설정을 `*` (전체 허용)으로 변경하여 개발 환경 통신 문제 해결.
+
+12/24
+## 6. 금리 및 환율 대시보드 구현
+
+- **데이터 수집 (Backend)**:
+  - `InterestRateService`: ECOS(한국은행) 및 FRED(미 연준) API 연동. (미 금리는 `DFEDTARU` 목표 금리 사용)
+  - `ExchangeRateService`: ECOS API 연동 (원/달러 환율).
+  - 10년치 데이터를 5000건 제한으로 조회하여 2015~현재 데이터 확보.
+- **차트 구현 (Frontend)**:
+  - `chart.js`, `vue-chartjs` 도입.
+  - 10년치 데이터를 가로 스크롤로 확인 가능하도록 구현 (최근 데이터 자동 스크롤).
+  - 디자인: 한국 금리(Bright Gold), 환율(Emerald Green) 등 테마 적용.
+- **구조 개선**:
+  - `src/api/index.js` 생성하여 Axios 인스턴스 중앙 관리.
+  - `.env` 및 `Soft Coding` 적용으로 배포 환경(Nginx) 대응 준비 완료.

@@ -1,6 +1,9 @@
 #back 기본 import
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv() # .env 파일 로드 명시적 호출
 
 #db connection
 from database import db 
@@ -30,12 +33,11 @@ app.include_router(dashboard.router)
 origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "*" # 개발 편의를 위해 모든 출처 허용 (배포 시 제거 필요)
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # origins 변수 대신 강제로 와일드카드 사용
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

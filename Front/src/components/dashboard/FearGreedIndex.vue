@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/api';
 
 const score = ref(0);
 const rating = ref('');
@@ -9,7 +9,7 @@ const timestamp = ref('');
 const fetchData = async () => {
   try {
     // Fetch data from our backend
-    const response = await axios.get("http://127.0.0.1:8000/dashboard/fear-greed");
+    const response = await api.get("/dashboard/fear-greed");
     
     if (response.data) {
       score.value = response.data.score;

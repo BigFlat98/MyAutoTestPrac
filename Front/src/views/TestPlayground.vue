@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import api from "@/api";
 
 const message = ref("");
 const healthStatus = ref("");
@@ -9,10 +9,10 @@ const echoResponse = ref("");
 
 const fetchData = async () => {
   try {
-    const rootResponse = await axios.get("http://127.0.0.1:8000/");
+    const rootResponse = await api.get("/");
     message.value = rootResponse.data.message;
 
-    const healthResponse = await axios.get("http://127.0.0.1:8000/health");
+    const healthResponse = await api.get("/health");
     healthStatus.value = healthResponse.data.status;
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -22,7 +22,7 @@ const fetchData = async () => {
 
 const sendEcho = async () => {
   try {
-    const response = await axios.post("http://127.0.0.1:8000/echo", {
+    const response = await api.post("/echo", {
       message: inputText.value,
     });
     echoResponse.value = response.data.echo;
@@ -37,7 +37,7 @@ const dbItems = ref([]); // 빈 배열로 초기화
 
 const fetchItems = async () => {
   try {
-    const response = await axios.get("http://127.0.0.1:8000/items");
+    const response = await api.get("/items");
     // API가 리스트 자체를 반환하므로 response.data.items가 아니라 response.data를 써야 할 수도 있음
     // 하지만 백엔드 응답 모델에 따라 다름. 백엔드가 [{}, {}] 형태라면 response.data가 맞음.
     // 기존 코드: dbItems.value = response.data.items; -> 백엔드가 {"items": []} 형태였음.
@@ -53,7 +53,7 @@ const fetchItems = async () => {
 const saveItem = async () => {
   if (!dbInput.value) return;
   try {
-    await axios.post("http://127.0.0.1:8000/items", {
+    await api.post("/items", {
       content: dbInput.value,
     });
     dbInput.value = "";

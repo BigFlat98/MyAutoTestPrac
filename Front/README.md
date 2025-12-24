@@ -45,7 +45,19 @@ This project follows a strict design theme characterized by **sharp edges, high 
 ### Key Files
 - `src/style.css`: Contains the **Tailwind v4 Setup** (`@import "tailwindcss"`) and Custom Theme variables (`@theme`).
 - `src/App.vue`: Main UI component using Tailwind utility classes.
+- `src/api/index.js`: **Centralized API Client**. Uses Axios with a configured `baseURL` for easy environment switching (Local vs Production with Nginx).
 - `postcss.config.js`: Configured for `@tailwindcss/postcss`.
+
+## 🌐 API Configuration
+
+API requests are managed centrally via `src/api/index.js`.
+- **Development**: Defaults to `http://127.0.0.1:8000`.
+- **Production (Nginx)**: Set `VITE_API_BASE_URL` in `.env` or use relative paths (e.g., `/api`) to allow Nginx to handle port forwarding/proxying.
+
+To configure the API URL:
+1. Create a `.env` file in the `Front` directory.
+2. Add `VITE_API_BASE_URL=your_api_url`.
+
 
 ## 🚀 Running the Project
 

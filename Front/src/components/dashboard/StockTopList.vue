@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import axios from 'axios';
+import api from '@/api/index.js';
 
 const activeTab = ref('kospi');
 const stocks = ref([]);
@@ -9,7 +9,7 @@ const loading = ref(false);
 const fetchStocks = async () => {
   loading.value = true;
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/dashboard/stocks/${activeTab.value}`);
+    const response = await api.get(`/dashboard/stocks/${activeTab.value}`);
     if (response.data && response.data.stocks) {
       stocks.value = response.data.stocks;
     }
