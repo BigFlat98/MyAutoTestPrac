@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 class EchoRequest(BaseModel):
     message: str
@@ -33,5 +33,5 @@ class TodoResponse(BaseModel):
     description: str
     due_date: date
     is_done: bool
-    created_at: str # Returning as string for simplicity in JSON
+    created_at: datetime
     author: Optional[str] = None
