@@ -4,10 +4,10 @@
   "settings": {
     "width": 5000,
     "height": 5000,
-    "scrollTop": -2435.7865,
-    "scrollLeft": -1770.658,
+    "scrollTop": -2434.7865,
+    "scrollLeft": -1773.658,
     "zoomLevel": 1,
-    "show": 431,
+    "show": 511,
     "database": 4,
     "databaseName": "",
     "canvasType": "ERD",
@@ -138,7 +138,7 @@
         "comment": "로그인 아이디",
         "dataType": "varchar(30)",
         "default": "",
-        "options": 8,
+        "options": 12,
         "ui": {
           "keys": 0,
           "widthName": 60,
@@ -147,7 +147,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1766660793773,
+          "updateAt": 1766722480112,
           "createAt": 1766660609255
         }
       },
@@ -198,7 +198,7 @@
         "comment": "사용자 닉네임",
         "dataType": "varchar(20)",
         "default": "",
-        "options": 8,
+        "options": 12,
         "ui": {
           "keys": 0,
           "widthName": 60,
@@ -207,7 +207,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1766662802216,
+          "updateAt": 1766722482885,
           "createAt": 1766660742267
         }
       },
@@ -383,7 +383,7 @@
           "columnIds": [
             "WK7z-VNcxLKGLtqIG3SaM"
           ],
-          "x": 2071.2947999999997,
+          "x": 2097.7947999999997,
           "y": 2630.5383,
           "direction": 8
         },
@@ -392,7 +392,7 @@
           "columnIds": [
             "5QTeksGUeJMtM6nce-NXW"
           ],
-          "x": 2186.3189,
+          "x": 2212.8189,
           "y": 2710.8054,
           "direction": 4
         },

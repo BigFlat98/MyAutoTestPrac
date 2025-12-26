@@ -48,7 +48,7 @@ class Database:
                  await conn.execute('''
                     /* Helper: Drop table for schema migration during dev - COMMENTED OUT FOR PERSISTENCE */
                     -- DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
-                    -- DROP TABLE IF EXISTS users;
+                    -- DROP TABLE IF EXISTS users; -- Reset users to apply UNIQUE constraint
 
                     CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ class Database:
                         id SERIAL PRIMARY KEY,
                         login_id VARCHAR(30) UNIQUE NOT NULL,
                         login_pw TEXT NOT NULL,
-                        nick_name VARCHAR(20) NOT NULL,
+                        nick_name VARCHAR(20) UNIQUE NOT NULL,
                         check_admin BOOLEAN DEFAULT FALSE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );

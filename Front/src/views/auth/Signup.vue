@@ -11,9 +11,26 @@
           <label class="block text-sm font-light uppercase tracking-widest mb-1" for="nick_name">Nickname</label>
           <input v-model="nickName" id="nick_name" type="text" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
         </div>
-        <div class="mb-6">
+        <div class="mb-4">
           <label class="block text-sm font-light uppercase tracking-widest mb-1" for="login_pw">Password</label>
-          <input v-model="loginPw" id="login_pw" type="password" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
+          <input v-model="loginPw" id="login_pw" type="password" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" placeholder="At least 8 characters" />
+        </div>
+        <div class="mb-6">
+          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="confirm_pw">Confirm Password</label>
+          <input 
+            v-model="confirmPw" 
+            id="confirm_pw" 
+            type="password" 
+            required 
+            class="w-full h-input border rounded-none px-3 py-2 focus:outline-none focus:ring-2 transition-colors duration-200" 
+            :class="{
+                'border-black focus:ring-[#996515]': !confirmPw,
+                'border-red-500 focus:ring-red-500 text-red-600': isPwMismatch,
+                'border-green-500 focus:ring-green-500 text-green-600': isPwMatch
+            }"
+          />
+          <p v-if="isPwMismatch" class="text-xs text-red-500 mt-1 font-light">Passwords do not match.</p>
+          <p v-if="isPwMatch" class="text-xs text-green-600 mt-1 font-light">Passwords match.</p>
         </div>
         <div v-if="errorMsg" class="text-red-600 text-sm mb-4">{{ errorMsg }}</div>
         <button type="submit" class="w-full h-input bg-[#996515] hover:bg-[#b8860b] text-white font-light uppercase tracking-widest transition-colors duration-200">
@@ -31,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
@@ -40,10 +57,32 @@ const authStore = useAuthStore();
 const loginId = ref('');
 const nickName = ref('');
 const loginPw = ref('');
+const confirmPw = ref('');
 const errorMsg = ref('');
+
+// Computed properties for validation feedback
+const isPwMismatch = computed(() => {
+    return loginPw.value && confirmPw.value && loginPw.value !== confirmPw.value;
+});
+
+const isPwMatch = computed(() => {
+    return loginPw.value && confirmPw.value && loginPw.value === confirmPw.value;
+});
 
 async function handleSignup() {
   errorMsg.value = '';
+
+  // Validation
+  if (loginPw.value.length < 8) {
+      errorMsg.value = "Password must be at least 8 characters long.";
+      return;
+  }
+
+  if (loginPw.value !== confirmPw.value) {
+      errorMsg.value = "Passwords do not match.";
+      return;
+  }
+
   try {
     await authStore.signup({ 
         login_id: loginId.value, 

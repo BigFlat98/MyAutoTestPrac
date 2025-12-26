@@ -68,10 +68,22 @@ npm run dev
 
 브라우저에서 `http://localhost:5173` 으로 접속하여 확인하세요! ✨
 
+### 🐳 Docker로 실행 (권장)
+
+필요한 환경(Node.js, Python, DB)을 설치할 필요 없이 한 번에 실행합니다.
+
+```bash
+docker-compose up --build
+```
+- **Frontend**: http://localhost
+- **Backend**: http://localhost:8000
+- **Database**: Port 5432 (User/PW: `postgres`/`1971601745` from .env.docker)
+
+
 ## 🗺 로드맵
 
 - [x] **Phase 1: Foundation** (초기 설정, Echo 기능, 기본 UI)
-- [ ] **Phase 2: Data Core** (PostgreSQL, CRUD, 일정/쇼핑몰 기능)
+- [x] **Phase 2: Data Core** (PostgreSQL, CRUD, 일정/쇼핑몰 기능)
 - [ ] **Phase 3: QA & Auto** (테스트 케이스 설계, Selenium/Playwright 자동화)
 - [ ] **Phase 4: High Perf** (Rust 스트리밍 서버, 실시간 채팅)
 - [ ] **Phase 5: Intelligence** (LangChain AI 챗봇 도입)

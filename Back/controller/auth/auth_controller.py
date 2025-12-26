@@ -18,6 +18,14 @@ async def create_user(user: UserCreate) -> UserResponse:
                 detail="Login ID already exists"
             )
         
+        # Check if nickname already exists
+        existing_nickname = await conn.fetchrow("SELECT id FROM users WHERE nick_name = $1", user.nick_name)
+        if existing_nickname:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Nickname already exists"
+            )
+        
         hashed_pw = get_password_hash(user.login_pw)
         
         row = await conn.fetchrow(
