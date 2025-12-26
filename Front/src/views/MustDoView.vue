@@ -169,7 +169,10 @@ const saveDescription = async (todo) => {
 }
 
 // Urgency Color Logic
-const getUrgencyClass = (dueDate, createdAt) => {
+const getUrgencyClass = (dueDate, createdAt, isDone) => {
+    // 0. If done, always show green (Completed)
+    if (isDone) return 'border-green-400 bg-green-50'
+
     // New Task Logic (< 1 hour old)
     if (createdAt) {
         const created = new Date(createdAt)
@@ -192,8 +195,9 @@ const getUrgencyClass = (dueDate, createdAt) => {
     if (diffDays < 1) return 'border-orange-500 bg-orange-50 animate-pulse-slow' // Today/Tomorrow
     if (diffDays < 3) return 'border-orange-300' // < 3 Days
     if (diffDays < 7) return 'border-yellow-400' // < 7 Days
+    if (diffDays < 14) return 'border-green-300' // < 2 Weeks (Green)
     
-    return 'border-gray-100' // Default > 7 Days
+    return 'border-gray-100' // > 2 Weeks (Gray)
 }
 
 const getDaysLeftText = (dueDate) => {
@@ -292,7 +296,7 @@ onMounted(() => {
         v-for="todo in todos" 
         :key="todo.id"
         class="group border-l-4 transition-all duration-300 shadow-sm bg-white"
-        :class="[getUrgencyClass(todo.due_date, todo.created_at)]"
+        :class="[getUrgencyClass(todo.due_date, todo.created_at, todo.is_done)]"
       >
         <!-- Summary Row (Click to Expand) -->
         <div class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50" @click="toggleAccordion(todo)">
