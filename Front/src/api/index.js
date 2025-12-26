@@ -3,7 +3,8 @@ import axios from 'axios';
 // Create an Axios instance with a configuration
 const api = axios.create({
     // Use VITE_API_BASE_URL from environment variables, or default to localhost
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+    // Use relative path for Nginx reverse proxy
+    baseURL: '/api',
     timeout: 10000, // 10 seconds timeout
     headers: {
         'Content-Type': 'application/json',

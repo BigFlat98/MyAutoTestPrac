@@ -36,17 +36,19 @@ app.include_router(auth_router)
 
 
 # CORS definition
+# CORS definition
 origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "http://localhost",
     "http://127.0.0.1",
-    
+    "http://15.134.122.75", # 사용자 EC2 Public IP
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    # allow_origin_regex="https?://.*", # Disabled for better security
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
