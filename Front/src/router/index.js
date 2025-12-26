@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import TestPlayground from '../views/TestPlayground.vue'
 import MustDoView from '../views/MustDoView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,19 +11,51 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/playground',
       name: 'playground',
-      component: TestPlayground
+      component: TestPlayground,
+      meta: { requiresAuth: true }
     },
     {
       path: '/mustdo',
       name: 'mustdo',
-      component: MustDoView
+      component: MustDoView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/auth/Login.vue')
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('../views/auth/Signup.vue')
     }
   ]
+})
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+
+  // If the route requires auth
+  if (to.meta.requiresAuth) {
+    // If not authenticated and checking auth hasn't happened yet
+    if (!authStore.isAuthenticated && !authStore.isAuthChecked) {
+      await authStore.checkAuth()
+    }
+
+    // If still not authenticated
+    if (!authStore.isAuthenticated) {
+      next({ name: 'login', replace: true })
+      return
+    }
+  }
+  next()
 })
 
 export default router

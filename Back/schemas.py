@@ -14,12 +14,29 @@ class ItemResponse(BaseModel):
     id: int
     content: str
 
+# User Schemas
+class UserCreate(BaseModel):
+    login_id: str
+    login_pw: str
+    nick_name: str
+
+class UserLogin(BaseModel):
+    login_id: str
+    login_pw: str
+
+class UserResponse(BaseModel):
+    id: int
+    nick_name: str
+    check_admin: bool
+
 # Must Do List Models
 class TodoCreate(BaseModel):
     title: str
     description: str
     due_date: date
-    author: Optional[str] = None # Optional for now
+    # author is handled by auth middleware or explicit login context usually, 
+    # but for now let's make it optional or remove if we infer it from session. 
+    # keeping it simple as per request.
 
 class TodoUpdate(BaseModel):
     title: Optional[str] = None
@@ -34,4 +51,5 @@ class TodoResponse(BaseModel):
     due_date: date
     is_done: bool
     created_at: datetime
-    author: Optional[str] = None
+    author_id: Optional[int] = None # Changed from author(text) to author_id(int)
+

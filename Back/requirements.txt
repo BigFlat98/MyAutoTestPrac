@@ -7,3 +7,6 @@ beautifulsoup4
 fredapi
 pandas
 pydantic
+python-multipart
+bcrypt
+itsdangerous

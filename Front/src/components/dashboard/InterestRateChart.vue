@@ -43,6 +43,7 @@ const mainChartOptions = ref({
   scales: {
     x: { 
       display: true,
+      offset: true,
       grid: { display: false },
       ticks: {
         maxTicksLimit: 60,
@@ -70,6 +71,16 @@ const fetchData = async () => {
   try {
     const res = await api.get('/dashboard/interest-rates');
     totalLabels.value = res.data.dates.length;
+    
+    // Add 5 months of padding to labels
+    if (res.data.dates.length > 0) {
+        const lastDate = new Date(res.data.dates[res.data.dates.length - 1]);
+        for (let i = 1; i <= 5; i++) {
+            const nextDate = new Date(lastDate);
+            nextDate.setMonth(lastDate.getMonth() + i);
+            res.data.dates.push(nextDate.toISOString().split('T')[0]);
+        }
+    }
     
     // Calculate Min/Max
     const allRates = [...res.data.kr, ...res.data.us].filter(r => r !== null);

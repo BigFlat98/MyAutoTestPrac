@@ -46,13 +46,22 @@ class Database:
             # (선택) 테이블 자동 생성 로직도 여기에 둘 수 있습니다.
             async with self.pool.acquire() as conn:
                  await conn.execute('''
-                    
-                    /* Helper: Drop table for schema migration during dev */
-                    DROP TABLE IF EXISTS todos;
+                    /* Helper: Drop table for schema migration during dev - COMMENTED OUT FOR PERSISTENCE */
+                    -- DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
+                    -- DROP TABLE IF EXISTS users;
 
                     CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
                         content TEXT
+                    );
+
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        login_id VARCHAR(30) UNIQUE NOT NULL,
+                        login_pw TEXT NOT NULL,
+                        nick_name VARCHAR(20) NOT NULL,
+                        check_admin BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
 
                     CREATE TABLE IF NOT EXISTS todos (
@@ -61,7 +70,7 @@ class Database:
                         description TEXT,
                         due_date DATE,
                         is_done BOOLEAN DEFAULT FALSE,
-                        author TEXT,
+                        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
                  ''')

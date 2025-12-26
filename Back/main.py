@@ -1,7 +1,9 @@
 #back 기본 import
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
+import os
 
 load_dotenv() # .env 파일 로드 명시적 호출
 
@@ -19,9 +21,10 @@ async def lifespan(app: FastAPI):
     await db.disconnect() #앱 종료 시 DB 연결 해제
 
 #router import 
-from controller.test.items import router as items_router
 from router import dashboard
 from router import todo
+from controller.test.items import router as items_router
+from router.auth import router as auth_router
 
 app = FastAPI(lifespan=lifespan)
 
@@ -29,6 +32,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(items_router)
 app.include_router(dashboard.router)
 app.include_router(todo.router)
+app.include_router(auth_router)
 
 
 # CORS definition
@@ -47,6 +51,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "your-secret-key"), max_age=7200, same_site="lax", https_only=False)
 
 
 

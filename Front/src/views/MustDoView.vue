@@ -78,7 +78,13 @@ const toggleTodo = async (todo) => {
         })
         todo.is_done = response.data.is_done
     } catch (error) {
-        console.error('Failed to toggle todo:', error)
+        if (error.response && error.response.status === 403) {
+            alert("권한이 없습니다. (작성자만 수정 가능)")
+            // Revert local change if needed, but fetchTodos usually better
+            todo.is_done = !todo.is_done // visual revert
+        } else {
+            console.error('Failed to toggle todo:', error)
+        }
     }
 }
 
@@ -89,7 +95,11 @@ const deleteTodo = async (id) => {
         await api.delete(`/todos/${id}`)
         todos.value = todos.value.filter(t => t.id !== id)
     } catch (error) {
-        console.error('Failed to delete todo:', error)
+        if (error.response && error.response.status === 403) {
+            alert("권한이 없습니다. (작성자 또는 관리자만 삭제 가능)")
+        } else {
+            console.error('Failed to delete todo:', error)
+        }
     }
 }
 
@@ -150,7 +160,11 @@ const saveDescription = async (todo) => {
         })
         alert("Updated!");
     } catch (error) {
-        console.error('Failed to update:', error)
+        if (error.response && error.response.status === 403) {
+            alert("권한이 없습니다. (작성자만 수정 가능)")
+        } else {
+             console.error('Failed to update:', error)
+        }
     }
 }
 
