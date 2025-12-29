@@ -234,19 +234,20 @@ onMounted(() => {
                         <div class="flex gap-4 text-xs font-medium">
                             <button 
                                 @click="activeTab = 'write'" 
-                                :class="activeTab === 'write' ? 'text-black border-b border-black' : 'text-gray-400 hover:text-gray-600'"
-                                class="uppercase tracking-widest pb-1 transition-colors"
+                                :class="activeTab === 'write' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-600'"
+                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-gray-200 !border-transparent !shadow-none hover:!shadow-[0_0_10px_rgba(0,0,0,0.15)] hover:!translate-y-0 rounded-sm"
                             >
                                 Write
                             </button>
                             <button 
                                 @click="activeTab = 'preview'" 
-                                :class="activeTab === 'preview' ? 'text-black border-b border-black' : 'text-gray-400 hover:text-gray-600'"
-                                class="uppercase tracking-widest pb-1 transition-colors"
+                                :class="activeTab === 'preview' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-600'"
+                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-gray-200 !border-transparent !shadow-none hover:!shadow-[0_0_10px_rgba(0,0,0,0.15)] hover:!translate-y-0 rounded-sm"
                             >
                                 Preview
                             </button>
                         </div>
+
                     </div>
 
                     <!-- Write Mode -->
@@ -310,7 +311,7 @@ onMounted(() => {
                 <div class="flex justify-end gap-4 pt-4 border-t border-gray-50">
                     <button 
                         @click="cancel"
-                        class="px-6 py-2 border border-gray-200 text-gray-500 text-xs uppercase tracking-widest hover:border-black hover:text-black transition-colors rounded-sm"
+                        class="px-6 py-2 border border-gray-200 text-gray-500 text-xs uppercase tracking-widest transition-all duration-300 hover:border-red-200 hover:text-red-600 hover:bg-red-50 hover:shadow-[0_0_15px_rgba(220,38,38,0.15)] hover:-translate-y-0.5 rounded-sm bg-white"
                     >
                         Cancel
                     </button>

@@ -188,7 +188,7 @@ async def get_comments(post_id: int) -> List[dict]:
         FROM post_replies r
         JOIN users u ON r.user_id = u.id
         WHERE r.post_id = $1 AND r.delete_at IS NULL
-        ORDER BY r.created_at ASC
+        ORDER BY r.created_at DESC
     """
     async with db.pool.acquire() as conn:
         rows = await conn.fetch(query, post_id)
