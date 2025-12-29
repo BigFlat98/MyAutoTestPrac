@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import api from '@/api'
+import { api } from '@/api'
 
 // Dummy Data Generation for UI Verification
 const todos = ref([])

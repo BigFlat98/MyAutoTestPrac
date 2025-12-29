@@ -73,6 +73,36 @@ class Database:
                         author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
+
+                    CREATE TABLE IF NOT EXISTS posts (
+                        id SERIAL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        description TEXT,
+                        view_count INTEGER DEFAULT 0,
+                        is_public BOOLEAN DEFAULT TRUE,
+                        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    CREATE TABLE IF NOT EXISTS post_images (
+                        id SERIAL PRIMARY KEY,
+                        image_name TEXT,
+                        image_location TEXT,
+                        uploader_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                        post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    CREATE TABLE IF NOT EXISTS post_replies (
+                        id SERIAL PRIMARY KEY,
+                        description TEXT,
+                        post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        reply_id INTEGER REFERENCES post_replies(id) ON DELETE CASCADE,
+                        delete_at TIMESTAMP,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
                  ''')
                  
         except Exception as e:

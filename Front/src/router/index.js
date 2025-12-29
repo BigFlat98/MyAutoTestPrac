@@ -35,6 +35,31 @@ const router = createRouter({
       path: '/signup',
       name: 'signup',
       component: () => import('../views/auth/Signup.vue')
+    },
+    // Board Routes
+    {
+      path: '/board',
+      name: 'board-list',
+      component: () => import('../views/post/BoardListView.vue'), // Lazy load from views/post
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/board/write',
+      name: 'board-write',
+      component: () => import('../views/post/BoardWriteView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/board/:id',
+      name: 'board-detail',
+      component: () => import('../views/post/BoardDetailView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/board/edit/:id',
+      name: 'board-edit',
+      component: () => import('../views/post/BoardWriteView.vue'), // Reusing WriteView for Edit
+      meta: { requiresAuth: true }
     }
   ]
 })

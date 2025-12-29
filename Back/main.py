@@ -23,16 +23,22 @@ async def lifespan(app: FastAPI):
 #router import 
 from router import dashboard
 from router import todo
+from router import board
 from controller.test.items import router as items_router
 from router.auth import router as auth_router
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(lifespan=lifespan)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 #router 등록
 app.include_router(items_router)
 app.include_router(dashboard.router)
 app.include_router(todo.router)
 app.include_router(auth_router)
+app.include_router(board.router)
 
 
 # CORS definition
@@ -42,7 +48,7 @@ origins = [
     "http://localhost:5173",
     "http://localhost",
     "http://127.0.0.1",
-    "http://15.134.122.75", # 사용자 EC2 Public IP
+    "http://52.63.33.119", # 사용자 EC2 Public IP
 ]
 
 app.add_middleware(

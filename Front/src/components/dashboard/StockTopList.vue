@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import api from '@/api/index.js';
+import { api } from '@/api/index.js';
 
 const activeTab = ref('kospi');
 const stocks = ref([]);

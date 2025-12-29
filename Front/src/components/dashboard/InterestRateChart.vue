@@ -12,7 +12,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'vue-chartjs';
-import api from '@/api/index.js';
+import { api } from '@/api/index.js';
 
 ChartJS.register(
   CategoryScale,

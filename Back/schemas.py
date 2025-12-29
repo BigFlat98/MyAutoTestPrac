@@ -53,3 +53,41 @@ class TodoResponse(BaseModel):
     created_at: datetime
     author_id: Optional[int] = None # Changed from author(text) to author_id(int)
 
+
+# Board / Post Models
+class PostCreate(BaseModel):
+    title: str
+    description: str
+    image: Optional[str] = None # For image URL
+
+class PostResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    view_count: int
+    author: str # Nickname from join
+    created_at: datetime
+    image: Optional[str] = None
+
+class PostListResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    posts: list[PostResponse]
+
+class CommentCreate(BaseModel):
+    description: str
+    reply_id: Optional[int] = None
+
+class CommentResponse(BaseModel):
+    id: int
+    author: str
+    content: str # Maps to description in DB
+    created_at: datetime
+    replies: list['CommentResponse'] = []
+    
+    class Config:
+        from_attributes = True
+
+# Update forward refs for recursive model
+CommentResponse.model_rebuild()

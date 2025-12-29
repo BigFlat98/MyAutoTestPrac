@@ -29,6 +29,9 @@ async function handleLogout() {
       <router-link to="/mustdo" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Todo
       </router-link>
+      <router-link to="/board" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
+        Board
+      </router-link>
     </div>
 
     <!-- Right Side Auth -->

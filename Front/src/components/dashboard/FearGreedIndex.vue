@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import api from '@/api';
+import { api } from '@/api';
 
 const score = ref(0);
 const rating = ref('');
