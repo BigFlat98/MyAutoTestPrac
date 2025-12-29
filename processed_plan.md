@@ -73,3 +73,23 @@
 - **구조 개선**:
   - `src/api/index.js` 생성하여 Axios 인스턴스 중앙 관리.
   - `.env` 및 `Soft Coding` 적용으로 배포 환경(Nginx) 대응 준비 완료.
+
+12/26
+## 7. 로그인 구현 및 AWS EC2 배포
+
+- **기능 구현**:
+  - 로그인 기능 개발 완료.
+- **인프라 및 배포**:
+  - AWS EC2 인스턴스 생성 및 설정.
+  - 어플리케이션 배포 및 CORS 문제 해결.
+
+## 8. 향후 로드맵 (Roadmap)
+
+- **단기 목표 (Next Steps)**:
+  - **게시판 페이지 (Bulletin Board)** 구현.
+  - **이커머스 페이지 (E-commerce)** 구현.
+  - 위 기능들의 EC2 배포 및 배포 자동화(Automation) 실습.
+- **장기 목표 (Future)**:
+  - **소셜 로그인 (Social Login)** 연동.
+  - **스트리밍 서버 (Streaming Server)** 구축.
+  - **챗봇 (Chatbot)** 기능 추가.

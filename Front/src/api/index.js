@@ -12,7 +12,16 @@ const api = axios.create({
     withCredentials: true,
 });
 
-export default api;
+const chat = axios.create({
+    baseURL: '/chat',
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
+})
+
+export { api, chat };
 
 // Authentication API
 export const login = (data) => api.post('/auth/login', data);
