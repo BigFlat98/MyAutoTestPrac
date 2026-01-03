@@ -45,5 +45,21 @@ services:
     depends_on:
       - backend
 
+  # 4. Chat Service (Rust)
+  chat:
+    build:
+      context: ./Chat
+      dockerfile: Dockerfile
+    container_name: chat_container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - ./.env.docker
+    environment:
+      - PORT=3000
+      - DB_HOST=postgres
+
 volumes:
   postgres_data:

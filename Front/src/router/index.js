@@ -60,6 +60,13 @@ const router = createRouter({
       name: 'board-edit',
       component: () => import('../views/post/BoardWriteView.vue'), // Reusing WriteView for Edit
       meta: { requiresAuth: true }
+    },
+    // Chat Route
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../views/chat/ChatView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

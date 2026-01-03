@@ -52,6 +52,8 @@ class Database:
                     -- DROP TABLE IF EXISTS posts;
                     -- DROP TABLE IF EXISTS post_images;
                     -- DROP TABLE IF EXISTS post_replies;
+                    -- DROP TABLE IF EXISTS chat_rooms;
+                    -- DROP TABLE IF EXISTS messages;
 
                     CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
@@ -106,6 +108,25 @@ class Database:
                         delete_at TIMESTAMP,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
+
+                    CREATE TABLE IF NOT EXISTS chat_rooms(
+                        id SERIAL PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    CREATE TABLE IF NOT EXISTS messages(
+                        id SERIAL PRIMARY KEY,
+                        room_id INTEGER REFERENCES chat_rooms(id) ON DELETE CASCADE,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        content TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP,
+                        deleted_at TIMESTAMP
+                    );
+
+                    /* Default Chat Room (ID: 1) */
+                    INSERT INTO chat_rooms (id, name) VALUES (1, 'General') ON CONFLICT (id) DO NOTHING;
                  ''')
                  
         except Exception as e:
