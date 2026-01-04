@@ -80,6 +80,53 @@ docker-compose up --build
 - **Database**: Port 5432 (User/PW: `postgres`/`1971601745` from .env.docker)
 
 
+
+## ☁️ EC2 배포 초기 설정 가이드 (Swap, Docker, Git)
+
+EC2 프리 티어(t2.micro, t3.micro)는 RAM이 1GB로 제한적이어서, **스왑(Swap) 메모리 설정**이 필수적입니다.
+
+### 0. 시스템 업데이트 (최초 접속 시 권장)
+```bash
+# Ubuntu
+sudo apt update && sudo apt upgrade -y
+
+# Amazon Linux 2023
+sudo dnf update -y
+```
+
+### 1. 스왑(Swap) 메모리 설정 (RAM 부족 해결)
+```bash
+# 1. 2GB 스왑 파일 생성
+sudo dd if=/dev/zero of=/swapfile bs=128M count=16
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# 2. 재부팅 후 유지 설정
+echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+```
+
+### 2. Git 설치
+```bash
+# Ubuntu
+sudo apt install git -y
+
+# Amazon Linux 2023
+sudo dnf install git -y
+```
+
+### 3. Docker & Compose 설치 (Ubuntu 기준)
+```bash
+# Docker 설치
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu
+newgrp docker
+
+# Docker Compose (최신 버전은 플러그인으로 포함됨)
+docker compose version
+```
+
 ## 🗺 로드맵
 
 - [x] **Phase 1: Foundation** (초기 설정, Echo 기능, 기본 UI)
