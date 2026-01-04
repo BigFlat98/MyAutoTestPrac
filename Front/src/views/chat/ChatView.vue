@@ -372,7 +372,7 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background-color: #fdfbf7; /* Very warm light gray/beige for premium feel */
+    background-color: #ffffff; /* White background */
 }
 
 /* 스크롤바 커스텀 */
@@ -452,32 +452,25 @@ onUnmounted(() => {
 }
 
 .edit-btn {
-    border: none;
+    border: 1px solid #ffffff; /* White border */
+    background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
     font-size: 0.7rem;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.2s;
+    color: #5c4e38; /* Dark brown text for contrast */
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
 }
 
-.edit-btn.save {
-    background-color: #bfa57d; /* Matching Gold theme */
-    color: white;
+.edit-btn:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.25); /* More subtle, premium golden glow */
+    /* Remove transform for a more stable feel */
 }
 
-.edit-btn.save:hover {
-    background-color: #a88e66;
-}
 
-.edit-btn.cancel {
-    background-color: #f3f4f6;
-    color: #6b7280;
-}
-
-.edit-btn.cancel:hover {
-    background-color: #e5e7eb;
-}
 
 /* Message Meta & Action Links */
 .message-meta {
@@ -548,13 +541,14 @@ onUnmounted(() => {
     flex-direction: row-reverse; 
 }
 
+
 .my-message .message-bubble {
-    /* Muted, Elegant Gold (Sand/Champagne) */
-    background: #eaddcf; /* Soft beige base */
-    background: linear-gradient(135deg, #eaddcf 0%, #e3d5b0 100%); /* Subtle sand-gold gradient */
+    /* Almost white with a very subtle yellow tint */
+    background-color: #fcfcf9; 
     color: #4a4238; /* Soft dark brown */
     border-radius: 18px 18px 2px 18px; 
-    border: 1px solid rgba(220, 204, 174, 0.3); /* Very subtle border */
+    border: 1px solid #e5e7eb; /* Slightly darker border for separation */
+    backdrop-filter: blur(4px); /* Glass effect */
 }
 
 .my-message .message-time {

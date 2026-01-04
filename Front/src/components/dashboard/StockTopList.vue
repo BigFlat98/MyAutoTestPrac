@@ -55,7 +55,7 @@ const formatPrice = (price, market) => {
       </div>
     </div>
 
-    <div class="flex-1 overflow-auto">
+    <div class="h-[340px] overflow-auto">
       <div v-if="loading" class="h-full flex items-center justify-center text-gray-400 text-sm font-light">
         Loading Market Data...
       </div>

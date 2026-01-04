@@ -23,9 +23,10 @@ async def create_todo(todo: TodoCreate, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("", response_model=List[TodoResponse])
-async def read_todos():
+async def read_todos(request: Request):
     try:
-        return await get_todos_service()
+        user_id = request.session.get("user_id")
+        return await get_todos_service(author_id=user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

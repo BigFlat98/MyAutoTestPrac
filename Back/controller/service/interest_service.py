@@ -24,7 +24,7 @@ class InterestRateService:
         # 통계표: 722Y001 (한국은행 기준금리 및 여수신금리)
         # 주기: D (일) / 항목: 0101000 (한국은행 기준금리)
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=365*10)).strftime("%Y%m%d")
+            start_date = (datetime.now() - timedelta(days=365*6)).strftime("%Y%m%d")
         if not end_date:
             end_date = datetime.now().strftime("%Y%m%d")
             
@@ -57,7 +57,7 @@ class InterestRateService:
             # FRED는 pandas Series로 반환
             # FEDFUNDS: 실효 기금 금리 (시장 거래 평균, 변동 있음)
             # DFEDTARU: 연준 목표 금리 상단 (정책 금리, 0.25 단위)
-            series = self.fred.get_series('DFEDTARU', observation_start=datetime.now() - timedelta(days=365*10))
+            series = self.fred.get_series('DFEDTARU', observation_start=datetime.now() - timedelta(days=365*6))
             df = pd.DataFrame({'date': series.index, 'us_rate': series.values})
             return df
         except Exception as e:

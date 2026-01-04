@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 
 class EchoRequest(BaseModel):
@@ -23,6 +23,7 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     login_id: str
     login_pw: str
+    nick_name: str
 
 class UserResponse(BaseModel):
     id: int
@@ -88,6 +89,21 @@ class CommentResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+# Stock Models
+class StockItem(BaseModel):
+    rank: int
+    symbol: str
+    name: str
+    price: float
+    change: float
+    currency: str
+
+class StockListResponse(BaseModel):
+    market: str
+    stocks: List[StockItem]
+    status: str
+    message: Optional[str] = None
 
 # Update forward refs for recursive model
 CommentResponse.model_rebuild()

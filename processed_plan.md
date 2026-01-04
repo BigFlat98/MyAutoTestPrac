@@ -78,17 +78,39 @@
 ## 7. 로그인 구현 및 AWS EC2 배포
 
 - **기능 구현**:
-  - 로그인 기능 개발 완료.
+  - 로그인 기능 개발 완료. (JWT 기반 인증)
 - **인프라 및 배포**:
   - AWS EC2 인스턴스 생성 및 설정.
-  - 어플리케이션 배포 및 CORS 문제 해결.
+  - 도커(Docker) 도입: Front, Back, DB를 `docker-compose`로 컨테이너화.
+  - Nginx 리버스 프록시 설정으로 보안 강화 및 CORS 문제 해결.
 
-## 8. 향후 로드맵 (Roadmap)
+12/29
+## 8. Rust 채팅 서버 구축 및 UI 개선
 
-- **단기 목표 (Next Steps)**:
-  - **게시판 페이지 (Bulletin Board)** 구현.
+- **Rust 채팅 서버 (`/Chat`)**:
+  - `Axum` 프레임워크와 `Tokio`를 사용하여 고성능 비동기 채팅 서버 구축.
+  - `SQLx`를 사용한 PostgreSQL 연동 (기존 DB와 `chat_rooms`, `messages` 테이블 공유).
+  - WebSocket 핸들러 구현: 클라이언트 연결 관리 및 실시간 메시지 브로드캐스팅.
+- **프론트엔드 개선**:
+  - **이미지 업로드**: 게시판 글 작성 시 인라인 이미지 붙여넣기 및 미리보기 기능 구현 (DC Inside 스타일).
+  - **모바일 반응형**: 모바일 환경에서도 네비게이션 및 레이아웃이 깨지지 않도록 CSS 최적화.
+
+1/3
+## 9. 채팅 기능 고도화 (수정/삭제)
+
+- **기능 확장**:
+  - **Backend (Rust)**:
+    - `PATCH /messages/:id`, `DELETE /messages/:id` API 구현.
+    - WebSocket 이벤트(`update`, `delete`) 브로드캐스팅 로직 추가.
+  - **Frontend**:
+    - 본인 메시지에만 수정/삭제 버튼 노출.
+    - 실시간 수정/삭제 반영 및 시각적 피드백(수정됨 배지 등) 구현.
+
+## 10. 향후 로드맵 (Roadmap)
+
+- **진행 중 (In Progress)**:
   - **이커머스 페이지 (E-commerce)** 구현.
-  - 위 기능들의 EC2 배포 및 배포 자동화(Automation) 실습.
+  - 배포 자동화(CI/CD) 실습.
 - **장기 목표 (Future)**:
   - **소셜 로그인 (Social Login)** 연동.
   - **스트리밍 서버 (Streaming Server)** 구축.

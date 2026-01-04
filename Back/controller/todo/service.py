@@ -20,11 +20,20 @@ async def create_todo_service(todo: TodoCreate, author_id: Optional[int] = None)
             logger.error(f"Error in create_todo_service: {e}")
             raise e
 
-async def get_todos_service() -> List[dict]:
+async def get_todos_service(author_id: Optional[int] = None) -> List[dict]:
     ctx = await db.get_connection()
     async with ctx as conn:
         try:
-            rows = await conn.fetch("SELECT id, title, description, due_date, is_done, created_at, author_id FROM todos ORDER BY created_at DESC")
+            query = "SELECT id, title, description, due_date, is_done, created_at, author_id FROM todos"
+            args = []
+            
+            if author_id:
+                query += " WHERE author_id = $1"
+                args.append(author_id)
+                
+            query += " ORDER BY created_at DESC"
+            
+            rows = await conn.fetch(query, *args)
             return [dict(row) for row in rows]
         except Exception as e:
             logger.error(f"Error in get_todos_service: {e}")

@@ -29,7 +29,27 @@ This project follows a strict design theme characterized by **sharp edges, high 
 - **Interactions**:
     - Hovering usually triggers a color change to **Gold** + a slight lift (`-translate-y-0.5`).
     - Focus states use a Gold ring.
+    - Focus states use a Gold ring.
 
+### 4. Component Standards
+
+#### Glass Button (Ghost Style)
+Used for secondary actions or overlay buttons (e.g., Edit/Cancel in chat).
+
+```css
+.glass-btn {
+    border: 1px solid #ffffff;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
+    transition: all 0.3s ease;
+}
+
+.glass-btn:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Subtle Premium Gold Glow */
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.25);
+}
+```
 ---
 
 ## 🛠 Tech Stack & Migration
