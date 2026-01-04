@@ -34,7 +34,9 @@ class UserResponse(BaseModel):
 class TodoCreate(BaseModel):
     title: str
     description: str
-    due_date: date
+    due_date: Optional[date] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     # author is handled by auth middleware or explicit login context usually, 
     # but for now let's make it optional or remove if we infer it from session. 
     # keeping it simple as per request.
@@ -43,13 +45,17 @@ class TodoUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     due_date: Optional[date] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     is_done: Optional[bool] = None
 
 class TodoResponse(BaseModel):
     id: int
     title: str
     description: str
-    due_date: date
+    due_date: Optional[date]
+    start_date: Optional[date]
+    end_date: Optional[date]
     is_done: bool
     created_at: datetime
     author_id: Optional[int] = None # Changed from author(text) to author_id(int)

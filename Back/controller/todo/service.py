@@ -11,10 +11,10 @@ async def create_todo_service(todo: TodoCreate, author_id: Optional[int] = None)
     async with ctx as conn:
         try:
             row = await conn.fetchrow("""
-                INSERT INTO todos (title, description, due_date, author_id)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id, title, description, due_date, is_done, created_at, author_id
-            """, todo.title, todo.description, todo.due_date, author_id)
+                INSERT INTO todos (title, description, due_date, start_date, end_date, author_id)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, title, description, due_date, start_date, end_date, is_done, created_at, author_id
+            """, todo.title, todo.description, todo.due_date, todo.start_date, todo.end_date, author_id)
             return dict(row)
         except Exception as e:
             logger.error(f"Error in create_todo_service: {e}")
@@ -24,7 +24,7 @@ async def get_todos_service(author_id: Optional[int] = None) -> List[dict]:
     ctx = await db.get_connection()
     async with ctx as conn:
         try:
-            query = "SELECT id, title, description, due_date, is_done, created_at, author_id FROM todos"
+            query = "SELECT id, title, description, due_date, start_date, end_date, is_done, created_at, author_id FROM todos"
             args = []
             
             if author_id:
@@ -63,10 +63,12 @@ async def update_todo_service(todo_id: int, todo: TodoUpdate, user_id: int) -> O
                     title = COALESCE($1, title),
                     description = COALESCE($2, description),
                     due_date = COALESCE($3, due_date),
-                    is_done = COALESCE($4, is_done)
-                WHERE id = $5
-                RETURNING id, title, description, due_date, is_done, created_at, author_id
-            """, todo.title, todo.description, todo.due_date, todo.is_done, todo_id)
+                    start_date = COALESCE($4, start_date),
+                    end_date = COALESCE($5, end_date),
+                    is_done = COALESCE($6, is_done)
+                WHERE id = $7
+                RETURNING id, title, description, due_date, start_date, end_date, is_done, created_at, author_id
+            """, todo.title, todo.description, todo.due_date, todo.start_date, todo.end_date, todo.is_done, todo_id)
             
             return dict(row)
         except HTTPException:

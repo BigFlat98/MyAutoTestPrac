@@ -1,6 +1,9 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { api } from '@/api'
+import FullCalendar from '@fullcalendar/vue3'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
 
 // Dummy Data Generation for UI Verification
 const todos = ref([])
@@ -8,9 +11,59 @@ const todos = ref([])
 const form = ref({
     title: '',
     description: '',
-    due_date: '',
+    start_date: '',
+    end_date: '',
+    due_date: '', // Legacy support if needed, or mapped to end_date
 })
 const isLoading = ref(false)
+
+// Calendar Options
+const calendarOptions = ref({
+    plugins: [ dayGridPlugin, interactionPlugin ],
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,dayGridWeek'
+    },
+    events: [],
+    eventClick: (info) => {
+        const todoId = info.event.id
+        const todo = todos.value.find(t => t.id == todoId)
+        if (todo) {
+            todo.expanded = true
+            // Allow DOM to update with expanded state
+            setTimeout(() => {
+                const el = document.getElementById(`todo-${todoId}`)
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    el.classList.add('ring-2', 'ring-luxury-gold', 'ring-offset-2')
+                    setTimeout(() => el.classList.remove('ring-2', 'ring-luxury-gold', 'ring-offset-2'), 2000)
+                }
+            }, 100)
+        }
+    },
+    editable: false,
+    selectable: true
+})
+
+// Update Calendar Events from Todos
+const updateCalendarEvents = () => {
+    calendarOptions.value.events = todos.value.map(t => ({
+        id: t.id,
+        title: t.title,
+        start: t.start_date || t.created_at, // Fallback to created_at if no start_date
+        end: t.end_date || t.due_date,
+        allDay: true,
+        backgroundColor: t.is_done ? '#10B981' : '#3B82F6', // Green if done, Blue otherwise
+        borderColor: t.is_done ? '#10B981' : '#3B82F6'
+    }))
+}
+
+// Watch todos to update calendar
+watch(todos, () => {
+    updateCalendarEvents()
+}, { deep: true })
 
 // Function to fetch todos
 const fetchTodos = async () => {
@@ -22,9 +75,12 @@ const fetchTodos = async () => {
             ...t,
             title: t.title || t.content, // Fallback for old data
             description: t.description || '',
-            due_date: t.due_date || null,
+            start_date: t.start_date || null,
+            end_date: t.end_date || t.due_date,
+            due_date: t.due_date || t.end_date, // Sync for legacy display logic
             expanded: false
         }))
+        updateCalendarEvents()
     } catch (error) {
         console.error('Failed to fetch todos:', error)
     } finally {
@@ -34,18 +90,21 @@ const fetchTodos = async () => {
 
 // Function to add a todo
 const addTodo = async () => {
-    if (!form.value.title.trim() || !form.value.due_date) {
-        alert("Title and Due Date are required.");
+    // Validate: Title required, and at least one date or just title is allowed?
+    // Request says "startdate, enddate logic added", implied required? Enforce Title
+    if (!form.value.title.trim()) {
+        alert("Title is required.");
         return;
     }
 
     try {
         const payload = {
-            content: form.value.title, // Backend might still expect 'content' until updated
+            content: form.value.title,
             title: form.value.title,
             description: form.value.description,
-            due_date: form.value.due_date,
-            // author: null // Not sending yet as backend logic updates are next
+            start_date: form.value.start_date || null,
+            end_date: form.value.end_date || form.value.due_date || null,
+            due_date: form.value.end_date || form.value.due_date || null
         }
 
         const response = await api.post('/todos', payload)
@@ -55,12 +114,14 @@ const addTodo = async () => {
             ...response.data,
             title: payload.title,
             description: payload.description,
+            start_date: payload.start_date,
+            end_date: payload.end_date,
             due_date: payload.due_date,
             expanded: false 
         })
         
         // Reset Form
-        form.value = { title: '', description: '', due_date: '' }
+        form.value = { title: '', description: '', start_date: '', end_date: '', due_date: '' }
     } catch (error) {
         console.error('Failed to add todo:', error)
     }
@@ -71,16 +132,16 @@ const toggleTodo = async (todo) => {
     try {
         const response = await api.put(`/todos/${todo.id}`, {
             is_done: !todo.is_done,
-            // Pass other fields to avoid nulling if backend is partial
             title: todo.title,
             description: todo.description,
-            due_date: todo.due_date
+            due_date: todo.due_date,
+            start_date: todo.start_date,
+            end_date: todo.end_date
         })
         todo.is_done = response.data.is_done
     } catch (error) {
         if (error.response && error.response.status === 403) {
             alert("권한이 없습니다. (작성자만 수정 가능)")
-            // Revert local change if needed, but fetchTodos usually better
             todo.is_done = !todo.is_done // visual revert
         } else {
             console.error('Failed to toggle todo:', error)
@@ -118,11 +179,8 @@ const beforeEnter = (el) => {
 }
 
 const enter = (el) => {
-  // Force reflow
-  el.offsetHeight;
-  
+  el.offsetHeight; // Force reflow
   el.style.transition = 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)';
-  // Calculate full height including padding (scrollHeight usually includes padding)
   el.style.maxHeight = el.scrollHeight + 'px';
   el.style.opacity = '1';
   el.style.paddingTop = ''; // Revert to CSS value
@@ -156,7 +214,9 @@ const saveDescription = async (todo) => {
             is_done: todo.is_done,
             title: todo.title,
             description: todo.description,
-            due_date: todo.due_date
+            due_date: todo.due_date,
+            start_date: todo.start_date,
+            end_date: todo.end_date
         })
         alert("Updated!");
     } catch (error) {
@@ -170,22 +230,18 @@ const saveDescription = async (todo) => {
 
 // Urgency Color Logic
 const getUrgencyClass = (dueDate, createdAt, isDone) => {
-    // 0. If done, always show green (Completed)
     if (isDone) return 'border-green-400 bg-green-50'
 
-    // New Task Logic (< 1 hour old)
     if (createdAt) {
         const created = new Date(createdAt)
         const now = new Date()
         const diffCreatedHours = (now - created) / (1000 * 60 * 60)
-        // Changed to Lime (brighter green/yellow-green) as requested
         if (diffCreatedHours < 1) return 'border-lime-400 bg-lime-50' 
     }
 
     if (!dueDate) return 'border-gray-100' // Default
     
     const now = new Date()
-    // Reset time for accurate date comparison
     now.setHours(0,0,0,0)
     const due = new Date(dueDate)
     const diffMs = due - now
@@ -207,9 +263,6 @@ const getDaysLeftText = (dueDate) => {
     const due = new Date(dueDate)
     const diffTime = now - due
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) 
-    // now - due > 0 => Past (Overdue) => diffDays > 0
-    // now - due < 0 => Future => diffDays < 0
-    // now - due == 0 => Today => diffDays == 0
     
     if (diffDays > 0) return 'Overdue'
     if (diffDays === 0) return 'Due Today'
@@ -241,7 +294,7 @@ onMounted(() => {
     <div class="mb-12 shadow-lg border border-gray-100 p-6 bg-white">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
             <!-- Title Input -->
-            <div class="md:col-span-8">
+            <div class="md:col-span-12">
                 <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Title</label>
                 <input 
                     v-model="form.title"
@@ -250,15 +303,25 @@ onMounted(() => {
                     class="w-full h-[3.2rem] border border-gray-200 px-4 focus:outline-none focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold transition-all font-light"
                 />
             </div>
-            <!-- Date Input -->
-            <div class="md:col-span-4">
-                <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Due Date</label>
-                <input 
-                    v-model="form.due_date"
+            
+            <!-- Date Inputs -->
+            <div class="md:col-span-6">
+                 <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Start Date</label>
+                 <input 
+                    v-model="form.start_date"
                     type="date" 
                     class="w-full h-[3.2rem] border border-gray-200 px-4 focus:outline-none focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold transition-all font-light"
                 />
             </div>
+            <div class="md:col-span-6">
+                 <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">End Date (Due)</label>
+                 <input 
+                    v-model="form.end_date"
+                    type="date" 
+                    class="w-full h-[3.2rem] border border-gray-200 px-4 focus:outline-none focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold transition-all font-light"
+                />
+            </div>
+
             <!-- Description Input -->
             <div class="md:col-span-12">
                  <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Description</label>
@@ -281,6 +344,11 @@ onMounted(() => {
         </div>
     </div>
 
+    <!-- Calendar Area -->
+    <div class="mb-12 shadow-lg border border-gray-100 p-6 bg-white">
+        <FullCalendar :options="calendarOptions" />
+    </div>
+
     <!-- Todo List -->
     <div class="space-y-4">
       <div v-if="isLoading" class="py-8 text-center text-gray-400 font-light">
@@ -295,14 +363,14 @@ onMounted(() => {
         v-else
         v-for="todo in todos" 
         :key="todo.id"
+        :id="'todo-' + todo.id"
         class="group border-l-4 transition-all duration-300 shadow-sm bg-white"
-        :class="[getUrgencyClass(todo.due_date, todo.created_at, todo.is_done)]"
+        :class="[getUrgencyClass(todo.end_date || todo.due_date, todo.created_at, todo.is_done)]"
       >
         <!-- Summary Row (Click to Expand) -->
         <div class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50" @click="toggleAccordion(todo)">
             <div class="flex items-center gap-4 flex-1">
                  <!-- Custom Checkbox (Stop propagation to prevent accordion toggle) -->
-                 <!-- Custom Checkbox (Bare Checkmark Style) -->
                 <button 
                     @click.stop="toggleTodo(todo)"
                     class="focus:outline-none transition-all duration-300 shrink-0 bg-transparent border-none p-1"
@@ -327,14 +395,14 @@ onMounted(() => {
                     >
                         {{ todo.title }}
                     </span>
-                    <span class="text-xs text-gray-400 font-mono flex items-center gap-1 shrink-0" v-if="todo.due_date">
-                        {{ new Date(todo.due_date).toLocaleDateString() }}
+                    <span class="text-xs text-gray-400 font-mono flex items-center gap-1 shrink-0" v-if="todo.end_date || todo.due_date">
+                        {{ new Date(todo.end_date || todo.due_date).toLocaleDateString() }}
                         <span class="font-medium ml-1" :class="{
-                            'text-red-400': getDaysLeftText(todo.due_date) === 'Overdue',
-                            'text-orange-400': getDaysLeftText(todo.due_date) === 'Due Today',
-                            'text-blue-400': getDaysLeftText(todo.due_date).includes('days left')
+                            'text-red-400': getDaysLeftText(todo.end_date || todo.due_date) === 'Overdue',
+                            'text-orange-400': getDaysLeftText(todo.end_date || todo.due_date) === 'Due Today',
+                            'text-blue-400': getDaysLeftText(todo.end_date || todo.due_date).includes('days left')
                         }">
-                           ({{ getDaysLeftText(todo.due_date) }})
+                           ({{ getDaysLeftText(todo.end_date || todo.due_date) }})
                         </span>
                     </span>
                 </div>
@@ -360,8 +428,8 @@ onMounted(() => {
             >
                 <div class="flex flex-col gap-4">
                      <!-- Edit Title & Date -->
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div class="md:col-span-12">
                             <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Title</label>
                             <input 
                                 v-model="todo.title"
@@ -369,10 +437,18 @@ onMounted(() => {
                                 class="w-full bg-white border border-gray-200 h-[2.8rem] px-3 font-light text-sm focus:outline-none focus:border-black transition-colors"
                             />
                         </div>
-                        <div>
-                            <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Due Date</label>
+                        <div class="md:col-span-6">
+                            <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">Start Date</label>
                             <input 
-                                v-model="todo.due_date"
+                                v-model="todo.start_date"
+                                type="date"
+                                class="w-full bg-white border border-gray-200 h-[2.8rem] px-3 font-light text-sm focus:outline-none focus:border-black transition-colors"
+                            />
+                        </div>
+                        <div class="md:col-span-6">
+                            <label class="block text-xs uppercase tracking-widest text-gray-400 mb-1">End Date</label>
+                            <input 
+                                v-model="todo.end_date"
                                 type="date"
                                 class="w-full bg-white border border-gray-200 h-[2.8rem] px-3 font-light text-sm focus:outline-none focus:border-black transition-colors"
                             />
@@ -411,6 +487,104 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style>
+/* FullCalendar Overrides (Global or Deep Selector needed because they are child components) */
+/* Note: In Vue scoped styles, use :deep() or place in global style. 
+   Since we are in a scoped block, we will use :deep() */
+
+:deep(.fc) {
+  --fc-border-color: #f3f4f6; /* gray-100 */
+  --fc-today-bg-color: #fdfce7; /* yellow-50 (luxurious warm tint) */
+  font-family: inherit;
+}
+
+/* Toolbar Buttons */
+:deep(.fc-button) {
+  border-radius: 0 !important; /* Sharp edges */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem !important; /* text-xs */
+  font-weight: 500;
+  padding: 0.8rem 1.2rem !important;
+  transition: all 0.3s ease;
+  background-color: transparent !important;
+  border: 1px solid #e5e7eb !important; /* gray-200 */
+  color: #9ca3af !important; /* gray-400 */
+  box-shadow: none !important;
+}
+
+:deep(.fc-button:hover) {
+  border-color: #996515 !important; /* Luxury Gold */
+  color: #996515 !important;
+  background-color: transparent !important;
+}
+
+:deep(.fc-button-active) {
+  background-color: #111827 !important; /* Black */
+  border-color: #111827 !important;
+  color: #ffffff !important;
+}
+
+:deep(.fc-button-active:hover) {
+  background-color: #996515 !important; /* Gold Hover */
+  border-color: #996515 !important;
+}
+
+/* Today Button Special Style */
+:deep(.fc-today-button) {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  color: #374151 !important; /* gray-700 */
+  border: 1px solid #f3f4f6 !important;
+  opacity: 1 !important;
+}
+:deep(.fc-today-button:disabled) {
+  opacity: 0.5 !important;
+}
+
+/* Header Title */
+:deep(.fc-toolbar-title) {
+  font-size: 1.5rem !important;
+  font-weight: 300 !important; /* Light */
+  letter-spacing: -0.025em;
+  color: #111827;
+}
+
+/* Calendar Grid */
+:deep(.fc-col-header-cell-cushion) {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 1rem 0 !important;
+  color: #9ca3af; /* gray-400 */
+  font-weight: normal;
+  text-decoration: none !important;
+}
+
+:deep(.fc-daygrid-day-number) {
+  color: #374151; /* gray-700 */
+  font-weight: 300;
+  padding: 0.5rem !important;
+  text-decoration: none !important;
+}
+
+:deep(.fc-day-today) {
+  background-color: transparent !important; /* Remove default yellow */
+}
+:deep(.fc-day-today .fc-daygrid-day-frame) {
+  background-color: #fffbeb !important; /* amber-50 custom today */
+}
+
+/* Events */
+:deep(.fc-event) {
+  border: none !important;
+  border-radius: 0 !important; /* Sharp edges */
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  font-weight: 300;
+  cursor: pointer;
+}
+</style>
 
 <style scoped>
 @keyframes pulse-slow {

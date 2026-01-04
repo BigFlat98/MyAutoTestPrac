@@ -47,9 +47,9 @@ class Database:
             async with self.pool.acquire() as conn:
                  await conn.execute('''
                     /* Helper: Drop table for schema migration during dev - COMMENTED OUT FOR PERSISTENCE */
-                    -- DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
+                     DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
                     -- DROP TABLE IF EXISTS users; -- Reset users to apply UNIQUE constraint
-                    -- DROP TABLE IF EXISTS posts;
+                    -- DROP TABLE --IF EXISTS posts;
                     -- DROP TABLE IF EXISTS post_images;
                     -- DROP TABLE IF EXISTS post_replies;
                     -- DROP TABLE IF EXISTS chat_rooms;
@@ -74,6 +74,8 @@ class Database:
                         title TEXT NOT NULL,
                         description TEXT,
                         due_date DATE,
+                        start_date DATE,
+                        end_date DATE,
                         is_done BOOLEAN DEFAULT FALSE,
                         author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
