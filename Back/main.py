@@ -48,7 +48,7 @@ origins = [
     "http://localhost:5173",
     "http://localhost",
     "http://127.0.0.1",
-    "http://52.63.33.119", # 사용자 EC2 Public IP
+    "http://3.34.207.211", # 사용자 EC2 Public IP
 ]
 
 app.add_middleware(

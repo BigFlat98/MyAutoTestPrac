@@ -47,7 +47,7 @@ class Database:
             async with self.pool.acquire() as conn:
                  await conn.execute('''
                     /* Helper: Drop table for schema migration during dev - COMMENTED OUT FOR PERSISTENCE */
-                     DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
+                    -- DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
                     -- DROP TABLE IF EXISTS users; -- Reset users to apply UNIQUE constraint
                     -- DROP TABLE --IF EXISTS posts;
                     -- DROP TABLE IF EXISTS post_images;
