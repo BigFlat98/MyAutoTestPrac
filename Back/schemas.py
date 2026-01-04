@@ -23,7 +23,6 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     login_id: str
     login_pw: str
-    nick_name: str
 
 class UserResponse(BaseModel):
     id: int

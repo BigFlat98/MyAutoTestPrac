@@ -17,7 +17,12 @@ export const useAuthStore = defineStore('auth', {
                 this.isAuthenticated = true;
                 return true;
             } catch (error) {
-                this.authError = error.response?.data?.detail || 'Login failed';
+                const detail = error.response?.data?.detail;
+                if (Array.isArray(detail)) {
+                    this.authError = "입력 정보 형식이 올바르지 않습니다.";
+                } else {
+                    this.authError = detail || '로그인에 실패했습니다.';
+                }
                 this.isAuthenticated = false;
                 throw error;
             }
