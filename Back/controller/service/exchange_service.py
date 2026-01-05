@@ -12,7 +12,7 @@ class ExchangeRateService:
         # 통계표: 731Y001 (원/달러 환율)
         # 주기: D (일) / 항목: 0000001 (원/달러)
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=365*6)).strftime("%Y%m%d") # 6년치
+            start_date = (datetime.now() - timedelta(days=365*10)).strftime("%Y%m%d") # 6년치
         if not end_date:
             end_date = datetime.now().strftime("%Y%m%d")
             

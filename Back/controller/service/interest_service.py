@@ -24,7 +24,7 @@ class InterestRateService:
         # 통계표: 722Y001 (한국은행 기준금리 및 여수신금리)
         # 주기: D (일) / 항목: 0101000 (한국은행 기준금리)
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=365*6)).strftime("%Y%m%d")
+            start_date = (datetime.now() - timedelta(days=365*10)).strftime("%Y%m%d")
         if not end_date:
             end_date = datetime.now().strftime("%Y%m%d")
             
