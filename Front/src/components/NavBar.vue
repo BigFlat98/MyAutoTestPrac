@@ -38,6 +38,9 @@ async function handleLogout() {
       <router-link to="/chat" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Chat
       </router-link>
+      <router-link to="/video" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
+        Video
+      </router-link>
     </div>
 
     <!-- Right Side Actions (Auth + Mobile Menu Toggle) -->
@@ -80,6 +83,9 @@ async function handleLogout() {
       </router-link>
       <router-link @click="isMenuOpen = false" to="/chat" class="text-sm uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Chat
+      </router-link>
+      <router-link @click="isMenuOpen = false" to="/video" class="text-sm uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
+        Video
       </router-link>
     </div>
   </nav>

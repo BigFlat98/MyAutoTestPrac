@@ -67,6 +67,13 @@ const router = createRouter({
       name: 'chat',
       component: () => import('../views/chat/ChatView.vue'),
       meta: { requiresAuth: true }
+    },
+    // Video Route
+    {
+      path: '/video',
+      name: 'video-list',
+      component: () => import('../views/video/VideoView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

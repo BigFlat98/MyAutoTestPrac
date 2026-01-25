@@ -127,3 +127,11 @@
   - **소셜 로그인 (Social Login)** 연동.
   - **스트리밍 서버 (Streaming Server)** 구축.
   - **챗봇 (Chatbot)** 기능 추가.
+
+1/25
+## 12. 동영상 페이지 기획 (Video Page Planning)
+
+- **기획 (Planning)**:
+  - fow.tv 스타일의 동영상 상세 페이지 구현 결정.
+  - **DB 설계**: 동영상 댓글용 `PostReply` 재사용 vs 신규 테이블 생성 검토 결과, **`VideoReply` 신규 테이블 생성**으로 결정 (리그레션 방지 및 유지보수 용이성).
+  - `implementation_plan.md` 작성 완료 (한글).

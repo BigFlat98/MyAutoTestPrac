@@ -488,15 +488,22 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 /* FullCalendar Overrides (Global or Deep Selector needed because they are child components) */
 /* Note: In Vue scoped styles, use :deep() or place in global style. 
    Since we are in a scoped block, we will use :deep() */
 
 :deep(.fc) {
-  --fc-border-color: #f3f4f6; /* gray-100 */
-  --fc-today-bg-color: #fdfce7; /* yellow-50 (luxurious warm tint) */
+  --fc-border-color: #e5e7eb; /* gray-200 */
+  --fc-today-bg-color: transparent; /* Maintained by daygrid-day-frame instead */
   font-family: inherit;
+}
+
+/* Thinner, cleaner borders */
+:deep(.fc-theme-standard td), 
+:deep(.fc-theme-standard th),
+:deep(.fc-theme-standard .fc-scrollgrid) {
+    border-color: #e5e7eb !important;
 }
 
 /* Toolbar Buttons */
@@ -529,6 +536,7 @@ onMounted(() => {
 :deep(.fc-button-active:hover) {
   background-color: #996515 !important; /* Gold Hover */
   border-color: #996515 !important;
+  color: #ffffff !important; /* Keep text white */
 }
 
 /* Today Button Special Style */
@@ -573,6 +581,25 @@ onMounted(() => {
 }
 :deep(.fc-day-today .fc-daygrid-day-frame) {
   background-color: #fffbeb !important; /* amber-50 custom today */
+}
+
+/* Weekend Styling - User Request */
+/* Saturday: Blue Text & Light BG */
+:deep(.fc-day-sat) {
+    background-color: #DBEAFE !important; /* blue-100 */
+}
+:deep(.fc-col-header-cell.fc-day-sat .fc-col-header-cell-cushion),
+:deep(.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number) {
+    color: #1E40AF !important; /* blue-800 for better contrast on darker bg */
+}
+
+/* Sunday: Red Text & Light BG */
+:deep(.fc-day-sun) {
+    background-color: #FEE2E2 !important; /* red-100 */
+}
+:deep(.fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion),
+:deep(.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number) {
+    color: #991B1B !important; /* red-800 for better contrast on darker bg */
 }
 
 /* Events */
