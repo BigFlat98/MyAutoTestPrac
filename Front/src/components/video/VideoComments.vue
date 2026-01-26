@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { api } from '@/api';
 
 const props = defineProps({
   comments: {
@@ -40,18 +41,20 @@ const nestedComments = computed(() => {
   return roots;
 });
 
-const addComment = () => {
+const addComment = async () => {
   if (!newComment.value.trim()) return;
   
-  props.comments.unshift({
-    id: Date.now(),
-    author: 'Me',
-    content: newComment.value,
-    created_at: new Date().toLocaleString(),
-    reply_id: null
-  });
-  
-  newComment.value = '';
+  try {
+      const response = await api.post(`/videos/${props.videoId}/comments`, {
+          content: newComment.value
+      });
+      // Add to local list to update UI immediately
+      props.comments.push(response.data);
+      newComment.value = '';
+  } catch (error) {
+      console.error("Failed to post comment:", error);
+      alert("댓글 등록에 실패했습니다.");
+  }
 };
 
 const toggleReplyForm = (commentId) => {
@@ -64,19 +67,22 @@ const toggleReplyForm = (commentId) => {
   }
 };
 
-const addReply = (parentId) => {
+const addReply = async (parentId) => {
   if (!replyContent.value.trim()) return;
 
-  props.comments.push({
-    id: Date.now(),
-    author: 'Me',
-    content: replyContent.value,
-    created_at: new Date().toLocaleString(),
-    reply_id: parentId
-  });
-
-  activeReplyId.value = null;
-  replyContent.value = '';
+  try {
+      const response = await api.post(`/videos/${props.videoId}/comments`, {
+          content: replyContent.value,
+          reply_id: parentId
+      });
+      // Add to local list
+      props.comments.push(response.data);
+      activeReplyId.value = null;
+      replyContent.value = '';
+  } catch (error) {
+      console.error("Failed to post reply:", error);
+      alert("답글 등록에 실패했습니다.");
+  }
 };
 </script>
 

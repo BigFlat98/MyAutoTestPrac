@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
 from router import dashboard
 from router import todo
 from router import board
+from router import video
 from controller.test.items import router as items_router
 from router.auth import router as auth_router
 from fastapi.staticfiles import StaticFiles
@@ -39,6 +40,7 @@ app.include_router(dashboard.router)
 app.include_router(todo.router)
 app.include_router(auth_router)
 app.include_router(board.router)
+app.include_router(video.router)
 
 
 # CORS definition

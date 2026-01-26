@@ -1,11 +1,43 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import VideoList from '../../components/video/VideoList.vue';
 import VideoRegisterModal from '../../components/video/VideoRegisterModal.vue';
-import { dummyVideos } from '../../data/dummyVideoData';
+import { api } from '@/api';
 
-const videos = ref([...dummyVideos]);
+const videos = ref([]);
 const isModalOpen = ref(false);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const itemsPerPage = 10;
+
+const fetchVideos = async () => {
+    try {
+        const response = await api.get(`/videos?page=${currentPage.value}&limit=${itemsPerPage}`);
+        videos.value = response.data.videos;
+        totalPages.value = Math.ceil(response.data.total / itemsPerPage);
+        
+        // Fix: If current page > total pages (e.g. after deletion), go to last page
+        if (currentPage.value > totalPages.value && totalPages.value > 0) {
+            changePage(totalPages.value);
+        } else if (totalPages.value === 0) {
+             // If no videos left at all
+             currentPage.value = 1;
+        }
+    } catch (error) {
+        console.error("Failed to fetch videos:", error);
+    }
+}
+
+const changePage = (page) => {
+    if (page < 1 || (totalPages.value > 0 && page > totalPages.value)) return;
+    currentPage.value = page;
+    fetchVideos();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+onMounted(() => {
+    fetchVideos();
+});
 
 const openModal = () => {
   isModalOpen.value = true;
@@ -16,10 +48,17 @@ const closeModal = () => {
 };
 
 const handleRegisterVideo = (newVideo) => {
-  // Add new video to the top of the list (local only)
-  videos.value.unshift(newVideo);
+  // Reset to page 1 and re-fetch to ensure pagination limit is respected
+  currentPage.value = 1;
+  fetchVideos();
   closeModal();
 };
+
+const handleDeleteVideo = (deletedId) => {
+    // Instead of local filter, re-fetch to handle pagination shifts (e.g. item from next page moving up)
+    // Local filter: videos.value = videos.value.filter(v => v.id !== deletedId);
+    fetchVideos();
+}
 </script>
 
 <template>
@@ -43,7 +82,36 @@ const handleRegisterVideo = (newVideo) => {
     </div>
 
     <!-- Video List Area -->
-    <VideoList :videos="videos" />
+    <VideoList :videos="videos" @delete="handleDeleteVideo" />
+
+    <!-- Pagination -->
+    <div class="mt-8 flex justify-center gap-2" v-if="totalPages > 1">
+        <button 
+            @click="changePage(currentPage - 1)" 
+            :disabled="currentPage === 1"
+            class="w-10 h-10 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)] hover:bg-white transition-all duration-300 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-400 disabled:hover:shadow-none bg-white"
+        >
+            &lt;
+        </button>
+        
+        <button 
+            v-for="page in totalPages" 
+            :key="page"
+            @click="changePage(page)"
+            :class="currentPage === page ? 'bg-black text-white border-black shadow-sm' : 'text-gray-600 border-gray-200 bg-white hover:bg-white hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)]'"
+            class="w-10 h-10 border flex items-center justify-center text-sm font-light transition-all duration-300"
+        >
+            {{ page }}
+        </button>
+        
+        <button 
+            @click="changePage(currentPage + 1)" 
+            :disabled="currentPage === totalPages"
+            class="w-10 h-10 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)] hover:bg-white transition-all duration-300 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-400 disabled:hover:shadow-none bg-white"
+        >
+            &gt;
+        </button>
+    </div>
 
     <!-- Modals -->
     <VideoRegisterModal 

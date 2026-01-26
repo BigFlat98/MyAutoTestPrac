@@ -7,6 +7,7 @@ defineProps({
     required: true
   }
 });
+const emit = defineEmits(['delete']);
 </script>
 
 <template>
@@ -15,6 +16,7 @@ defineProps({
       v-for="video in videos" 
       :key="video.id" 
       :video="video" 
+      @delete="$emit('delete', $event)"
     />
   </div>
 </template>

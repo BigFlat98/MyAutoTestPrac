@@ -4,8 +4,8 @@
   "settings": {
     "width": 5000,
     "height": 5000,
-    "scrollTop": -2130.516,
-    "scrollLeft": -2379.4398,
+    "scrollTop": -2100.516,
+    "scrollLeft": -2455.4398,
     "zoomLevel": 0.8,
     "show": 511,
     "database": 4,
@@ -301,7 +301,7 @@
       },
       "ytoCJwEn7FWMvB_y77mx9": {
         "id": "ytoCJwEn7FWMvB_y77mx9",
-        "name": "VideoData",
+        "name": "Video",
         "comment": "동영상 등록 데이터 저장 테이블",
         "columnIds": [
           "qn_k27YziZfJsZW1PSblJ",
@@ -313,7 +313,8 @@
           "p0VoJ1CyuNb_ziApvZewk",
           "j0RzYMlnUrUuc6fvVAJsG",
           "iwDY9l42091WTmIPgTmR6",
-          "qYQIrYOgKU0fUoMQUFajG"
+          "qYQIrYOgKU0fUoMQUFajG",
+          "tcoqlqWG180o7-ZkIsvyh"
         ],
         "seqColumnIds": [
           "qn_k27YziZfJsZW1PSblJ",
@@ -326,7 +327,8 @@
           "p0VoJ1CyuNb_ziApvZewk",
           "j0RzYMlnUrUuc6fvVAJsG",
           "iwDY9l42091WTmIPgTmR6",
-          "qYQIrYOgKU0fUoMQUFajG"
+          "qYQIrYOgKU0fUoMQUFajG",
+          "tcoqlqWG180o7-ZkIsvyh"
         ],
         "ui": {
           "x": 2470.4847,
@@ -337,7 +339,7 @@
           "color": ""
         },
         "meta": {
-          "updateAt": 1769330737480,
+          "updateAt": 1769393729614,
           "createAt": 1769321533110
         }
       },
@@ -372,7 +374,7 @@
       },
       "X1m1zTTatHBD76jtn4s7w": {
         "id": "X1m1zTTatHBD76jtn4s7w",
-        "name": "VideoReply",
+        "name": "VideoComments",
         "comment": "영상 댓글",
         "columnIds": [
           "ojapjWCuScdpbhCw5-JfD",
@@ -395,12 +397,12 @@
           "x": 3057.5917,
           "y": 2261.678,
           "zIndex": 324,
-          "widthName": 62,
+          "widthName": 90,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1769330231121,
+          "updateAt": 1769391146363,
           "createAt": 1769324723393
         }
       }
@@ -1472,7 +1474,7 @@
         "name": "like_count",
         "comment": "좋아요 수",
         "dataType": "INT",
-        "default": "",
+        "default": "0",
         "options": 0,
         "ui": {
           "keys": 0,
@@ -1482,7 +1484,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1769330778603,
+          "updateAt": 1769390543226,
           "createAt": 1769321565476
         }
       },
@@ -1512,7 +1514,7 @@
         "name": "hate_count",
         "comment": "싫어요 수",
         "dataType": "INT",
-        "default": "",
+        "default": "0",
         "options": 0,
         "ui": {
           "keys": 0,
@@ -1522,7 +1524,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1769330781536,
+          "updateAt": 1769390545530,
           "createAt": 1769321733490
         }
       },
@@ -1872,7 +1874,7 @@
         "name": "view_count",
         "comment": "조회수",
         "dataType": "INT",
-        "default": "",
+        "default": "0",
         "options": 0,
         "ui": {
           "keys": 0,
@@ -1882,8 +1884,28 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1769330774134,
+          "updateAt": 1769390549073,
           "createAt": 1769330737480
+        }
+      },
+      "tcoqlqWG180o7-ZkIsvyh": {
+        "id": "tcoqlqWG180o7-ZkIsvyh",
+        "tableId": "ytoCJwEn7FWMvB_y77mx9",
+        "name": "report_count",
+        "comment": "",
+        "dataType": "int",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 70,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1769393743168,
+          "createAt": 1769393729614
         }
       }
     },
@@ -2132,7 +2154,7 @@
             "p0VoJ1CyuNb_ziApvZewk"
           ],
           "x": 2470.4847,
-          "y": 2229.0257,
+          "y": 2241.0257,
           "direction": 1
         },
         "meta": {
@@ -2159,8 +2181,8 @@
           "columnIds": [
             "j0RzYMlnUrUuc6fvVAJsG"
           ],
-          "x": 2928.4847,
-          "y": 2155.0257,
+          "x": 2937.4847,
+          "y": 2161.0257,
           "direction": 2
         },
         "meta": {
@@ -2178,8 +2200,8 @@
           "columnIds": [
             "qn_k27YziZfJsZW1PSblJ"
           ],
-          "x": 2928.4847,
-          "y": 2303.0257,
+          "x": 2937.4847,
+          "y": 2321.0257,
           "direction": 2
         },
         "end": {

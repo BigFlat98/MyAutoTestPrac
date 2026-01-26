@@ -49,11 +49,11 @@ class Database:
                     /* Helper: Drop table for schema migration during dev - COMMENTED OUT FOR PERSISTENCE */
                     -- DROP TABLE IF EXISTS todos; -- Reset todos to apply FK change
                     -- DROP TABLE IF EXISTS users; -- Reset users to apply UNIQUE constraint
-                    -- DROP TABLE --IF EXISTS posts;
-                    -- DROP TABLE IF EXISTS post_images;
-                    -- DROP TABLE IF EXISTS post_replies;
-                    -- DROP TABLE IF EXISTS chat_rooms;
-                    -- DROP TABLE IF EXISTS messages;
+                    
+                    /* Force schema update for Video Feature Refactor */
+                    -- DROP TABLE IF EXISTS video_comments CASCADE;
+                    -- DROP TABLE IF EXISTS videos CASCADE;
+                    -- DROP TABLE IF EXISTS video_tags CASCADE;
 
                     CREATE TABLE IF NOT EXISTS items (
                         id SERIAL PRIMARY KEY,
@@ -129,6 +129,42 @@ class Database:
 
                     /* Default Chat Room (ID: 1) */
                     INSERT INTO chat_rooms (id, name) VALUES (1, 'General') ON CONFLICT (id) DO NOTHING;
+
+                    /* Video Tags Table (Single Choice) */
+                    CREATE TABLE IF NOT EXISTS video_tags (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(50) UNIQUE NOT NULL
+                    );
+                    
+                    /* Seed Default Tags */
+                    INSERT INTO video_tags (name) VALUES 
+                        ('Music'), ('Game'), ('Humor'), ('Vlog'), ('Tech'), ('Policy'), ('Beauty'), ('Sports')
+                    ON CONFLICT (name) DO NOTHING;
+
+                    CREATE TABLE IF NOT EXISTS videos (
+                        id SERIAL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        original_title TEXT,
+                        description TEXT,
+                        url TEXT NOT NULL,
+                        video_key TEXT,
+                        view_count INTEGER DEFAULT 0,
+                        like_count INTEGER DEFAULT 0,
+                        hate_count INTEGER DEFAULT 0,
+                        reported_count INTEGER DEFAULT 0,
+                        tag_id INTEGER REFERENCES video_tags(id) ON DELETE SET NULL,
+                        uploader_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    CREATE TABLE IF NOT EXISTS video_comments (
+                        id SERIAL PRIMARY KEY,
+                        video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        content TEXT NOT NULL,
+                        reply_id INTEGER REFERENCES video_comments(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
                  ''')
                  
         except Exception as e:

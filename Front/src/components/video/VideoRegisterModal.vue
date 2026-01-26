@@ -1,54 +1,75 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { api } from '@/api';
 
 const emit = defineEmits(['close', 'register']);
 
 const title = ref('');
 const url = ref('');
 const description = ref('');
+const tag_id = ref('');
+const tags = ref([]);
 
-const extractVideoId = (inputUrl) => {
-  try {
-    const urlObj = new URL(inputUrl);
-    if (urlObj.hostname.includes('youtube.com')) {
-      return urlObj.searchParams.get('v');
-    } else if (urlObj.hostname.includes('youtu.be')) {
-      return urlObj.pathname.slice(1);
+const fetchTags = async () => {
+    try {
+        const response = await api.get('/videos/tags');
+        tags.value = response.data;
+    } catch (error) {
+        console.error("Failed to fetch tags:", error);
     }
-  } catch (e) {
-    return null;
-  }
-  return null;
-};
+}
 
-const handleSubmit = () => {
+onMounted(() => {
+    fetchTags();
+});
+
+const urlError = ref('');
+
+const validateUrl = () => {
+    if (!url.value) {
+        urlError.value = '';
+        return true;
+    }
+    // Simple regex for YouTube URLs (includes youtube.com, youtu.be, embed, watch)
+    const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    if (!pattern.test(url.value)) {
+        urlError.value = '올바른 YouTube URL 형식이 아닙니다.';
+        return false;
+    }
+    urlError.value = '';
+    return true;
+}
+
+const handleSubmit = async () => {
+  if (!validateUrl()) {
+      return;
+  }
+
   if (!title.value || !url.value) {
     alert('제목과 URL을 입력해주세요.');
     return;
   }
-
-  const videoId = extractVideoId(url.value);
-  if (!videoId) {
-    alert('올바른 유튜브 URL을 입력해주세요.');
-    return;
+  
+  if (!tag_id.value) {
+      alert('태그를 선택해주세요.');
+      return;
   }
 
-  const newVideo = {
-    id: Date.now(),
-    title: title.value,
-    url: url.value,
-    videoId: videoId,
-    author: 'Me',
-    view_count: 0,
-    like_count: 0,
-    hate_count: 0,
-    created_at: new Date().toLocaleString(),
-    description: description.value,
-    tags: ['New'],
-    comments: []
-  };
-
-  emit('register', newVideo);
+  try {
+      const payload = {
+          title: title.value,
+          description: description.value,
+          url: url.value,
+          tag_id: tag_id.value
+      }
+      
+      const response = await api.post('/videos', payload);
+      emit('register', response.data);
+      emit('close');
+  } catch (error) {
+      console.error("Failed to register video:", error);
+      alert("영상 등록에 실패했습니다.");
+  }
 };
 </script>
 
@@ -76,10 +97,13 @@ const handleSubmit = () => {
           <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">YouTube URL</label>
           <input 
             v-model="url"
+            @blur="validateUrl"
             type="text" 
             placeholder="paste your youtube link here..."
             class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none placeholder-gray-300 bg-transparent"
+            :class="{'border-red-500': urlError}"
           />
+          <p v-if="urlError" class="text-xs text-red-500 mt-1">{{ urlError }}</p>
         </div>
         
         <div>
@@ -90,6 +114,24 @@ const handleSubmit = () => {
             placeholder="enter video title..."
             class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none placeholder-gray-300 bg-transparent"
           />
+        </div>
+
+        <div>
+           <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">Tag</label>
+           <div class="relative">
+               <select 
+                v-model="tag_id"
+                class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none bg-transparent appearance-none cursor-pointer"
+               >
+                   <option value="" disabled selected>Select a tag</option>
+                   <option v-for="tag in tags" :key="tag.id" :value="tag.id">
+                       {{ tag.name }}
+                   </option>
+               </select>
+               <div class="absolute right-0 top-0 h-full flex items-center pointer-events-none text-gray-400">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+               </div>
+           </div>
         </div>
 
         <div>

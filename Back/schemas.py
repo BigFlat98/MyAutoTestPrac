@@ -112,3 +112,48 @@ class StockListResponse(BaseModel):
 
 # Update forward refs for recursive model
 CommentResponse.model_rebuild()
+
+# Video Models
+class VideoTagResponse(BaseModel):
+    id: int
+    name: str
+
+class VideoCommentCreate(BaseModel):
+    content: str
+    reply_id: Optional[int] = None
+
+class VideoCommentResponse(BaseModel):
+    id: int
+    author: str
+    content: str
+    created_at: datetime
+    reply_id: Optional[int] = None
+
+class VideoCreate(BaseModel):
+    title: str
+    description: str
+    url: str
+    tag_id: Optional[int] = None
+
+class VideoResponse(BaseModel):
+    id: int
+    title: str
+    original_title: Optional[str] = None
+    description: str
+    url: str
+    video_key: Optional[str] = None
+    view_count: int
+    like_count: int
+    hate_count: int
+    reported_count: int
+    tag_id: Optional[int] = None
+    tag_name: Optional[str] = None
+    uploader_id: int
+    author: str 
+    created_at: datetime
+    comments: List[VideoCommentResponse] = []
+
+class VideoListResponse(BaseModel):
+    total: int
+    videos: List[VideoResponse]
+
