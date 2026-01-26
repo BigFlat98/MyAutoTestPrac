@@ -258,6 +258,7 @@ const thumbnailUrl = computed(() => {
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"
               ></iframe>
               <div v-else class="w-full h-full flex items-center justify-center text-white font-light tracking-widest text-xs">
                 VIDEO URL INVALID
