@@ -114,6 +114,7 @@ const canDelete = computed(() => {
 
 // Helper to get embed URL from youtube link or ID
 const embedUrl = computed(() => {
+  if (!props.video || !props.video.url) return '';
   if (props.video.video_key) {
     return `https://www.youtube.com/embed/${props.video.video_key}`;
   }
@@ -125,6 +126,9 @@ const embedUrl = computed(() => {
     const url = new URL(props.video.url);
     const v = url.searchParams.get('v');
     if (v) return `https://www.youtube.com/embed/${v}`;
+    if (url.pathname.startsWith('/shorts/')) {
+        return `https://www.youtube.com/embed/${url.pathname.split('/shorts/')[1]}`;
+    }
     if (url.hostname.includes('youtu.be')) return `https://www.youtube.com/embed${url.pathname}`;
   } catch (e) {
     return '';
@@ -134,11 +138,16 @@ const embedUrl = computed(() => {
 });
 
 const thumbnailUrl = computed(() => {
+  if (!props.video) return '';
   let videoId = props.video.video_key || props.video.videoId;
   if (!videoId) {
       try {
+        if (!props.video.url) return '';
         const url = new URL(props.video.url);
         videoId = url.searchParams.get('v');
+        if (!videoId && url.pathname.startsWith('/shorts/')) {
+            videoId = url.pathname.split('/shorts/')[1];
+        }
         if (!videoId && url.hostname.includes('youtu.be')) {
             videoId = url.pathname.slice(1);
         }
