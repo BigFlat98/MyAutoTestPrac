@@ -77,7 +77,7 @@ docker-compose up --build
 ```
 - **Frontend**: http://localhost
 - **Backend**: http://localhost:8000
-- **Database**: Port 5432 (User/PW: `postgres`/`1971601745` from .env.docker)
+- **Database**: Port 5432
 
 
 
