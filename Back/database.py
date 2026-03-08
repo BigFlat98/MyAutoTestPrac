@@ -165,6 +165,85 @@ class Database:
                         reply_id INTEGER REFERENCES video_comments(id) ON DELETE CASCADE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
+
+                    /* ==================== Dashboard Market Data Tables ==================== */
+
+                    /* 공포탐욕지수 스냅샷 - 수집할 때마다 INSERT, 조회 시 최신 1건 사용 */
+                    CREATE TABLE IF NOT EXISTS market_fear_greed (
+                        id SERIAL PRIMARY KEY,
+                        score INTEGER NOT NULL,
+                        rating VARCHAR(20) NOT NULL,
+                        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 주식 현재가 스냅샷 - 수집할 때마다 INSERT, 조회 시 market별 최신 수집분 사용 */
+                    CREATE TABLE IF NOT EXISTS market_stocks (
+                        id SERIAL PRIMARY KEY,
+                        market VARCHAR(10) NOT NULL,
+                        rank INTEGER NOT NULL,
+                        name VARCHAR(100) NOT NULL,
+                        symbol VARCHAR(20) NOT NULL,
+                        price NUMERIC(15,2) NOT NULL,
+                        change_rate NUMERIC(6,2) NOT NULL,
+                        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 원/달러 환율 일별 시계열 - trade_date UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_exchange_rate (
+                        id SERIAL PRIMARY KEY,
+                        trade_date DATE UNIQUE NOT NULL,
+                        rate NUMERIC(10,2) NOT NULL,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 한/미 기준금리 시계열 - trade_date UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_interest_rate (
+                        id SERIAL PRIMARY KEY,
+                        trade_date DATE UNIQUE NOT NULL,
+                        kr_rate NUMERIC(5,2),
+                        us_rate NUMERIC(5,2),
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 암호화폐 현재가 스냅샷 - 수집할 때마다 INSERT, 조회 시 coin별 최신 1건 사용 */
+                    CREATE TABLE IF NOT EXISTS market_crypto_price (
+                        id SERIAL PRIMARY KEY,
+                        coin VARCHAR(10) NOT NULL,
+                        krw_price NUMERIC(20,2) NOT NULL,
+                        usd_price NUMERIC(15,4) NOT NULL,
+                        change_rate NUMERIC(6,2) NOT NULL,
+                        kimchi_premium NUMERIC(6,2) NOT NULL,
+                        exchange_rate NUMERIC(10,2) NOT NULL,
+                        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 암호화폐 90일 OHLCV 히스토리 - (coin, trade_datetime) UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_crypto_history (
+                        id SERIAL PRIMARY KEY,
+                        coin VARCHAR(10) NOT NULL,
+                        trade_datetime TIMESTAMP NOT NULL,
+                        upbit_price NUMERIC(20,2) NOT NULL,
+                        binance_price NUMERIC(20,2) NOT NULL,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE (coin, trade_datetime)
+                    );
+
+                    /* 금 현재가 스냅샷 - 수집할 때마다 INSERT, 조회 시 최신 1건 사용 */
+                    CREATE TABLE IF NOT EXISTS market_gold_price (
+                        id SERIAL PRIMARY KEY,
+                        domestic_price NUMERIC(15,2) NOT NULL,
+                        change_rate NUMERIC(6,2) NOT NULL,
+                        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 금 가격 시계열 - trade_date UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_gold_history (
+                        id SERIAL PRIMARY KEY,
+                        trade_date DATE UNIQUE NOT NULL,
+                        domestic_price NUMERIC(15,2) NOT NULL,
+                        international_price NUMERIC(15,4),
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
                  ''')
                  
         except Exception as e:

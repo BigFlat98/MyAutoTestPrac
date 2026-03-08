@@ -14,10 +14,18 @@ from contextlib import asynccontextmanager
 #pydantic import
 from schemas import EchoRequest, ItemRequest, ItemResponse
 
+# scheduler
+from controller.service.market_scheduler import setup_scheduler
+
 @asynccontextmanager #fastapi 앱이 켜지고 꺼질 때 DB 연결/해제 설정
 async def lifespan(app: FastAPI):
     await db.connect() #앱 시작 시 DB 연결
+    scheduler = setup_scheduler()
+    scheduler.start()
+    print("[Scheduler] Started.")
     yield
+    scheduler.shutdown()
+    print("[Scheduler] Shutdown.")
     await db.disconnect() #앱 종료 시 DB 연결 해제
 
 #router import 

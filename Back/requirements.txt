@@ -10,3 +10,6 @@ pydantic
 python-multipart
 bcrypt
 itsdangerous
+yfinance
+ccxt
+apscheduler

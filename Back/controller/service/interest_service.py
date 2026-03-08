@@ -84,3 +84,23 @@ class InterestRateService:
             "kr": merged['kr_rate'].tolist(),
             "us": merged['us_rate'].tolist()
         }
+
+
+async def get_comparison_data_from_db():
+    """DB에 저장된 한/미 기준금리 시계열을 반환합니다."""
+    from database import db
+
+    async with db.pool.acquire() as conn:
+        rows = await conn.fetch(
+            """SELECT trade_date, kr_rate, us_rate
+               FROM market_interest_rate
+               WHERE kr_rate IS NOT NULL AND us_rate IS NOT NULL
+               ORDER BY trade_date"""
+        )
+    if not rows:
+        return None
+    return {
+        "dates": [r["trade_date"].strftime("%Y-%m-%d") for r in rows],
+        "kr":    [float(r["kr_rate"]) for r in rows],
+        "us":    [float(r["us_rate"]) for r in rows]
+    }

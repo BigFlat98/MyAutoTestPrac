@@ -3,6 +3,8 @@ import FearGreedIndex from '../components/dashboard/FearGreedIndex.vue'
 import StockTopList from '../components/dashboard/StockTopList.vue'
 import InterestRateChart from '../components/dashboard/InterestRateChart.vue'
 import ExchangeRateChart from '../components/dashboard/ExchangeRateChart.vue'
+import BitcoinChart from '../components/dashboard/BitcoinChart.vue'
+import GoldChart from '../components/dashboard/GoldChart.vue'
 </script>
 
 <template>
@@ -35,6 +37,15 @@ import ExchangeRateChart from '../components/dashboard/ExchangeRateChart.vue'
         
         <!-- Quadrant 4: Interest Rates (Right) -->
         <InterestRateChart />
+      </div>
+
+      <!-- Bottom Row: 1:1 Ratio (New: Crypto & Gold) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+        <!-- Quadrant 5: Bitcoin (Left) -->
+        <BitcoinChart />
+        
+        <!-- Quadrant 6: Gold (Right) -->
+        <GoldChart />
       </div>
       
     </div>

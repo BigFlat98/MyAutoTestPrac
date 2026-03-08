@@ -39,3 +39,19 @@ class ExchangeRateService:
         except Exception as e:
             print(f"Failed to fetch Exchange Data: {e}")
             return {"dates": [], "rates": []}
+
+
+async def get_usd_krw_rate_from_db():
+    """DB에 저장된 원/달러 환율 시계열을 반환합니다."""
+    from database import db
+
+    async with db.pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT trade_date, rate FROM market_exchange_rate ORDER BY trade_date"
+        )
+    if not rows:
+        return None
+    return {
+        "dates": [r["trade_date"].strftime("%Y-%m-%d") for r in rows],
+        "rates": [float(r["rate"]) for r in rows]
+    }

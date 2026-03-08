@@ -233,3 +233,36 @@ def get_stock_data(market: str):
         }
     
     return final_data
+
+
+async def get_stock_data_from_db(market: str):
+    """DB에 저장된 최신 주식 현재가를 반환합니다."""
+    from database import db
+
+    async with db.pool.acquire() as conn:
+        latest = await conn.fetchrow(
+            "SELECT MAX(fetched_at) AS latest FROM market_stocks WHERE market = $1",
+            market.upper()
+        )
+        if not latest or not latest["latest"]:
+            return None
+
+        rows = await conn.fetch(
+            """SELECT rank, name, symbol, price, change_rate
+               FROM market_stocks
+               WHERE market = $1 AND fetched_at = $2
+               ORDER BY rank""",
+            market.upper(), latest["latest"]
+        )
+
+    stocks = [
+        {
+            "rank":   r["rank"],
+            "name":   r["name"],
+            "symbol": r["symbol"],
+            "price":  float(r["price"]),
+            "change": float(r["change_rate"])
+        }
+        for r in rows
+    ]
+    return {"market": market.lower(), "stocks": stocks, "status": "success"}

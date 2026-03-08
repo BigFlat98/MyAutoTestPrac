@@ -25,3 +25,13 @@ dist-ssr
 .env
 .env.docker
 .erd
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+Back/venv/
+
+# Rust build artifacts
+Chat/target/
