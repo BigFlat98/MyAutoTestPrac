@@ -50,14 +50,12 @@ const fetchGoldData = async () => {
 
         const labels = data.history.labels;
         const domesticData = data.history.domestic;
-        // International data might be used later or overlayed
-        // const internationalData = data.history.international; 
 
-        // Padding logic removed as per user request to show latest data without gaps
-        // for (let i = 0; i < 3; i++) {
-        //     labels.push('');
-        //     domesticData.push(null);
-        // }
+        // Add padding (3 empty points) to show latest data point without cutoff
+        for (let i = 0; i < 3; i++) {
+            labels.push('');
+            domesticData.push(null);
+        }
 
         chartData.value = {
             labels: labels,
@@ -185,7 +183,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-white p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
+  <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300">
     <!-- Header -->
     <div class="flex justify-between items-end mb-6">
       <div>
@@ -206,7 +204,7 @@ onMounted(() => {
     </div>
 
     <!-- Chart -->
-    <div class="flex-1 w-full min-h-[300px]">
+    <div class="flex-1 w-full min-h-0">
       <Line :data="chartData" :options="chartOptions" />
     </div>
   </div>

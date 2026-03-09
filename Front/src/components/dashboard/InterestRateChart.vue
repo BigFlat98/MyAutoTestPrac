@@ -32,6 +32,9 @@ const totalLabels = ref(0);
 const yMin = ref(0);
 const yMax = ref(10);
 
+const currentKR = ref(null);
+const currentUS = ref(null);
+
 const mainChartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -82,6 +85,12 @@ const fetchData = async () => {
         }
     }
     
+    // Extract latest values
+    const validKR = res.data.kr.filter(r => r !== null);
+    const validUS = res.data.us.filter(r => r !== null);
+    if (validKR.length) currentKR.value = validKR[validKR.length - 1];
+    if (validUS.length) currentUS.value = validUS[validUS.length - 1];
+
     // Calculate Min/Max
     const allRates = [...res.data.kr, ...res.data.us].filter(r => r !== null);
     const minVal = Math.min(...allRates);
@@ -131,17 +140,38 @@ onMounted(fetchData);
 
 <template>
   <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300">
-    <!-- Header: Title & Custom Legend -->
+    <!-- Header: Title & Current Rates -->
     <div class="flex justify-between items-start mb-4">
-      <h3 class="text-xs uppercase tracking-widest text-gray-500">Base Interest Rate</h3>
-      <!-- Custom Legend -->
-      <div class="flex gap-4 text-[10px] font-mono">
+      <div>
+        <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-1">Base Interest Rate</h3>
+        <div class="flex items-baseline gap-3">
+          <!-- Korea -->
+          <div class="flex items-baseline gap-1">
+            <span class="text-[10px] font-mono text-gray-400 uppercase">KR</span>
+            <span class="text-2xl font-light text-[#D4AF37] tracking-tight font-mono">
+              {{ currentKR !== null ? currentKR.toFixed(2) : '—' }}
+            </span>
+            <span class="text-xs text-gray-400">%</span>
+          </div>
+          <span class="text-gray-200 text-sm">|</span>
+          <!-- USA -->
+          <div class="flex items-baseline gap-1">
+            <span class="text-[10px] font-mono text-gray-400 uppercase">US</span>
+            <span class="text-2xl font-light text-gray-900 tracking-tight font-mono">
+              {{ currentUS !== null ? currentUS.toFixed(2) : '—' }}
+            </span>
+            <span class="text-xs text-gray-400">%</span>
+          </div>
+        </div>
+      </div>
+      <!-- Legend -->
+      <div class="flex gap-3 text-[10px] font-mono text-gray-400 mt-1">
         <div class="flex items-center gap-1">
-          <span class="w-3 h-3 bg-[#D4AF37]"></span>
+          <span class="w-3 h-[2px] bg-[#D4AF37] inline-block"></span>
           <span>Korea</span>
         </div>
         <div class="flex items-center gap-1">
-          <span class="w-3 h-3 bg-black"></span>
+          <span class="w-3 h-[2px] bg-black inline-block"></span>
           <span>USA</span>
         </div>
       </div>

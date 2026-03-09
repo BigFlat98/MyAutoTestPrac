@@ -221,7 +221,7 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="bg-white p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col relative group">
+  <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300 relative group">
     <!-- Header -->
     <div class="flex justify-between items-start mb-6 z-20 w-full">
       <div class="flex-1 relative custom-dropdown-container">
@@ -305,7 +305,7 @@ const chartOptions = {
     </div>
 
     <!-- Chart Area -->
-    <div class="flex-1 w-full min-h-[200px] relative">
+    <div class="flex-1 w-full min-h-0 relative">
       <Line :data="chartData" :options="chartOptions" />
     </div>
 

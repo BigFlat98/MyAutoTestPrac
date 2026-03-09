@@ -30,6 +30,9 @@ const totalLabels = ref(0);
 const yMin = ref(0);
 const yMax = ref(1500);
 
+const currentRate = ref(null);
+const changeRate = ref(null);
+
 // 1. Main Chart (Scrollable)
 const mainChartOptions = ref({
   responsive: true,
@@ -83,6 +86,16 @@ const fetchData = async () => {
         }
     }
 
+    // Extract current rate and change
+    const validRates = res.data.rates.filter(r => r !== null);
+    if (validRates.length >= 2) {
+      currentRate.value = validRates[validRates.length - 1];
+      const prev = validRates[validRates.length - 2];
+      changeRate.value = parseFloat(((currentRate.value - prev) / prev * 100).toFixed(2));
+    } else if (validRates.length === 1) {
+      currentRate.value = validRates[0];
+    }
+
     // Calculate Min/Max (Keep logic same)
     const rates = res.data.rates.filter(r => r !== null);
     const minVal = Math.min(...rates);
@@ -126,14 +139,26 @@ onMounted(fetchData);
 
 <template>
   <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300">
-    <!-- Header: Title & Custom Legend -->
+    <!-- Header: Title & Current Rate -->
     <div class="flex justify-between items-start mb-4">
-      <h3 class="text-xs uppercase tracking-widest text-gray-500">Exchange Rate</h3>
-      <div class="flex gap-4 text-[10px] font-mono">
-        <div class="flex items-center gap-1">
-          <span class="w-3 h-3 bg-[#10b981]"></span>
-          <span>USD/KRW</span>
+      <div>
+        <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-1">Exchange Rate</h3>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-light text-gray-900 tracking-tight font-mono">
+            {{ currentRate ? currentRate.toLocaleString('ko-KR') : '—' }}
+          </span>
+          <span class="text-xs text-gray-400">KRW</span>
         </div>
+        <div v-if="changeRate !== null" class="flex items-center gap-1 mt-0.5">
+          <span :class="changeRate >= 0 ? 'text-red-500' : 'text-blue-500'" class="text-xs font-mono font-medium">
+            {{ changeRate >= 0 ? '▲' : '▼' }} {{ Math.abs(changeRate) }}%
+          </span>
+          <span class="text-[10px] text-gray-400">vs prev day</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 text-[10px] font-mono text-gray-400 mt-1">
+        <span class="w-3 h-[2px] bg-[#10b981] inline-block"></span>
+        <span>USD / KRW</span>
       </div>
     </div>
     

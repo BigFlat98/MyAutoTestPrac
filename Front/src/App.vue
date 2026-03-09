@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import NavBar from './components/NavBar.vue'
+import Footer from './components/Footer.vue'
 import { onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
@@ -12,9 +13,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-white">
+  <div class="min-h-screen bg-white flex flex-col">
     <NavBar />
     
-    <RouterView />
-  </main>
+    <main>
+      <RouterView />
+    </main>
+
+    <Footer />
+  </div>
 </template>

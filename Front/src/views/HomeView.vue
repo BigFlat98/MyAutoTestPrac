@@ -19,32 +19,23 @@ import GoldChart from '../components/dashboard/GoldChart.vue'
     </header>
 
     <!-- Dashboard Layout -->
-    <div class="flex flex-col gap-6 h-[800px]">
+    <div class="flex flex-col gap-6">
       
       <!-- Top Row: 1:2 Ratio -->
-      <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 flex-1">
-        <!-- Quadrant 1: Fear & Greed Index (Narrower) -->
+      <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 h-[460px]">
         <FearGreedIndex />
-        
-        <!-- Quadrant 2: Stock Top 10 (Wider) -->
         <StockTopList />
       </div>
 
-      <!-- Bottom Row: 1:1 Ratio -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-        <!-- Quadrant 3: Exchange Rate (Left) -->
+      <!-- Middle Row: 1:1 Ratio -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[300px]">
         <ExchangeRateChart />
-        
-        <!-- Quadrant 4: Interest Rates (Right) -->
         <InterestRateChart />
       </div>
 
-      <!-- Bottom Row: 1:1 Ratio (New: Crypto & Gold) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-        <!-- Quadrant 5: Bitcoin (Left) -->
+      <!-- Bottom Row: Crypto & Gold -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[460px]">
         <BitcoinChart />
-        
-        <!-- Quadrant 6: Gold (Right) -->
         <GoldChart />
       </div>
       
