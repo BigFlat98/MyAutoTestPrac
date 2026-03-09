@@ -17,7 +17,7 @@ from datetime import datetime, date
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from database import db
-from controller.service.fng_crawler import get_fear_and_greed_index
+from controller.service.fng_crawler import fetch_fear_and_greed_from_api
 from controller.service.stock_service import get_stock_data
 from controller.service.exchange_service import ExchangeRateService
 from controller.service.interest_service import InterestRateService
@@ -53,7 +53,7 @@ scheduler = AsyncIOScheduler(job_defaults={"misfire_grace_time": None})
 async def fetch_and_save_fear_greed():
     print("[Scheduler] Fetching Fear & Greed Index...")
     try:
-        data = get_fear_and_greed_index()
+        data = fetch_fear_and_greed_from_api()
         async with db.pool.acquire() as conn:
             await conn.execute(
                 "INSERT INTO market_fear_greed (score, rating) VALUES ($1, $2)",

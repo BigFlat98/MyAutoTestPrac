@@ -74,7 +74,7 @@ class InterestRateService:
 
         # 2. 병합 (Outer Join으로 날짜 맞춤)
         merged = pd.merge(kr_df, us_df, on='date', how='outer')
-        merged = merged.sort_values('date').fillna(method='ffill') # 결측치 앞 데이터로 채움
+        merged = merged.sort_values('date').ffill() # 결측치 앞 데이터로 채움
         
         # 3. JSON 변환 (최근 데이터만, 너무 많으면 차트 무거움)
         merged = merged.dropna() # 앞부분 빈 곳 제거
