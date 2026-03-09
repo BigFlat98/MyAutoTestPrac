@@ -23,7 +23,28 @@ from controller.service.exchange_service import ExchangeRateService
 from controller.service.interest_service import InterestRateService
 from controller.service import crypto_service, gold_service
 
-scheduler = AsyncIOScheduler()
+# ──────────────────────────────────────────────────────────────────────────────
+# [트러블슈팅] 스케줄러 잡 미실행 문제
+#
+# 발생 문제:
+#   EC2 배포 후 앱 시작 시 crypto를 제외한 나머지 잡(fear_greed, stocks,
+#   exchange_rate, interest_rate, gold)이 실행되지 않아 DB에 데이터가
+#   저장되지 않음 → 해당 엔드포인트 전부 503 응답.
+#
+# 발생 원인:
+#   setup_scheduler()에서 모든 잡을 next_run_time=now로 등록하지만,
+#   APScheduler가 실제로 잡을 실행하기까지 EC2 환경에서 약 3초가 소요됨.
+#   APScheduler의 기본 misfire_grace_time은 1초이므로,
+#   3초 > 1초 → 1초를 초과한 잡은 "missed"로 처리되어 스킵됨.
+#   (crypto만 타이밍 차이로 1초 이내에 처리되어 정상 실행)
+#
+#   로그 예시:
+#     Run time of job "fetch_and_save_exchange_rate..." was missed by 0:00:02.966367
+#
+# 해결 방안:
+#   misfire_grace_time=None 설정 → 지연 시간에 상관없이 missed 잡을 반드시 실행.
+# ──────────────────────────────────────────────────────────────────────────────
+scheduler = AsyncIOScheduler(job_defaults={"misfire_grace_time": None})
 
 
 # ──────────────────────────────────────────
@@ -278,11 +299,12 @@ def setup_scheduler():
     """
     now = datetime.now()
 
-    scheduler.add_job(fetch_and_save_fear_greed,  "interval", hours=1,    id="fear_greed",    next_run_time=now)
-    scheduler.add_job(fetch_and_save_stocks,       "interval", minutes=10, id="stocks",        next_run_time=now)
-    scheduler.add_job(fetch_and_save_exchange_rate,"interval", hours=1,    id="exchange_rate", next_run_time=now)
-    scheduler.add_job(fetch_and_save_interest_rate,"interval", hours=24,   id="interest_rate", next_run_time=now)
-    scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now)
-    scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now)
+    # replace_existing=True: 재시작 시 동일 id 잡이 이미 등록된 경우 덮어씀 (ConflictingIdError 방지)
+    scheduler.add_job(fetch_and_save_fear_greed,  "interval", hours=1,    id="fear_greed",    next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_stocks,       "interval", minutes=10, id="stocks",        next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_exchange_rate,"interval", hours=1,    id="exchange_rate", next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_interest_rate,"interval", hours=24,   id="interest_rate", next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now, replace_existing=True)
 
     return scheduler
