@@ -8,10 +8,17 @@ services:
     # .env.docker 파일의 변수(POSTGRES_...)를 자동으로 컨테이너에 주입
     env_file:
       - ./.env.docker
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   # 2. Backend Service
   backend:
@@ -26,13 +33,18 @@ services:
     # 루트의 .env.docker 파일을 로드하여 Backend 컨테이너에 주입
     env_file:
       - ./.env.docker
+      - ./Back/.env
     environment:
       # DB_HOST는 docker-compose 내부 통신을 위해 'postgres' 서비스명으로 고정
-      # 다만 .env.docker에 이미 DB_HOST=postgres로 되어 있다면 오버라이드 안 해도 되지만,
-      # 명시성을 위해 남겨두거나 생략 가능. 여기서는 .env 값을 그대로 따르도록 함.
       - DB_HOST=postgres
-    volumes:
-      - ./Back:/app
+    networks:
+      - frontend_net
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   # 3. Frontend Service
   frontend:
@@ -41,9 +53,16 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_container
     ports:
-      - "80:80"
+      - "80:8080"
     depends_on:
       - backend
+    networks:
+      - frontend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
 
   # 4. Chat Service (Rust)
   chat:
@@ -60,6 +79,20 @@ services:
     environment:
       - PORT=3000
       - DB_HOST=postgres
+    networks:
+      - frontend_net
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
 
 volumes:
   postgres_data:
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge

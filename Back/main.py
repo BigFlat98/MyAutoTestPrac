@@ -56,7 +56,7 @@ app.include_router(video.router)
 origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "http://localhost",
+    "http://localhost:8080",
     "http://127.0.0.1",
     "http://3.34.207.211", # 사용자 EC2 Public IP
 ]

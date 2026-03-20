@@ -33,6 +33,10 @@ COPY --from=builder /usr/src/chat/target/release/chat /app/chat
 # Copy .env file (optional, but good for defaults if needed)
 # COPY .env .env 
 
+# Create non-root user
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 3000
 
 CMD ["./chat"]
