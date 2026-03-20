@@ -8,8 +8,8 @@ services:
     # .env.docker 파일의 변수(POSTGRES_...)를 자동으로 컨테이너에 주입
     env_file:
       - ./.env.docker
-    expose:
-      - "5432"
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
