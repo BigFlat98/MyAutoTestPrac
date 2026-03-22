@@ -52,13 +52,13 @@ app.include_router(video.router)
 
 
 # CORS definition
-# CORS definition
 origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "http://localhost:8080",
     "http://127.0.0.1",
-    "http://3.34.207.211", # 사용자 EC2 Public IP
+    f"https://{os.getenv('DOMAIN', '')}",
+    f"http://{os.getenv('DOMAIN', '')}",
 ]
 
 app.add_middleware(
@@ -70,7 +70,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "your-secret-key"), max_age=7200, same_site="lax", https_only=False)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "your-secret-key"), max_age=7200, same_site="lax", https_only=os.getenv("HTTPS_ONLY", "false").lower() == "true")
 
 
 
