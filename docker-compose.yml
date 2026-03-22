@@ -7,8 +7,9 @@ services:
     container_name: caddy_container
     ports:
       - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      # 도메인 구매 후 HTTPS 전환 시 아래 주석 해제
+      # - "443:443"
+      # - "443:443/udp"
     env_file:
       - ./.env.docker
     volumes:
