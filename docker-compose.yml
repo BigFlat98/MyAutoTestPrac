@@ -1,6 +1,30 @@
 version: '3.8'
 
 services:
+  # 0. Reverse Proxy + SSL (Caddy)
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy_container
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN}
+    depends_on:
+      - frontend
+    networks:
+      - frontend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
   # 1. Database Service (Postgres)
   postgres:
     image: postgres:13-alpine
@@ -52,8 +76,6 @@ services:
       context: ./Front
       dockerfile: Dockerfile
     container_name: frontend_container
-    ports:
-      - "80:8080"
     depends_on:
       - backend
     networks:
@@ -90,6 +112,8 @@ services:
 
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   frontend_net:
