@@ -224,10 +224,11 @@ const chartOptions = {
   <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300 relative group">
     <!-- Header -->
     <div class="flex justify-between items-end mb-6 z-20 w-full">
-      <div class="flex-1 relative custom-dropdown-container">
+      <div>
         <h2 class="text-sm font-bold text-gray-400 tracking-widest uppercase mb-1">Crypto Asset</h2>
         
         <!-- Custom Dropdown Trigger -->
+        <div class="relative custom-dropdown-container">
         <div 
             @click="toggleDropdown"
             class="flex items-center gap-2 cursor-pointer group w-fit"
@@ -273,6 +274,7 @@ const chartOptions = {
             </div>
         </transition>
 
+        </div><!-- /custom-dropdown-container -->
       </div>
       <!-- Icon -->
       <div 
