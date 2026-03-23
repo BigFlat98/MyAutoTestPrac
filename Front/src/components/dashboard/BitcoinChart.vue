@@ -223,7 +223,7 @@ const chartOptions = {
 <template>
   <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300 relative group">
     <!-- Header -->
-    <div class="flex justify-between items-start mb-6 z-20 w-full">
+    <div class="flex justify-between items-end mb-6 z-20 w-full">
       <div class="flex-1 relative custom-dropdown-container">
         <h2 class="text-sm font-bold text-gray-400 tracking-widest uppercase mb-1">Crypto Asset</h2>
         
