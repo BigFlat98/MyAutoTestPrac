@@ -7,13 +7,14 @@ services:
     container_name: caddy_container
     ports:
       - "0.0.0.0:80:80"
-      # 도메인 구매 후 HTTPS 전환 시 아래 주석 해제
-      # - "443:443"
-      # - "443:443/udp"
+      # [HTTPS 전환 시] 아래 두 줄 주석 해제 + 공유기에서 443 포트포워딩 추가 필요
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:443:443/udp"
     env_file:
       - ./.env.docker
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -33,8 +34,11 @@ services:
     # .env.docker 파일의 변수(POSTGRES_...)를 자동으로 컨테이너에 주입
     env_file:
       - ./.env.docker
-    ports:
-      - "127.0.0.1:5432:5432"
+    # [포트 매핑 제거] Windows WSL2/Hyper-V가 5432 포트를 선점하여 바인딩 오류 발생
+    # 컨테이너끼리는 backend_net 내부 네트워크(DB_HOST=postgres)로 통신하므로 호스트 포트 불필요
+    # 호스트(PC)에서 직접 DB 접속이 필요한 경우 아래 주석 해제 (단, 포트 충돌 주의)
+    # ports:
+    #   - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -87,7 +91,28 @@ services:
           cpus: '0.25'
           memory: 128M
 
-  # 4. Chat Service (Rust)
+  # 4. Kstock Service (Node.js / Hono) - KOSPI 실시간 WebSocket
+  kstock:
+    build:
+      context: ./Kstock
+      dockerfile: Dockerfile
+    container_name: kstock_container
+    env_file:
+      - ./.env.docker
+      - ./Back/.env
+    environment:
+      - KSTOCK_PORT=4000
+      - KIS_MOCK=true
+      - BACKEND_URL=http://backend:8000
+    networks:
+      - frontend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
+  # 5. Chat Service (Rust)
   chat:
     build:
       context: ./Chat

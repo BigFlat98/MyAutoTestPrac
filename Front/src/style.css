@@ -5,7 +5,8 @@
   --color-luxury-gold-hover: #b8860b;
   --color-luxury-gold-light: rgba(153, 101, 21, 0.02);
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Pretendard를 앞에 두어 한/영 모두 커버, Inter는 Pretendard 미로드 시 fallback */
+  --font-sans: 'Pretendard Variable', 'Pretendard', 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Custom height utility */
 }

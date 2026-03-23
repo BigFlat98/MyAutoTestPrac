@@ -26,9 +26,6 @@ async function handleLogout() {
       <router-link to="/" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Home
       </router-link>
-      <router-link to="/playground" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
-        Playground
-      </router-link>
       <router-link to="/mustdo" class="text-xs uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Todo
       </router-link>
@@ -71,9 +68,6 @@ async function handleLogout() {
     <div v-show="isMenuOpen" class="absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-lg md:hidden flex flex-col p-4 gap-4 z-40 transition-all duration-300 ease-in-out">
       <router-link @click="isMenuOpen = false" to="/" class="text-sm uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Home
-      </router-link>
-      <router-link @click="isMenuOpen = false" to="/playground" class="text-sm uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
-        Playground
       </router-link>
       <router-link @click="isMenuOpen = false" to="/mustdo" class="text-sm uppercase tracking-widest text-gray-500 hover:text-luxury-gold transition-colors font-medium">
         Todo

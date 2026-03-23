@@ -29,15 +29,49 @@ _kis_token_cache = {
     "token_expiry": None
 }
 
-# Predefined Top 5 Lists (Reduced due to API Rate Limit: 8/min)
-# Note: Twelve Data uses "005930.KS" format for Korea.
+# KIS REST API: 모의투자 기준 sleep 1.5s 간격으로 40개 조회 시 약 60초 소요
+# 10분 스케줄러 내 허용 범위이며, 장외 종가 확인용 DB 저장 목적
 KOSPI_SYMBOLS = [
-    "005930", # Samsung Electronics
-    "000660", # SK Hynix
-    "012450", # Hanwha Aerospace
-    "143850", # TIGER S&P500
-    "005380", # Hyundai Motor
-    "068270"  # Celltrion
+    "005930", # 삼성전자
+    "000660", # SK하이닉스
+    "005380", # 현대차
+    "012450", # 한화에어로스페이스
+    "079550", # LIG넥스원
+    "272210", # 한화시스템
+    "034020", # 두산에너빌리티
+    "360750", # TIGER 미국S&P500
+    "261220", # KODEX WTI원유선물(H)
+    "035420", # NAVER
+    "035720", # 카카오
+    "373220", # LG에너지솔루션
+    "006400", # 삼성SDI
+    "051910", # LG화학
+    "068270", # 셀트리온
+    "000270", # 기아
+    "005490", # POSCO홀딩스
+    "105560", # KB금융
+    "055550", # 신한지주
+    "086790", # 하나금융지주
+    "017670", # SK텔레콤
+    "030200", # KT
+    "066570", # LG전자
+    "028260", # 삼성물산
+    "012330", # 현대모비스
+    "096770", # SK이노베이션
+    "034730", # SK
+    "032830", # 삼성생명
+    "323410", # 카카오뱅크
+    "259960", # 크래프톤
+    "247540", # 에코프로비엠
+    "086520", # 에코프로
+    "003670", # 포스코퓨처엠
+    "329180", # HD현대중공업
+    "015760", # 한국전력
+    "241560", # 두산밥캣
+    "009150", # 삼성전기
+    "000720", # 현대건설
+    "003550", # LG
+    "069500", # KODEX 200
 ]
 
 NASDAQ_SYMBOLS = [
@@ -108,19 +142,34 @@ def get_kospi_data_from_kis():
     # We should map manually or fetch master. For simplicity, manual mapping for these 5 top stocks.
     
     name_map = {
-        "005930": "Samsung Electronics",
-        "000660": "SK Hynix",
-        "012450": "Hanwha Aerospace",
-        "143850": "TIGER S&P500",
-        "005380": "Hyundai Motor",
-        "068270": "Celltrion"
+        "005930": "삼성전자",       "000660": "SK하이닉스",
+        "005380": "현대차",         "012450": "한화에어로스페이스",
+        "079550": "LIG넥스원",      "272210": "한화시스템",
+        "034020": "두산에너빌리티", "360750": "TIGER 미국S&P500",
+        "261220": "KODEX WTI원유선물(H)",
+        "035420": "NAVER",          "035720": "카카오",
+        "373220": "LG에너지솔루션", "006400": "삼성SDI",
+        "051910": "LG화학",         "068270": "셀트리온",
+        "000270": "기아",           "005490": "POSCO홀딩스",
+        "105560": "KB금융",         "055550": "신한지주",
+        "086790": "하나금융지주",   "017670": "SK텔레콤",
+        "030200": "KT",             "066570": "LG전자",
+        "028260": "삼성물산",       "012330": "현대모비스",
+        "096770": "SK이노베이션",   "034730": "SK",
+        "032830": "삼성생명",       "323410": "카카오뱅크",
+        "259960": "크래프톤",       "247540": "에코프로비엠",
+        "086520": "에코프로",       "003670": "포스코퓨처엠",
+        "329180": "HD현대중공업",   "015760": "한국전력",
+        "241560": "두산밥캣",       "009150": "삼성전기",
+        "000720": "현대건설",       "003550": "LG",
+        "069500": "KODEX 200",
     }
 
-    import time # Import time for delay
-    
+    import time
+
     for i, symbol in enumerate(KOSPI_SYMBOLS):
-        # Add a small delay to avoid rate limits (KIS API often strictly limits TPS)
-        time.sleep(0.5)
+        # 모의투자 rate limit 대응: 1.5초 간격 (40종목 × 1.5s ≈ 60초)
+        time.sleep(1.5)
         
         params = {
             "fid_cond_mrkt_div_code": "J",

@@ -35,3 +35,6 @@ Back/venv/
 
 # Rust build artifacts
 Chat/target/
+
+# SSL/TLS 인증서 (Cloudflare Origin Certificate)
+certs/

@@ -1,8 +1,10 @@
-# HTTPS 설정 (도메인 구매 후 아래 주석 해제 후 :80 블록 제거)
-# {$DOMAIN} {
-#     reverse_proxy frontend:8080
-# }
+hadaboni.work {
+    tls /etc/caddy/certs/hadaboni.work.pem /etc/caddy/certs/hadaboni.work.key
 
-:80 {
+    handle /kstock/* {
+        uri strip_prefix /kstock
+        reverse_proxy kstock:4000
+    }
+
     reverse_proxy frontend:8080
 }

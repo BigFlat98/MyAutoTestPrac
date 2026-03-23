@@ -55,10 +55,8 @@ class Database:
                     -- DROP TABLE IF EXISTS videos CASCADE;
                     -- DROP TABLE IF EXISTS video_tags CASCADE;
 
-                    CREATE TABLE IF NOT EXISTS items (
-                        id SERIAL PRIMARY KEY,
-                        content TEXT
-                    );
+                    /* Playground 제거로 items 테이블 삭제 */
+                    DROP TABLE IF EXISTS items;
 
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,

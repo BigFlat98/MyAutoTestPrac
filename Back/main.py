@@ -12,7 +12,6 @@ from database import db
 from contextlib import asynccontextmanager
 
 #pydantic import
-from schemas import EchoRequest, ItemRequest, ItemResponse
 
 # scheduler
 from controller.service.market_scheduler import setup_scheduler
@@ -33,7 +32,6 @@ from router import dashboard
 from router import todo
 from router import board
 from router import video
-from controller.test.items import router as items_router
 from router.auth import router as auth_router
 from fastapi.staticfiles import StaticFiles
 
@@ -43,7 +41,6 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 #router 등록
-app.include_router(items_router)
 app.include_router(dashboard.router)
 app.include_router(todo.router)
 app.include_router(auth_router)
@@ -81,10 +78,6 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-@app.post("/echo")
-def echo_message(request: EchoRequest):
-    return {"echo": f"Server received: {request.message}"}
 
 
 

@@ -1,6 +1,6 @@
 # 프로젝트 설계서
 
-> 마지막 업데이트: 2026-03-09
+> 마지막 업데이트: 2026-03-23 (HTTPS 전환 완료)
 
 ---
 
@@ -12,12 +12,13 @@
 4. [환경 변수 (API 키)](#4-환경-변수-api-키)
 5. [백엔드 (FastAPI)](#5-백엔드-fastapi)
 6. [채팅 서버 (Rust / Axum)](#6-채팅-서버-rust--axum)
-7. [프론트엔드 (Vue 3)](#7-프론트엔드-vue-3)
-8. [페이지별 상세 설명](#8-페이지별-상세-설명)
-9. [외부 API 연동 목록](#9-외부-api-연동-목록)
-10. [데이터베이스 테이블 목록](#10-데이터베이스-테이블-목록)
-11. [스케줄러 (자동 수집 주기)](#11-스케줄러-자동-수집-주기)
-12. [추후 작업 예정](#12-추후-작업-예정)
+7. [KOSPI 실시간 서버 (Kstock / Node.js)](#7-kospi-실시간-서버-kstock--nodejs)
+8. [프론트엔드 (Vue 3)](#8-프론트엔드-vue-3)
+9. [페이지별 상세 설명](#9-페이지별-상세-설명)
+10. [외부 API 연동 목록](#10-외부-api-연동-목록)
+11. [데이터베이스 테이블 목록](#11-데이터베이스-테이블-목록)
+12. [스케줄러 (자동 수집 주기)](#12-스케줄러-자동-수집-주기)
+13. [추후 작업 예정](#13-추후-작업-예정)
 
 ---
 
@@ -30,7 +31,7 @@
 | 서비스 형태 | 개인용 풀스택 웹 애플리케이션 |
 | 인증 방식 | 세션 기반 (서버 측 세션, max_age=7200초) |
 | 데이터베이스 | PostgreSQL (asyncpg 비동기 드라이버) |
-| 배포 환경 | AWS EC2 + Nginx 리버스 프록시 |
+| 배포 환경 | 개인 서버 (iptime DDNS) + Cloudflare CDN + Caddy 리버스 프록시 |
 
 ---
 
@@ -39,21 +40,33 @@
 ```
 [브라우저 (Vue 3)]
         │
-        ▼
-[Nginx 리버스 프록시]
-    │           │
-    ▼           ▼
-[Back]      [Chat]
-FastAPI     Rust/Axum
-(Python)    WebSocket
-    │
-    ▼
-[PostgreSQL DB]
+        ▼ (HTTPS :443)
+  [Cloudflare CDN]
+  hadaboni.work
+  (오렌지 클라우드 프록시)
+        │
+        ▼ (HTTPS :443)
+  [Caddy hadaboni.work]
+  Origin Certificate (TLS)
+    │       │           │
+    ▼       ▼           ▼
+[Front]  [/chat/*]  [/kstock/*]
+ nginx   Rust/Axum   Node.js
+         WebSocket   Hono+ws
+              │           │
+              │      [KIS WebSocket]
+              │      실시간 체결가
+              ▼
+         [FastAPI /api/*]
+              │
+              ▼
+        [PostgreSQL DB]
 ```
 
-- `/api/*` → FastAPI (Python) 백엔드
+- `/kstock/*` → Kstock 서버 (Node.js / Hono) — KOSPI 실시간 WebSocket 브로드캐스트
 - `/chat/*` → Rust Axum 채팅 서버 (HTTP + WebSocket)
-- 프론트엔드는 Vite 빌드 후 Nginx가 정적 파일로 서빙
+- `/api/*` → FastAPI (Python) 백엔드
+- 프론트엔드는 Vite 빌드 후 nginx가 정적 파일로 서빙, Caddy가 리버스 프록시
 
 ---
 
@@ -76,6 +89,16 @@ FastAPI     Rust/Axum
 | HTML 파싱 | beautifulsoup4 | YouTube 제목 파싱 |
 | 데이터 처리 | pandas | 시계열 데이터 처리 |
 | 유효성 검사 | pydantic | 요청/응답 스키마 |
+
+### KOSPI 실시간 서버 (Kstock/)
+
+| 분류 | 항목 | 버전/설명 |
+|------|------|-----------|
+| 프레임워크 | Hono | Node.js 경량 웹 프레임워크 |
+| 런타임 | Node.js 20 | ESM 모듈 방식 |
+| WebSocket (KIS) | ws | KIS WebSocket 클라이언트 |
+| WebSocket (브라우저) | ws (WebSocketServer) | 브라우저 브로드캐스트 서버 |
+| 환경변수 | dotenv | 로컬 개발용 |
 
 ### 채팅 서버 (Chat/)
 
@@ -239,6 +262,73 @@ SessionMiddleware(secret_key=SESSION_SECRET, max_age=7200)
 
 ---
 
+## 7. KOSPI 실시간 서버 (Kstock / Node.js)
+
+### 구조
+
+```
+Kstock/
+├── package.json        ← hono, @hono/node-server, ws, dotenv
+├── Dockerfile          ← node:20-alpine
+└── src/
+    ├── index.js        ← Hono HTTP 서버 + 브라우저 WebSocket 브로드캐스트
+    └── kisWsClient.js  ← KIS WebSocket 클라이언트 + EventEmitter
+```
+
+### 동작 방식
+
+```
+Kstock 시작
+  ├─ startDbSync(): backend REST API에서 DB 종가 로드 (성공할 때까지 10초마다 재시도)
+  │                 이후 10분마다 자동 갱신 (스케줄러 주기와 동기화)
+  │
+  ├─ KIS approval_key 발급 (POST /oauth2/Approval)
+  ├─ KIS WebSocket 연결 (ws://ops.koreainvestment.com:31000 — 모의투자)
+  └─ 40개 KOSPI 종목 H0STCNT0 구독
+
+브라우저 연결 시:
+  └─ /ws 엔드포인트 → 즉시 현재 스냅샷 전송 → 체결 발생 시마다 push
+```
+
+### API 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| GET | `/health` | 서버 상태 + 연결 클라이언트 수 + 현재 스냅샷 |
+| GET | `/ws` | 브라우저 WebSocket 연결 (upgrade) |
+
+### WebSocket 메시지 형식 (서버 → 브라우저)
+
+```json
+{
+  "type": "price_update",
+  "stocks": [
+    { "rank": 1, "symbol": "005930", "name": "삼성전자", "price": 78000, "change": 1.23 },
+    ...
+  ]
+}
+```
+
+### 구독 종목 (40개)
+
+삼성전자, SK하이닉스, 현대차, 한화에어로스페이스, LIG넥스원, 한화시스템, 두산에너빌리티,
+TIGER 미국S&P500, KODEX WTI원유선물(H), NAVER, 카카오, LG에너지솔루션, 삼성SDI, LG화학,
+셀트리온, 기아, POSCO홀딩스, KB금융, 신한지주, 하나금융지주, SK텔레콤, KT, LG전자, 삼성물산,
+현대모비스, SK이노베이션, SK, 삼성생명, 카카오뱅크, 크래프톤, 에코프로비엠, 에코프로,
+포스코퓨처엠, HD현대중공업, 한국전력, 두산밥캣, 삼성전기, 현대건설, LG, KODEX 200
+
+### 환경변수
+
+| 키 | 기본값 | 설명 |
+|----|--------|------|
+| `KIS_APP_KEY` | - | KIS API 앱 키 (Back/.env 공유) |
+| `KIS_APP_SECRET` | - | KIS API 앱 시크릿 (Back/.env 공유) |
+| `KIS_MOCK` | `true` | `false`로 변경 시 실전투자 모드 |
+| `KSTOCK_PORT` | `4000` | 서버 포트 |
+| `BACKEND_URL` | `http://backend:8000` | FastAPI 내부 URL (DB 종가 조회용) |
+
+---
+
 ## 6. 채팅 서버 (Rust / Axum)
 
 ### 구조
@@ -279,7 +369,7 @@ Chat/
 
 ---
 
-## 7. 프론트엔드 (Vue 3)
+## 8. 프론트엔드 (Vue 3)
 
 ### 디렉토리 구조
 
@@ -298,10 +388,9 @@ Front/src/
 ├── views/
 │   ├── HomeView.vue                 ← 대시보드 메인
 │   ├── MustDoView.vue               ← 할 일 + 캘린더
-│   ├── TestPlayground.vue           ← 개발 테스트용
 │   ├── auth/
 │   │   ├── Login.vue                ← 로그인 페이지
-│   │   └── Signup.vue               ← 회원가입 페이지
+│   │   └── Signup.vue               ← 회원가입 (보안 공지 + 동의 체크박스 포함)
 │   ├── post/
 │   │   ├── BoardListView.vue        ← 게시글 목록
 │   │   ├── BoardWriteView.vue       ← 게시글 작성/수정 (공용)
@@ -344,7 +433,6 @@ chat = axios.create({ baseURL: '/chat', withCredentials: true })
 |------|----------|-----------|
 | `/` | HomeView | ✅ |
 | `/mustdo` | MustDoView | ✅ |
-| `/playground` | TestPlayground | ✅ |
 | `/login` | Login | ❌ |
 | `/signup` | Signup | ❌ |
 | `/board` | BoardListView | ✅ |
@@ -354,11 +442,17 @@ chat = axios.create({ baseURL: '/chat', withCredentials: true })
 | `/chat` | ChatView | ✅ |
 | `/video` | VideoView | ✅ |
 
+### 폰트
+
+- **Pretendard Variable** (CDN, `index.html`) — 한/영 통합 웹 폰트
+- fallback: Inter → system-ui → -apple-system → sans-serif
+- 기존 한글 맑은 고딕 fallback 렌더링 개선
+
 - 네비게이션 가드: `router.beforeEach` → `authStore.checkAuth()` → 미인증 시 `/login` 리다이렉트
 
 ---
 
-## 8. 페이지별 상세 설명
+## 9. 페이지별 상세 설명
 
 ### 8-1. 대시보드 (`/` → HomeView.vue)
 
@@ -388,12 +482,14 @@ chat = axios.create({ baseURL: '/chat', withCredentials: true })
 - 색상: 점수 구간별 (green → emerald → gray → orange → red)
 
 **StockTopList.vue** — 시장 주요 종목
-- API: `GET /dashboard/stocks/{market}` (market: `kospi` | `nasdaq`)
-- 데이터 소스:
-  - KOSPI: 한국투자증권 KIS API (삼성전자, SK하이닉스, 한화에어로스페이스, TIGER S&P500, 현대차, 셀트리온)
+- KOSPI 탭: Kstock 서버 WebSocket (`ws://host/kstock/ws`) 실시간 연결
+  - 연결 즉시 DB 종가 스냅샷 수신 → 장중 체결 발생 시 실시간 업데이트
+  - 헤더에 ● LIVE (초록) / ○ Connecting... (회색) 연결 상태 표시
+  - 40개 KOSPI 종목 표시
+- NASDAQ 탭: 기존 REST API 방식 유지 (`GET /dashboard/stocks/nasdaq`)
   - NASDAQ: Twelve Data API (AAPL, NVDA, MSFT, AMZN, GOOGL)
 - 표시 요소: 순위, 종목명/심볼, 현재가, 등락률 (등락 색상 표시)
-- 탭 전환: KOSPI ↔ NASDAQ
+- 탭 전환 시 WebSocket 자동 해제/연결
 
 **ExchangeRateChart.vue** — 원/달러 환율
 - API: `GET /dashboard/exchange-rate`
@@ -473,16 +569,19 @@ chat = axios.create({ baseURL: '/chat', withCredentials: true })
 
 ---
 
-### 8-6. 로그인 / 회원가입
+### 9-6. 로그인 / 회원가입
 
 - **로그인** (`Login.vue`): ID/PW 입력 → `POST /auth/login` → 세션 쿠키 발급
-- **회원가입** (`Signup.vue`): ID/PW 입력 → `POST /auth/signup` → bcrypt 해싱 후 DB 저장
+- **회원가입** (`Signup.vue`):
+  - 보안 취약 공지 박스 (비밀번호 입력 위에 표시)
+  - 공지 동의 체크박스 필수 체크 후에만 가입 버튼 활성화 (이중 유효성 검사)
+  - `POST /auth/signup` → bcrypt 해싱 후 DB 저장
 - 인증 상태: Pinia `auth.js` 스토어에서 `isAuthenticated` 관리
 - 자동 로그인 유지: 앱 시작 시 `GET /auth/me` 호출로 세션 확인
 
 ---
 
-## 9. 외부 API 연동 목록
+## 10. 외부 API 연동 목록
 
 | 서비스명 | API 주소 / 라이브러리 | 용도 | 인증 방식 | 키 이름 |
 |---------|---------------------|------|-----------|---------|
@@ -493,14 +592,15 @@ chat = axios.create({ baseURL: '/chat', withCredentials: true })
 | Binance | `ccxt` 라이브러리 | BTC/ETH/XRP USDT 시세, OHLCV | 없음 (public) | - |
 | yfinance | `yfinance` Python 라이브러리 | 국제 금 선물 (`GC=F`), 환율 보조 (`KRW=X`) | 없음 (Yahoo Finance) | - |
 | 공공데이터포털 | `apis.data.go.kr/1160100/.../getGoldPriceInfo` | KRX 국내 금 시세 | API Key | `DATA_GO_KR_API_KEY` |
-| 한국투자증권 KIS | `openapi.koreainvestment.com:9443` | KOSPI 주식 현재가 (OAuth2 토큰) | App Key/Secret | `KIS_APP_KEY`, `KIS_APP_SECRET` |
+| 한국투자증권 KIS REST | `openapi.koreainvestment.com:9443` (실전) / `openapivts.koreainvestment.com:29443` (모의) | KOSPI 40종목 종가 DB 저장 (10분 스케줄러) | App Key/Secret | `KIS_APP_KEY`, `KIS_APP_SECRET` |
+| 한국투자증권 KIS WebSocket | `ops.koreainvestment.com:21000` (실전) / `:31000` (모의) | KOSPI 40종목 실시간 체결가 (H0STCNT0) | approval_key (OAuth2) | `KIS_APP_KEY`, `KIS_APP_SECRET` |
 | Twelve Data | `api.twelvedata.com/quote` | NASDAQ 주식 현재가 | API Key | `TWELVE_DATA_API_KEY` |
 | EIA (미 에너지정보청) | `api.eia.gov/v2/petroleum` | 원유 가격 WTI/Brent **(예정)** | API Key | `EIA_API_KEY` |
 | YouTube | HTML 파싱 (`urllib.request`) | 영상 제목 자동 수집 | 없음 | - |
 
 ---
 
-## 10. 데이터베이스 테이블 목록
+## 11. 데이터베이스 테이블 목록
 
 PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS.
 
@@ -524,18 +624,18 @@ PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS
 | `market_crypto_history` | 암호화폐 90일 OHLCV 히스토리 | crypto_service |
 | `market_gold_price` | 금 현재가 스냅샷 (domestic_krw, international_usd, change_rate) | gold_service |
 | `market_gold_history` | 금 가격 시계열 (date, price_krw) | gold_service |
-| `items` | 개발 테스트용 | - |
 
 ---
 
-## 11. 스케줄러 (자동 수집 주기)
+## 12. 스케줄러 (자동 수집 주기)
 
 `market_scheduler.py` — APScheduler 기반. 앱 시작 시 1회 즉시 실행 후 주기 반복.
 
 | 데이터 | 수집 주기 | 서비스 파일 | 비고 |
 |--------|----------|------------|------|
 | 공포탐욕지수 | 1시간 | `fng_crawler.py` | CNN API 실패 시 Mock 데이터 반환 |
-| KOSPI/NASDAQ 주식 | 10분 | `stock_service.py` | 5분 인메모리 캐시 적용 |
+| KOSPI 주식 (40종목) | 10분 | `stock_service.py` | 장외 종가 DB 저장 목적. sleep 1.5s 간격 (약 60초 소요). Kstock DB 폴백용 |
+| NASDAQ 주식 (5종목) | 10분 | `stock_service.py` | Twelve Data API |
 | 원/달러 환율 | 1시간 | `exchange_service.py` | ECOS API |
 | 기준금리 (한/미) | 24시간 | `interest_service.py` | ECOS + FRED |
 | 암호화폐 (BTC/ETH/XRP) | 5분 | `crypto_service.py` | Upbit + Binance via ccxt |
@@ -543,7 +643,7 @@ PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS
 
 ---
 
-## 12. 추후 작업 예정
+## 13. 추후 작업 예정
 
 | 항목 | 내용 | 우선순위 |
 |------|------|---------|
@@ -553,5 +653,6 @@ PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS
 | | 프론트: `OilChart.vue` 컴포넌트 추가 | |
 | TradingView 위젯 대체 | 기존 TradingView 위젯 → DB 데이터 기반 자체 Chart.js 차트로 전환 | 중간 |
 | 모바일 앱 + 위젯 | DB 데이터 활용 모바일 앱 (Capacitor 또는 Flutter), 홈 위젯 지원 | 낮음 |
-| ~~실시간 주가 (KIS WebSocket)~~ | ~~KIS WebSocket 실시간 체결가 연동~~ | ~~취소~~ |
-| | ~~공개 웹사이트 상 상업적 사용 제한으로 적용 불가~~ | |
+| ✅ 실시간 주가 (KIS WebSocket) | Kstock 서비스 신설. KIS WebSocket(H0STCNT0)으로 KOSPI 40종목 실시간 체결가 수신 → 브라우저 브로드캐스트 | 완료 |
+| initFromDb 재시도 안정화 | Kstock 시작 시 backend 미준비로 DB 폴백 실패 → 현재 10초 재시도 로직 적용 중. 추가 검증 필요 | 낮음 |
+| ✅ HTTPS 전환 (Cloudflare + Caddy) | hadaboni.work 도메인 구매 → Cloudflare 오렌지 클라우드 프록시 ON → Origin Certificate 발급 → Caddy tls 지시어로 인증서 마운트. docker-compose 443 포트 개방 | 완료 |
