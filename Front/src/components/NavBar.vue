@@ -15,10 +15,10 @@ async function handleLogout() {
 </script>
 
 <template>
-  <nav class="relative flex items-center justify-between px-4 md:px-8 py-3 border-b border-gray-100 bg-white z-50">
+  <nav class="relative flex items-center justify-between px-4 md:px-8 py-0 border-b border-gray-100 bg-white z-50">
     <!-- Logo -->
     <router-link to="/" class="flex items-center transition-opacity hover:opacity-80">
-      <img src="/HadaLogo.png" alt="Hadaboni Logo" class="h-16 md:h-20 object-contain" />
+      <img src="/HadaLogo.png?v=2" alt="Hadaboni Logo" class="h-16 md:h-20 object-contain" />
     </router-link>
 
     <!-- Desktop Centered Links -->
