@@ -66,6 +66,10 @@ services:
     environment:
       # DB_HOST는 docker-compose 내부 통신을 위해 'postgres' 서비스명으로 고정
       - DB_HOST=postgres
+    volumes:
+      # 업로드 파일을 호스트에 영구 보존 (컨테이너 재빌드 시에도 유지)
+      - ./Back/uploads:/app/uploads
+      - ./Back/profile_uploads:/app/profile_uploads
     networks:
       - frontend_net
       - backend_net

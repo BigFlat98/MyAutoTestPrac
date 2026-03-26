@@ -9,7 +9,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 4. 소스 코드 복사
 COPY . .
 # 5. 사용자 추가 및 권한 설정
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN useradd -m appuser \
+    && mkdir -p /app/uploads /app/profile_uploads \
+    && chown -R appuser:appuser /app
 USER appuser
 # 6. 포트 노출 (FastAPI 기본 포트)
 EXPOSE 8000
