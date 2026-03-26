@@ -1,14 +1,20 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Request, HTTPException
 from typing import List, Optional
 from schemas import PostResponse, CommentResponse, CommentCreate, PostListResponse
-from controller.auth.auth_controller import get_current_user
+from controller.auth.auth_controller import get_current_user, get_optional_current_user
 from controller.post import post_controller
 
 router = APIRouter(prefix="/posts", tags=["Board"])
 
 @router.get("", response_model=PostListResponse)
-async def get_posts(page: int = 1, limit: int = 15):
-    return await post_controller.get_posts(page, limit)
+async def get_posts(request: Request, page: int = 1, limit: int = 15, author_me: bool = False):
+    author_id = None
+    if author_me:
+        current_user = await get_optional_current_user(request)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+        author_id = current_user.id
+    return await post_controller.get_posts(page, limit, author_id)
 
 @router.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: int):

@@ -25,22 +25,33 @@ async def upload_image(file: UploadFile, current_user) -> dict:
     image_url = f"/static/{filename}"
     return {"url": image_url}
 
-async def get_posts(page: int, limit: int) -> dict:
+async def get_posts(page: int, limit: int, author_id: Optional[int] = None) -> dict:
     offset = (page - 1) * limit
     
     async with db.pool.acquire() as conn:
-        # Get Total Count
-        total = await conn.fetchval("SELECT COUNT(*) FROM posts")
-        
-        query = """
-            SELECT p.id, p.title, p.description, p.view_count, p.created_at, u.nick_name as author, p.author_id, i.image_location as image
-            FROM posts p
-            JOIN users u ON p.author_id = u.id
-            LEFT JOIN post_images i ON p.id = i.post_id
-            ORDER BY p.created_at DESC
-            LIMIT $1 OFFSET $2
-        """
-        rows = await conn.fetch(query, limit, offset)
+        if author_id is not None:
+            total = await conn.fetchval("SELECT COUNT(*) FROM posts WHERE author_id = $1", author_id)
+            query = """
+                SELECT p.id, p.title, p.description, p.view_count, p.created_at, u.nick_name as author, p.author_id, i.image_location as image
+                FROM posts p
+                JOIN users u ON p.author_id = u.id
+                LEFT JOIN post_images i ON p.id = i.post_id
+                WHERE p.author_id = $3
+                ORDER BY p.created_at DESC
+                LIMIT $1 OFFSET $2
+            """
+            rows = await conn.fetch(query, limit, offset, author_id)
+        else:
+            total = await conn.fetchval("SELECT COUNT(*) FROM posts")
+            query = """
+                SELECT p.id, p.title, p.description, p.view_count, p.created_at, u.nick_name as author, p.author_id, i.image_location as image
+                FROM posts p
+                JOIN users u ON p.author_id = u.id
+                LEFT JOIN post_images i ON p.id = i.post_id
+                ORDER BY p.created_at DESC
+                LIMIT $1 OFFSET $2
+            """
+            rows = await conn.fetch(query, limit, offset)
         
         return {
             "total": total,

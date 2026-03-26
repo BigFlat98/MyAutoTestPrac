@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Request
+from fastapi import APIRouter, status, Request, UploadFile, File
 from schemas import UserCreate, UserLogin, UserResponse
 from controller.auth import auth_controller
 
@@ -19,3 +19,7 @@ async def logout(request: Request):
 @router.get("/me", response_model=UserResponse)
 async def check_session(request: Request):
     return await auth_controller.get_current_user(request)
+
+@router.post("/profile-image", response_model=UserResponse)
+async def upload_profile_image(request: Request, file: UploadFile = File(...)):
+    return await auth_controller.update_profile_image(file, request)

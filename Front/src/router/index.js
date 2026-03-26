@@ -67,6 +67,13 @@ const router = createRouter({
       name: 'video-list',
       component: () => import('../views/video/VideoView.vue'),
       meta: { requiresAuth: true }
+    },
+    // My Page Route
+    {
+      path: '/mypage',
+      name: 'mypage',
+      component: () => import('../views/MyPageView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

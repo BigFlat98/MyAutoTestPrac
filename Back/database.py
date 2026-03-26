@@ -58,6 +58,9 @@ class Database:
                     /* Playground 제거로 items 테이블 삭제 */
                     DROP TABLE IF EXISTS items;
 
+                    /* 마이페이지: users 테이블에 profile_image 컬럼 추가 */
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image TEXT;
+
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
                         login_id VARCHAR(30) UNIQUE NOT NULL,

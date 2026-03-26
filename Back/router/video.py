@@ -83,9 +83,18 @@ async def create_video(video: VideoCreate, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("", response_model=VideoListResponse)
-async def get_videos(page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50)):
+async def get_videos(request: Request, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50), uploader_me: bool = Query(False)):
     try:
-        return await get_videos_service(page=page, limit=limit)
+        uploader_id = None
+        if uploader_me:
+            from controller.auth.auth_controller import get_optional_current_user
+            current_user = await get_optional_current_user(request)
+            if not current_user:
+                raise HTTPException(status_code=401, detail="Not authenticated")
+            uploader_id = current_user.id
+        return await get_videos_service(page=page, limit=limit, uploader_id=uploader_id)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

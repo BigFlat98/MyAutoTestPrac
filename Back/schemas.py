@@ -16,6 +16,8 @@ class UserResponse(BaseModel):
     id: int
     nick_name: str
     check_admin: bool
+    profile_image: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 # Must Do List Models
 class TodoCreate(BaseModel):

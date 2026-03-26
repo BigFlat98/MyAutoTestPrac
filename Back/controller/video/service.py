@@ -84,26 +84,37 @@ async def create_video_service(video: VideoCreate, author_id: int) -> dict:
             logger.error(f"Error in create_video_service: {e}")
             raise e
 
-async def get_videos_service(page: int = 1, limit: int = 10) -> dict:
+async def get_videos_service(page: int = 1, limit: int = 10, uploader_id: Optional[int] = None) -> dict:
     ctx = await db.get_connection()
     async with ctx as conn:
         try:
             offset = (page - 1) * limit
-            
-            # Get Total Count
-            count_row = await conn.fetchrow("SELECT count(*) FROM videos")
-            total = count_row[0]
-            
-            # Get Videos with Author and Tag Name
-            query = """
-                SELECT v.*, u.nick_name as author, t.name as tag_name
-                FROM videos v
-                LEFT JOIN users u ON v.uploader_id = u.id
-                LEFT JOIN video_tags t ON v.tag_id = t.id
-                ORDER BY v.created_at DESC
-                LIMIT $1 OFFSET $2
-            """
-            rows = await conn.fetch(query, limit, offset)
+
+            if uploader_id is not None:
+                count_row = await conn.fetchrow("SELECT count(*) FROM videos WHERE uploader_id = $1", uploader_id)
+                total = count_row[0]
+                query = """
+                    SELECT v.*, u.nick_name as author, t.name as tag_name
+                    FROM videos v
+                    LEFT JOIN users u ON v.uploader_id = u.id
+                    LEFT JOIN video_tags t ON v.tag_id = t.id
+                    WHERE v.uploader_id = $3
+                    ORDER BY v.created_at DESC
+                    LIMIT $1 OFFSET $2
+                """
+                rows = await conn.fetch(query, limit, offset, uploader_id)
+            else:
+                count_row = await conn.fetchrow("SELECT count(*) FROM videos")
+                total = count_row[0]
+                query = """
+                    SELECT v.*, u.nick_name as author, t.name as tag_name
+                    FROM videos v
+                    LEFT JOIN users u ON v.uploader_id = u.id
+                    LEFT JOIN video_tags t ON v.tag_id = t.id
+                    ORDER BY v.created_at DESC
+                    LIMIT $1 OFFSET $2
+                """
+                rows = await conn.fetch(query, limit, offset)
             
             videos = []
             for row in rows:

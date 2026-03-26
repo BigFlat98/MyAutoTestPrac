@@ -38,6 +38,8 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI(lifespan=lifespan)
 
 # Mount static files
+# 더 구체적인 경로를 먼저 등록해야 정상 라우팅됨
+app.mount("/static/profile", StaticFiles(directory="profile_uploads"), name="static_profile")
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 #router 등록
