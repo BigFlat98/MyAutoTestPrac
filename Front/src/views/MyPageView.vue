@@ -9,8 +9,10 @@ const authStore = useAuthStore()
 
 const myPosts = ref([])
 const myVideos = ref([])
+const myTodos = ref([])
 const isLoadingPosts = ref(false)
 const isLoadingVideos = ref(false)
+const isLoadingTodos = ref(false)
 const isUploadingImage = ref(false)
 const profileImageError = ref(false)
 
@@ -62,6 +64,18 @@ const fetchMyVideos = async () => {
   }
 }
 
+const fetchMyTodos = async () => {
+  isLoadingTodos.value = true
+  try {
+    const response = await api.get('/todos')
+    myTodos.value = response.data ?? []
+  } catch {
+    myTodos.value = []
+  } finally {
+    isLoadingTodos.value = false
+  }
+}
+
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
@@ -98,7 +112,7 @@ const goToPost = (id) => {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchMyPosts(), fetchMyVideos()])
+  await Promise.all([fetchMyPosts(), fetchMyVideos(), fetchMyTodos()])
 })
 </script>
 
@@ -174,6 +188,11 @@ onMounted(async () => {
             <div class="flex flex-col items-center md:items-start gap-0.5">
               <span class="text-xl font-light text-black font-mono">{{ myVideos.length }}</span>
               <span class="text-[10px] uppercase tracking-widest text-gray-400">Videos</span>
+            </div>
+            <div class="w-px bg-gray-100 hidden md:block self-stretch"></div>
+            <div class="flex flex-col items-center md:items-start gap-0.5">
+              <span class="text-xl font-light text-black font-mono">{{ myTodos.length }}</span>
+              <span class="text-[10px] uppercase tracking-widest text-gray-400">Todos</span>
             </div>
           </div>
 
