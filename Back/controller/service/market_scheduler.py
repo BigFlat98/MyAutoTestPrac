@@ -21,7 +21,7 @@ from controller.service.fng_crawler import fetch_fear_and_greed_from_api
 from controller.service.stock_service import get_stock_data
 from controller.service.exchange_service import ExchangeRateService
 from controller.service.interest_service import InterestRateService
-from controller.service import crypto_service, gold_service
+from controller.service import crypto_service, gold_service, oil_service
 
 # ──────────────────────────────────────────────────────────────────────────────
 # [트러블슈팅] 스케줄러 잡 미실행 문제
@@ -290,6 +290,54 @@ async def fetch_and_save_gold():
 
 
 # ──────────────────────────────────────────
+# 유가 (WTI / Brent) — EIA v2
+# ──────────────────────────────────────────
+async def fetch_and_save_oil():
+    print("[Scheduler] Fetching Oil Prices...")
+    try:
+        for grade in ["WTI", "BRENT"]:
+            rows = await asyncio.get_event_loop().run_in_executor(
+                None, oil_service.fetch_oil_prices, grade, 90
+            )
+            if not rows:
+                print(f"[Scheduler][WARN] Oil {grade}: no data")
+                continue
+
+            latest = rows[-1]
+            current_price = float(latest.get("value", 0))
+
+            if len(rows) >= 2:
+                prev_price = float(rows[-2].get("value", current_price))
+                change_rate = round((current_price - prev_price) / prev_price * 100, 2) if prev_price else 0.0
+            else:
+                change_rate = 0.0
+
+            async with db.pool.acquire() as conn:
+                await conn.execute(
+                    "INSERT INTO market_oil_price (grade, price_usd, change_rate) VALUES ($1, $2, $3)",
+                    grade, current_price, change_rate,
+                )
+
+                for row in rows:
+                    period = row.get("period", "")
+                    if len(period) >= 10:
+                        trade_date = datetime.strptime(period[:10], "%Y-%m-%d").date()
+                        price = float(row.get("value", 0))
+                        await conn.execute(
+                            """INSERT INTO market_oil_history (grade, trade_date, price_usd)
+                               VALUES ($1, $2, $3)
+                               ON CONFLICT (grade, trade_date) DO UPDATE
+                               SET price_usd   = EXCLUDED.price_usd,
+                                   updated_at  = CURRENT_TIMESTAMP""",
+                            grade, trade_date, price,
+                        )
+
+            print(f"[Scheduler] Oil {grade} saved: price={current_price:.2f} + {len(rows)} history rows")
+    except Exception as e:
+        print(f"[Scheduler][ERROR] Oil: {e}")
+
+
+# ──────────────────────────────────────────
 # 스케줄러 등록
 # ──────────────────────────────────────────
 def setup_scheduler():
@@ -306,5 +354,6 @@ def setup_scheduler():
     scheduler.add_job(fetch_and_save_interest_rate,"interval", hours=24,   id="interest_rate", next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_oil,          "interval", hours=1,    id="oil",           next_run_time=now, replace_existing=True)
 
     return scheduler

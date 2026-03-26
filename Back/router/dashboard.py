@@ -5,6 +5,7 @@ from controller.service.interest_service import get_comparison_data_from_db
 from controller.service.exchange_service import get_usd_krw_rate_from_db
 from controller.service.crypto_service import get_crypto_data_from_db
 from controller.service.gold_service import get_gold_data_from_db
+from controller.service.oil_service import get_oil_data_from_db
 from fastapi import HTTPException
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -49,6 +50,13 @@ async def get_crypto(coin: str):
 @router.get("/gold")
 async def get_gold():
     data = await get_gold_data_from_db()
+    if not data:
+        raise HTTPException(status_code=503, detail="데이터를 수집 중입니다. 잠시 후 다시 시도해 주세요.")
+    return data
+
+@router.get("/oil")
+async def get_oil(grade: str = "WTI"):
+    data = await get_oil_data_from_db(grade.upper())
     if not data:
         raise HTTPException(status_code=503, detail="데이터를 수집 중입니다. 잠시 후 다시 시도해 주세요.")
     return data

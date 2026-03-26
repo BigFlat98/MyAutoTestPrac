@@ -656,3 +656,11 @@ PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS
 | ✅ 실시간 주가 (KIS WebSocket) | Kstock 서비스 신설. KIS WebSocket(H0STCNT0)으로 KOSPI 40종목 실시간 체결가 수신 → 브라우저 브로드캐스트 | 완료 |
 | initFromDb 재시도 안정화 | Kstock 시작 시 backend 미준비로 DB 폴백 실패 → 현재 10초 재시도 로직 적용 중. 추가 검증 필요 | 낮음 |
 | ✅ HTTPS 전환 (Cloudflare + Caddy) | hadaboni.work 도메인 구매 → Cloudflare 오렌지 클라우드 프록시 ON → Origin Certificate 발급 → Caddy tls 지시어로 인증서 마운트. docker-compose 443 포트 개방 | 완료 |
+| 마이페이지 | 로그인 유저 전용 마이페이지 (`/mypage`) 신설 | 중간 |
+| | - 프로필 이미지 업로드/변경 (서버 저장 후 `/static/` 서빙, `users` 테이블에 profile_image 컬럼 추가) | |
+| | - 내가 작성한 게시글 목록 조회 (`GET /posts?author_me=true`) | |
+| | - 내가 등록한 영상 목록 조회 (`GET /videos?uploader_me=true`) | |
+| 소셜 로그인 | Google / GitHub / KakaoTalk OAuth2 연동 | 중간 |
+| | - 백엔드: OAuth2 콜백 처리, 소셜 계정 연결 정보 저장 (`user_social_accounts` 테이블) | |
+| | - 프론트: 로그인/회원가입 페이지에 소셜 로그인 버튼 추가 | |
+| | - 기존 세션 기반 인증과 통합 (소셜 로그인 후 동일 세션 쿠키 발급) | |

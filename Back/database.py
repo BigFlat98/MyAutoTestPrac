@@ -242,6 +242,25 @@ class Database:
                         international_price NUMERIC(15,4),
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
+
+                    /* 유가 현재가 스냅샷 - 수집할 때마다 INSERT, 조회 시 grade별 최신 1건 사용 */
+                    CREATE TABLE IF NOT EXISTS market_oil_price (
+                        id SERIAL PRIMARY KEY,
+                        grade VARCHAR(10) NOT NULL,
+                        price_usd NUMERIC(10,2) NOT NULL,
+                        change_rate NUMERIC(6,2) NOT NULL,
+                        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    /* 유가 일별 시계열 - (grade, trade_date) UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_oil_history (
+                        id SERIAL PRIMARY KEY,
+                        grade VARCHAR(10) NOT NULL,
+                        trade_date DATE NOT NULL,
+                        price_usd NUMERIC(10,2) NOT NULL,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE (grade, trade_date)
+                    );
                  ''')
                  
         except Exception as e:
