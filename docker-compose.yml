@@ -37,8 +37,8 @@ services:
     # [포트 매핑 제거] Windows WSL2/Hyper-V가 5432 포트를 선점하여 바인딩 오류 발생
     # 컨테이너끼리는 backend_net 내부 네트워크(DB_HOST=postgres)로 통신하므로 호스트 포트 불필요
     # 호스트(PC)에서 직접 DB 접속이 필요한 경우 아래 주석 해제 (단, 포트 충돌 주의)
-    # ports:
-    #   - "127.0.0.1:5432:5432"
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
