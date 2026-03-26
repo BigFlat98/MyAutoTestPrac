@@ -338,6 +338,25 @@ async def fetch_and_save_oil():
 
 
 # ──────────────────────────────────────────
+# 회원 탈퇴 계정 정리 (7일 경과 시 영구 삭제)
+# ──────────────────────────────────────────
+async def cleanup_withdrawn_users():
+    print("[Scheduler] Cleaning up withdrawn user accounts...")
+    try:
+        async with db.pool.acquire() as conn:
+            result = await conn.execute(
+                """
+                DELETE FROM users
+                WHERE delete_date IS NOT NULL
+                  AND delete_date < NOW() - INTERVAL '7 days'
+                """
+            )
+        print(f"[Scheduler] Withdrawn users cleanup: {result}")
+    except Exception as e:
+        print(f"[Scheduler][ERROR] Withdrawn users cleanup: {e}")
+
+
+# ──────────────────────────────────────────
 # 스케줄러 등록
 # ──────────────────────────────────────────
 def setup_scheduler():
@@ -355,5 +374,6 @@ def setup_scheduler():
     scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_oil,          "interval", hours=1,    id="oil",           next_run_time=now, replace_existing=True)
+    scheduler.add_job(cleanup_withdrawn_users,     "interval", hours=24,   id="user_cleanup",  next_run_time=now, replace_existing=True)
 
     return scheduler

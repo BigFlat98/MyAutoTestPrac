@@ -38,7 +38,7 @@ async def create_user(user: UserCreate) -> UserResponse:
             """
             INSERT INTO users (login_id, login_pw, nick_name)
             VALUES ($1, $2, $3)
-            RETURNING id, nick_name, check_admin, profile_image, created_at
+            RETURNING id, nick_name, check_admin, profile_image, created_at, delete_date
             """,
             user.login_id, hashed_pw, user.nick_name
         )
@@ -48,13 +48,14 @@ async def create_user(user: UserCreate) -> UserResponse:
             nick_name=row['nick_name'],
             check_admin=row['check_admin'],
             profile_image=row['profile_image'],
-            created_at=row['created_at']
+            created_at=row['created_at'],
+            delete_date=row['delete_date']
         )
 
 async def authenticate_user(user: UserLogin, request: Request) -> UserResponse:
     async with db.pool.acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT id, login_pw, nick_name, check_admin, profile_image, created_at FROM users WHERE login_id = $1",
+            "SELECT id, login_pw, nick_name, check_admin, profile_image, created_at, delete_date FROM users WHERE login_id = $1",
             user.login_id
         )
         
@@ -77,7 +78,8 @@ async def authenticate_user(user: UserLogin, request: Request) -> UserResponse:
             nick_name=row['nick_name'],
             check_admin=row['check_admin'],
             profile_image=row['profile_image'],
-            created_at=row['created_at']
+            created_at=row['created_at'],
+            delete_date=row['delete_date']
         )
 
 async def logout_user(request: Request):
@@ -91,7 +93,7 @@ async def get_current_user(request: Request) -> UserResponse:
     
     async with db.pool.acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT id, nick_name, check_admin, profile_image, created_at FROM users WHERE id = $1",
+            "SELECT id, nick_name, check_admin, profile_image, created_at, delete_date FROM users WHERE id = $1",
             user_id
         )
         if not row:
@@ -103,7 +105,8 @@ async def get_current_user(request: Request) -> UserResponse:
             nick_name=row['nick_name'],
             check_admin=row['check_admin'],
             profile_image=row['profile_image'],
-            created_at=row['created_at']
+            created_at=row['created_at'],
+            delete_date=row['delete_date']
         )
 
 async def get_optional_current_user(request: Request):
@@ -136,7 +139,7 @@ async def update_profile_image(file: UploadFile, request: Request) -> UserRespon
         row = await conn.fetchrow(
             """
             UPDATE users SET profile_image = $1 WHERE id = $2
-            RETURNING id, nick_name, check_admin, profile_image, created_at
+            RETURNING id, nick_name, check_admin, profile_image, created_at, delete_date
             """,
             image_path, current_user.id
         )
@@ -146,5 +149,46 @@ async def update_profile_image(file: UploadFile, request: Request) -> UserRespon
         nick_name=row['nick_name'],
         check_admin=row['check_admin'],
         profile_image=row['profile_image'],
-        created_at=row['created_at']
+        created_at=row['created_at'],
+        delete_date=row['delete_date']
+    )
+
+async def withdraw_user(request: Request) -> UserResponse:
+    """탈퇴 예약: delete_date를 현재 시간으로 설정"""
+    current_user = await get_current_user(request)
+    async with db.pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            UPDATE users SET delete_date = CURRENT_TIMESTAMP WHERE id = $1
+            RETURNING id, nick_name, check_admin, profile_image, created_at, delete_date
+            """,
+            current_user.id
+        )
+    return UserResponse(
+        id=row['id'],
+        nick_name=row['nick_name'],
+        check_admin=row['check_admin'],
+        profile_image=row['profile_image'],
+        created_at=row['created_at'],
+        delete_date=row['delete_date']
+    )
+
+async def cancel_withdraw_user(request: Request) -> UserResponse:
+    """탈퇴 취소: delete_date를 NULL로 초기화"""
+    current_user = await get_current_user(request)
+    async with db.pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            UPDATE users SET delete_date = NULL WHERE id = $1
+            RETURNING id, nick_name, check_admin, profile_image, created_at, delete_date
+            """,
+            current_user.id
+        )
+    return UserResponse(
+        id=row['id'],
+        nick_name=row['nick_name'],
+        check_admin=row['check_admin'],
+        profile_image=row['profile_image'],
+        created_at=row['created_at'],
+        delete_date=row['delete_date']
     )

@@ -20,6 +20,15 @@ const fileInput = ref(null)
 
 const user = computed(() => authStore.user)
 
+// 탈퇴 예약 여부 및 남은 일수
+const deleteDate = computed(() => user.value?.delete_date ? new Date(user.value.delete_date) : null)
+const daysUntilDeletion = computed(() => {
+  if (!deleteDate.value) return null
+  const deleteAt = new Date(deleteDate.value)
+  deleteAt.setDate(deleteAt.getDate() + 7)
+  return Math.max(0, Math.ceil((deleteAt - new Date()) / (1000 * 60 * 60 * 24)))
+})
+
 const profileImageUrl = computed(() => {
   if (!user.value?.profile_image) return null
   // profile_image 컬럼에 '/static/profile/...' 형태로 저장되므로 앞에 /api만 붙임
@@ -102,6 +111,30 @@ const handleImageUpload = async (event) => {
   }
 }
 
+const handleWithdraw = async () => {
+  const confirmed = window.confirm(
+    '정말 탈퇴하시겠습니까?\n탈퇴 요청 후 7일 이내에 취소할 수 있으며, 7일이 지나면 계정과 모든 데이터가 영구 삭제됩니다.'
+  )
+  if (!confirmed) return
+  try {
+    await api.post('/auth/withdraw')
+    await authStore.checkAuth()
+  } catch (err) {
+    console.error('탈퇴 요청 실패:', err)
+  }
+}
+
+const handleCancelWithdraw = async () => {
+  const confirmed = window.confirm('탈퇴를 취소하시겠습니까? 계정이 정상 복구됩니다.')
+  if (!confirmed) return
+  try {
+    await api.delete('/auth/withdraw')
+    await authStore.checkAuth()
+  } catch (err) {
+    console.error('탈퇴 취소 실패:', err)
+  }
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   return new Date(dateString).toLocaleDateString('ko-KR')
@@ -120,7 +153,7 @@ onMounted(async () => {
   <div class="max-w-5xl mx-auto py-12 px-6">
 
     <!-- Page Header -->
-    <div class="mb-12">
+    <div class="mb-12 text-left">
       <h1 class="text-4xl font-light tracking-tight mb-2">MY PAGE</h1>
       <div class="w-16 h-px mb-4" style="background-color: #C9A227;"></div>
       <p class="text-xs uppercase tracking-widest text-gray-500 font-medium">
@@ -307,6 +340,39 @@ onMounted(async () => {
         </div>
       </div>
     </section>
+
+    <!-- 회원 탈퇴 영역 -->
+    <div class="mt-16 flex justify-end">
+      <!-- 탈퇴 예약 중 -->
+      <div v-if="deleteDate" class="flex flex-col items-end gap-2">
+        <p class="text-[11px] font-mono text-red-400">
+          탈퇴 예정 — {{ daysUntilDeletion }}일 후 계정이 영구 삭제됩니다
+        </p>
+        <button
+          @click="handleCancelWithdraw"
+          class="px-4 py-1.5 text-[11px] uppercase tracking-widest font-medium border rounded-sm
+                 border-red-300 text-red-400 bg-transparent
+                 hover:border-red-400 hover:text-red-500 hover:bg-red-50
+                 transition-colors duration-200 h-auto min-h-0 min-w-0 shadow-none
+                 hover:shadow-none hover:-translate-y-0 hover:tracking-widest"
+        >
+          탈퇴 취소
+        </button>
+      </div>
+
+      <!-- 탈퇴 버튼 -->
+      <button
+        v-else
+        @click="handleWithdraw"
+        class="px-4 py-1.5 text-[11px] uppercase tracking-widest font-medium border rounded-sm
+               border-red-200 text-red-300 bg-transparent
+               hover:border-red-400 hover:text-red-500 hover:bg-red-50
+               transition-colors duration-200 h-auto min-h-0 min-w-0 shadow-none
+               hover:shadow-none hover:-translate-y-0 hover:tracking-widest"
+      >
+        회원 탈퇴
+      </button>
+    </div>
 
   </div>
 </template>

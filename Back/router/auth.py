@@ -23,3 +23,13 @@ async def check_session(request: Request):
 @router.post("/profile-image", response_model=UserResponse)
 async def upload_profile_image(request: Request, file: UploadFile = File(...)):
     return await auth_controller.update_profile_image(file, request)
+
+@router.post("/withdraw", response_model=UserResponse)
+async def withdraw(request: Request):
+    """회원 탈퇴 예약 (7일 후 계정 영구 삭제)"""
+    return await auth_controller.withdraw_user(request)
+
+@router.delete("/withdraw", response_model=UserResponse)
+async def cancel_withdraw(request: Request):
+    """회원 탈퇴 취소 (delete_date 초기화)"""
+    return await auth_controller.cancel_withdraw_user(request)

@@ -18,6 +18,7 @@ class UserResponse(BaseModel):
     check_admin: bool
     profile_image: Optional[str] = None
     created_at: Optional[datetime] = None
+    delete_date: Optional[datetime] = None
 
 # Must Do List Models
 class TodoCreate(BaseModel):

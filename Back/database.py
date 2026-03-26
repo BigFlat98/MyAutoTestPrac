@@ -61,6 +61,9 @@ class Database:
                     /* 마이페이지: users 테이블에 profile_image 컬럼 추가 */
                     ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image TEXT;
 
+                    /* 회원 탈퇴: users 테이블에 delete_date 컬럼 추가 (soft delete 예약) */
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS delete_date TIMESTAMP;
+
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
                         login_id VARCHAR(30) UNIQUE NOT NULL,
