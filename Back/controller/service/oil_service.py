@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -78,12 +78,26 @@ async def get_oil_data_from_db(grade: str = "WTI"):
     if not price_row:
         return None
 
+    labels = [r["trade_date"].strftime("%m/%d") for r in history_rows]
+    prices = [float(r["price_usd"]) for r in history_rows]
+
+    # EIA 데이터는 1~2 영업일 지연 게시 → 마지막 값으로 오늘까지 forward-fill
+    if history_rows:
+        last_date = history_rows[-1]["trade_date"]
+        today = datetime.now().date()
+        current = last_date + timedelta(days=1)
+        last_price = prices[-1]
+        while current <= today:
+            labels.append(current.strftime("%m/%d"))
+            prices.append(last_price)
+            current += timedelta(days=1)
+
     return {
         "grade": grade,
         "price": float(price_row["price_usd"]),
         "changeRate": float(price_row["change_rate"]),
         "history": {
-            "labels": [r["trade_date"].strftime("%m/%d") for r in history_rows],
-            "prices": [float(r["price_usd"]) for r in history_rows],
+            "labels": labels,
+            "prices": prices,
         },
     }

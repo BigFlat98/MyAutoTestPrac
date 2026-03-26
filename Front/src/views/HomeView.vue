@@ -34,11 +34,15 @@ import OilChart from '../components/dashboard/OilChart.vue'
         <InterestRateChart />
       </div>
 
-      <!-- Bottom Row: Crypto, Gold & Oil -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[460px]">
-        <BitcoinChart />
-        <GoldChart />
+      <!-- Bottom Row: Oil & Gold -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[460px]">
         <OilChart />
+        <GoldChart />
+      </div>
+
+      <!-- Crypto Row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[460px]">
+        <BitcoinChart />
       </div>
       
     </div>
