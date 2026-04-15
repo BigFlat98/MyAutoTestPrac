@@ -1,6 +1,6 @@
 # 프로젝트 설계서
 
-> 마지막 업데이트: 2026-03-23 (HTTPS 전환 완료)
+> 마지막 업데이트: 2026-03-26 (마이페이지 구현 완료)
 
 ---
 
@@ -652,14 +652,23 @@ PostgreSQL. `database.py`에서 앱 시작 시 자동 CREATE TABLE IF NOT EXISTS
 | | 스케줄러: 1시간 주기 수집 | |
 | | 프론트: `OilChart.vue` 컴포넌트 추가 | |
 | TradingView 위젯 대체 | 기존 TradingView 위젯 → DB 데이터 기반 자체 Chart.js 차트로 전환 | 중간 |
-| 모바일 앱 + 위젯 | DB 데이터 활용 모바일 앱 (Capacitor 또는 Flutter), 홈 위젯 지원 | 낮음 |
+| 모바일 앱 + 위젯 (Flutter) | **Flutter (Dart)** 기반 안드로이드 앱 + 홈 화면 위젯 구현 | 중간 |
+| | - 기술 스택: Flutter / VS Code / 안드로이드 스튜디오 에뮬레이터 | |
+| | - 백엔드 API 100% 재사용 (웹과 동일한 FastAPI 엔드포인트) | |
+| | - 우선 안드로이드 집중 (iOS는 Mac 환경 확보 후 진행) | |
+| | - 홈 화면 위젯: 환율, 금/유가, 암호화폐 등 핵심 지표 빠른 확인 | |
+| | - **현재 상태**: Flutter SDK + 안드로이드 에뮬레이터 세팅 완료 | |
 | ✅ 실시간 주가 (KIS WebSocket) | Kstock 서비스 신설. KIS WebSocket(H0STCNT0)으로 KOSPI 40종목 실시간 체결가 수신 → 브라우저 브로드캐스트 | 완료 |
 | initFromDb 재시도 안정화 | Kstock 시작 시 backend 미준비로 DB 폴백 실패 → 현재 10초 재시도 로직 적용 중. 추가 검증 필요 | 낮음 |
 | ✅ HTTPS 전환 (Cloudflare + Caddy) | hadaboni.work 도메인 구매 → Cloudflare 오렌지 클라우드 프록시 ON → Origin Certificate 발급 → Caddy tls 지시어로 인증서 마운트. docker-compose 443 포트 개방 | 완료 |
-| 마이페이지 | 로그인 유저 전용 마이페이지 (`/mypage`) 신설 | 중간 |
-| | - 프로필 이미지 업로드/변경 (서버 저장 후 `/static/` 서빙, `users` 테이블에 profile_image 컬럼 추가) | |
-| | - 내가 작성한 게시글 목록 조회 (`GET /posts?author_me=true`) | |
-| | - 내가 등록한 영상 목록 조회 (`GET /videos?uploader_me=true`) | |
+| ✅ 마이페이지 | 로그인 유저 전용 마이페이지 (`/mypage`) 구현 완료 | 완료 |
+| | - 프로필 이미지 업로드/변경 (`profile_uploads/` 저장, `/static/profile/` 서빙) | |
+| | - 내가 작성한 게시글 목록 (`GET /posts?author_me=true`) | |
+| | - 내가 등록한 영상 목록 (`GET /videos?uploader_me=true`) | |
+| | - 내 할 일 개수 통계 표시 (`GET /todos`) | |
+| | - 회원 탈퇴 예약 / 취소 (7일 유예 후 스케줄러가 영구 삭제) | |
+| | - NavBar 우측에 사람 아이콘 추가 (로그인 시에만 표시) | |
+| | - Docker 볼륨 마운트 추가 (`uploads/`, `profile_uploads/`) | |
 | 소셜 로그인 | Google / GitHub / KakaoTalk OAuth2 연동 | 중간 |
 | | - 백엔드: OAuth2 콜백 처리, 소셜 계정 연결 정보 저장 (`user_social_accounts` 테이블) | |
 | | - 프론트: 로그인/회원가입 페이지에 소셜 로그인 버튼 추가 | |

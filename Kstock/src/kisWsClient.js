@@ -62,10 +62,13 @@ const SYMBOLS = [
 class KisWsClient extends EventEmitter {
   constructor() {
     super()
-    this.ws             = null
-    this.approvalKey    = null
-    this.latestPrices   = new Map()   // symbol -> { price, change }
-    this.reconnectTimer = null
+    this.ws              = null
+    this.approvalKey     = null
+    this.latestPrices    = new Map()   // symbol -> { price, change }
+    this.reconnectTimer  = null
+    this.dbSyncStarted   = false       // DB 동기화 루프 중복 실행 방지 플래그
+    this.dbSyncTimer     = null        // 재시도 setTimeout 참조
+    this.dbSyncInterval  = null        // 성공 후 setInterval 참조
   }
 
   // KIS WebSocket 접속키(approval_key) 발급
@@ -108,13 +111,19 @@ class KisWsClient extends EventEmitter {
   // DB 종가 동기화 루프
   // - 성공할 때까지 10초마다 재시도 (backend 기동 지연 대응)
   // - 성공 후에는 10분마다 갱신 (스케줄러 주기와 동기화)
+  // - connect() 재연결 시 중복 실행 방지
   startDbSync() {
+    if (this.dbSyncStarted) return
+    this.dbSyncStarted = true
+
     const tryLoad = async () => {
       const ok = await this.initFromDb()
       if (!ok) {
-        setTimeout(tryLoad, 10_000)
+        this.dbSyncTimer = setTimeout(tryLoad, 10_000)
       } else {
-        setInterval(() => this.initFromDb(), 10 * 60 * 1_000)
+        // 기존 interval이 있으면 정리 후 새로 등록
+        if (this.dbSyncInterval) clearInterval(this.dbSyncInterval)
+        this.dbSyncInterval = setInterval(() => this.initFromDb(), 10 * 60 * 1_000)
       }
     }
     tryLoad()
