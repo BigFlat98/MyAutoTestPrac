@@ -5,58 +5,92 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-EIA_API_KEY = os.getenv("EIA_API_KEY")
-EIA_BASE_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/"
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
 
-# EIA v2 product facet codes for crude oil spot prices
+# Alpha Vantage commodities functions for crude oil
 GRADE_CONFIG = {
-    "WTI":   {"product": "EPCWTI"},
-    "BRENT": {"product": "EPCBRENT"},
+    "WTI": {"function": "WTI"},
+    "BRENT": {"function": "BRENT"},
 }
 
 
-def fetch_oil_prices(grade: str, length: int = 90):
+def fetch_oil_prices(grade: str, length: int = 90, include_missing: bool = False):
     """
-    EIA v2 API에서 원유 일별 현물가 (USD/bbl)를 최대 length일치 가져옵니다.
+    Alpha Vantage API에서 원유 일별 가격 (USD/bbl)을 최대 length일치 가져옵니다.
     반환값: 날짜 오름차순 정렬된 dict 리스트 [{"period": "2024-01-15", "value": "72.50"}, ...]
     """
-    if not EIA_API_KEY:
-        print("[oil_service] EIA_API_KEY not found in env")
+    if not ALPHA_VANTAGE_API_KEY:
+        print("[oil_service] ALPHA_VANTAGE_API_KEY not found in env")
         return None
 
-    product_code = GRADE_CONFIG.get(grade.upper(), {}).get("product")
-    if not product_code:
+    fn = GRADE_CONFIG.get(grade.upper(), {}).get("function")
+    if not fn:
         print(f"[oil_service] Unknown grade: {grade}")
         return None
 
     params = {
-        "api_key": EIA_API_KEY,
-        "frequency": "daily",
-        "data[]": "value",
-        "facets[product][]": product_code,
-        "sort[0][column]": "period",
-        "sort[0][direction]": "desc",
-        "length": length,
+        "apikey": ALPHA_VANTAGE_API_KEY,
+        "function": fn,
+        "interval": "daily",
+        "datatype": "json",
     }
 
     try:
-        response = requests.get(EIA_BASE_URL, params=params, timeout=15)
+        response = requests.get(ALPHA_VANTAGE_BASE_URL, params=params, timeout=20)
         if response.status_code != 200:
-            print(f"[oil_service] EIA API Error: {response.status_code} - {response.text[:200]}")
+            print(f"[oil_service] Alpha Vantage API Error: {response.status_code} - {response.text[:200]}")
             return None
 
-        rows = response.json().get("response", {}).get("data", [])
+        payload = response.json()
+        if isinstance(payload, dict) and (payload.get("Note") or payload.get("Information")):
+            # Rate limit / informational response
+            msg = payload.get("Note") or payload.get("Information")
+            print(f"[oil_service] Alpha Vantage note/info for {grade}: {str(msg)[:200]}")
+            return None
+        if isinstance(payload, dict) and payload.get("Error Message"):
+            print(f"[oil_service] Alpha Vantage error for {grade}: {str(payload.get('Error Message'))[:200]}")
+            return None
+
+        rows = []
+
+        # Commodities endpoints commonly return: {"name": "...", "interval": "...", "unit": "...", "data": [{"date": "...", "value": "..."}]}
+        if isinstance(payload, dict) and isinstance(payload.get("data"), list):
+            for item in payload.get("data") or []:
+                period = item.get("date")
+                value = item.get("value")
+                if period:
+                    rows.append({"period": str(period), "value": value})
+
+        # Fallback: in case of time-series style payloads
+        if not rows and isinstance(payload, dict):
+            ts = payload.get("Time Series (Daily)") or payload.get("time_series") or payload.get("timeSeries")
+            if isinstance(ts, dict):
+                for dt, ohlc in ts.items():
+                    if isinstance(ohlc, dict):
+                        close_v = ohlc.get("4. close") or ohlc.get("close") or ohlc.get("value")
+                    else:
+                        close_v = None
+                    rows.append({"period": str(dt), "value": close_v})
+
         if not rows:
-            print(f"[oil_service] EIA: empty data for {grade}")
+            print(f"[oil_service] Alpha Vantage: empty/unrecognized data for {grade}")
             return None
 
-        # 유효한 값만 추려 날짜 오름차순 정렬
+        # 날짜 오름차순 정렬 후 최근 length개만 사용
+        rows.sort(key=lambda x: x.get("period", ""))
+        if length and len(rows) > length:
+            rows = rows[-length:]
+
+        if include_missing:
+            return rows
+
+        # 유효한 값만 추려 반환
         valid = [r for r in rows if r.get("value") not in (None, ".")]
-        valid.sort(key=lambda x: x.get("period", ""))
         return valid
 
     except Exception as e:
-        print(f"[oil_service] Error fetching EIA data for {grade}: {e}")
+        print(f"[oil_service] Error fetching Alpha Vantage data for {grade}: {e}")
         return None
 
 

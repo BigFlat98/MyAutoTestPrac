@@ -296,12 +296,29 @@ async def fetch_and_save_oil():
     print("[Scheduler] Fetching Oil Prices...")
     try:
         for grade in ["WTI", "BRENT"]:
+            # 진단용: raw(결측 포함) 최근 데이터로 최신 게시 여부 확인
+            raw_rows = await asyncio.get_event_loop().run_in_executor(
+                None, oil_service.fetch_oil_prices, grade, 14, True
+            )
             rows = await asyncio.get_event_loop().run_in_executor(
                 None, oil_service.fetch_oil_prices, grade, 90
             )
             if not rows:
                 print(f"[Scheduler][WARN] Oil {grade}: no data")
                 continue
+
+            if raw_rows:
+                raw_last = raw_rows[-1]
+                raw_period = str(raw_last.get("period"))
+                raw_value = str(raw_last.get("value"))
+                valid_last = rows[-1]
+                valid_period = str(valid_last.get("period"))
+                valid_value = str(valid_last.get("value"))
+                if raw_period != valid_period or raw_value in (".", "None"):
+                    print(
+                        f"[Scheduler][INFO] Oil {grade}: latest raw=({raw_period}, {raw_value}) "
+                        f"latest valid=({valid_period}, {valid_value})"
+                    )
 
             latest = rows[-1]
             current_price = float(latest.get("value", 0))
@@ -373,7 +390,7 @@ def setup_scheduler():
     scheduler.add_job(fetch_and_save_interest_rate,"interval", hours=24,   id="interest_rate", next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now, replace_existing=True)
-    scheduler.add_job(fetch_and_save_oil,          "interval", hours=1,    id="oil",           next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_oil,          "interval", minutes=10, id="oil",           next_run_time=now, replace_existing=True)
     scheduler.add_job(cleanup_withdrawn_users,     "interval", hours=24,   id="user_cleanup",  next_run_time=now, replace_existing=True)
 
     return scheduler
