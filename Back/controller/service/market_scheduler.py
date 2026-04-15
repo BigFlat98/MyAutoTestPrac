@@ -296,29 +296,32 @@ async def fetch_and_save_oil():
     print("[Scheduler] Fetching Oil Prices...")
     try:
         for grade in ["WTI", "BRENT"]:
-            # 진단용: raw(결측 포함) 최근 데이터로 최신 게시 여부 확인
+            # Alpha Vantage rate limit 대응:
+            # - grade당 API 호출 1회로 raw/valid를 모두 파생
+            # - grade 간 요청 간격을 둠
             raw_rows = await asyncio.get_event_loop().run_in_executor(
-                None, oil_service.fetch_oil_prices, grade, 14, True
+                None, oil_service.fetch_oil_prices, grade, 90, True
             )
-            rows = await asyncio.get_event_loop().run_in_executor(
-                None, oil_service.fetch_oil_prices, grade, 90
-            )
-            if not rows:
+            if not raw_rows:
                 print(f"[Scheduler][WARN] Oil {grade}: no data")
                 continue
 
-            if raw_rows:
-                raw_last = raw_rows[-1]
-                raw_period = str(raw_last.get("period"))
-                raw_value = str(raw_last.get("value"))
-                valid_last = rows[-1]
-                valid_period = str(valid_last.get("period"))
-                valid_value = str(valid_last.get("value"))
-                if raw_period != valid_period or raw_value in (".", "None"):
-                    print(
-                        f"[Scheduler][INFO] Oil {grade}: latest raw=({raw_period}, {raw_value}) "
-                        f"latest valid=({valid_period}, {valid_value})"
-                    )
+            rows = [r for r in raw_rows if r.get("value") not in (None, ".")]
+            if not rows:
+                print(f"[Scheduler][WARN] Oil {grade}: all values missing")
+                continue
+
+            raw_last = raw_rows[-1]
+            raw_period = str(raw_last.get("period"))
+            raw_value = str(raw_last.get("value"))
+            valid_last = rows[-1]
+            valid_period = str(valid_last.get("period"))
+            valid_value = str(valid_last.get("value"))
+            if raw_period != valid_period or raw_value in (".", "None"):
+                print(
+                    f"[Scheduler][INFO] Oil {grade}: latest raw=({raw_period}, {raw_value}) "
+                    f"latest valid=({valid_period}, {valid_value})"
+                )
 
             latest = rows[-1]
             current_price = float(latest.get("value", 0))
@@ -350,6 +353,9 @@ async def fetch_and_save_oil():
                         )
 
             print(f"[Scheduler] Oil {grade} saved: price={current_price:.2f} + {len(rows)} history rows")
+
+            # 무료 플랜 레이트리밋(초당 1회 등) 완화
+            await asyncio.sleep(1.2)
     except Exception as e:
         print(f"[Scheduler][ERROR] Oil: {e}")
 
