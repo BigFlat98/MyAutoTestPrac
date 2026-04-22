@@ -17,6 +17,11 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
   border-left: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+  // Firefox(Gecko)는 backdrop-filter GPU 가속이 불완전하므로 blur 값을 낮춰 성능 보완
+  @supports (-moz-appearance: none) {
+    backdrop-filter: blur(8px);
+  }
 }
 
 @mixin glass-hover($bg-alpha: 0.08) {
@@ -51,16 +56,21 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
   background-color: $bg-color-dark; 
   overflow: hidden;
 
-  // 1. 다이내믹 도트(점선) 패턴 (무한 슬라이딩 애니메이션 추가)
+  // 1. 다이내믹 도트(점선) 패턴 (GPU 합성 레이어 사용: transform 기반 슬라이딩)
   &::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    // translate3d 애니메이션 시 가장자리 끊김 방지를 위해 36px씩 여유 확장
+    top: -36px;
+    left: -36px;
+    width: calc(100% + 72px);
+    height: calc(100% + 72px);
     background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
     background-size: 36px 36px;
     mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
     -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
     z-index: 1;
+    will-change: transform;
     animation: gridPan 30s linear infinite;
   }
 
@@ -78,8 +88,8 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
   .orb {
     position: absolute;
     z-index: 0;
-    filter: blur(90px);
-    will-change: transform;
+    filter: blur(60px);
+    will-change: transform, opacity;
   }
 
   .orb-1 {
@@ -101,6 +111,34 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
     border-radius: 60% 40% 50% 50% / 40% 60% 40% 60%;
     animation: auroraDrift2 22s ease-in-out infinite;
   }
+
+  // ─── Firefox 전용: 오로라 애니메이션 정지 ───────────────────────────────────
+  // backdrop-filter 뒤의 요소가 움직일 때마다 Firefox는 blur를 CPU로 재계산함.
+  // 애니메이션을 멈추면 재계산이 사라져 버벅임이 근본적으로 해소됨.
+  // orb는 키프레임 중간값 위치에 정적으로 고정하여 분위기는 그대로 유지.
+  @supports (-moz-appearance: none) {
+    &::before {
+      animation: none; // gridPan 정지
+      will-change: auto;
+    }
+
+    .orb {
+      will-change: auto; // 애니메이션 없으면 will-change는 오히려 메모리 낭비
+    }
+
+    .orb-1 {
+      animation: none;
+      // auroraDrift1 33%~66% 사이 중간값 위치에 자연스럽게 고정
+      transform: translate(4%, 12%) rotate(8deg) scale(1.0);
+    }
+
+    .orb-2 {
+      animation: none;
+      // auroraDrift2 33%~66% 사이 중간값 위치에 자연스럽게 고정
+      transform: translate(-8%, -10%) rotate(-8deg) scale(1.05);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 }
 
 // 오로라 유영 모션 1
@@ -120,9 +158,10 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
 }
 
 // 배경 도트 무한 슬라이딩 애니메이션
+// background-position 변경 대신 transform: translate3d() 사용 → GPU 합성 레이어로 처리 (Firefox 성능 개선)
 @keyframes gridPan {
-  0% { background-position: 0 0; }
-  100% { background-position: 36px 36px; } 
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(36px, 36px, 0); }
 }
 
 // --- Content Container ---
@@ -172,7 +211,8 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
   @include glass-panel();
   padding: 28px;
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.4s ease, border-color 0.4s ease;
-  will-change: transform, box-shadow; 
+  // box-shadow는 GPU 합성 불가 속성이므로 will-change에서 제거
+  will-change: transform;
 
   &:hover {
     @include glass-hover();
