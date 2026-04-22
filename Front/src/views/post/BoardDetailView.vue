@@ -6,7 +6,6 @@ import { useAuthStore } from '@/stores/auth'
 import CommentItem from './CommentItem.vue'
 
 const authStore = useAuthStore()
-
 const route = useRoute()
 const router = useRouter()
 const postId = route.params.id
@@ -20,7 +19,6 @@ const parsedContent = computed(() => {
     if (!post.value || !post.value.content) return []
     
     const text = post.value.content
-    // Regex to capture ![alt](url)
     const regex = /!\[(.*?)\]\((.*?)\)/g
     
     const segments = []
@@ -28,25 +26,20 @@ const parsedContent = computed(() => {
     let match
     
     while ((match = regex.exec(text)) !== null) {
-        // Text before match
         if (match.index > lastIndex) {
             segments.push({
                 type: 'text',
                 content: text.substring(lastIndex, match.index)
             })
         }
-        
-        // Image match
         segments.push({
             type: 'image',
             alt: match[1],
             src: match[2]
         })
-        
         lastIndex = regex.lastIndex
     }
     
-    // Remaining text
     if (lastIndex < text.length) {
         segments.push({
             type: 'text',
@@ -57,8 +50,6 @@ const parsedContent = computed(() => {
     return segments
 })
 
-// Fetch Post Details
-// Fetch Post Details
 const fetchPostDetail = async () => {
     isLoading.value = true
     try {
@@ -68,9 +59,7 @@ const fetchPostDetail = async () => {
         ])
         
         post.value = postRes.data
-        // Adapt backend 'description' to frontend 'content'
         post.value.content = post.value.description 
-        
         comments.value = commentRes.data
 
     } catch (error) {
@@ -100,7 +89,6 @@ const submitComment = async () => {
             reply_id: null
         })
         newComment.value = ''
-        // Reload comments
         const res = await api.get(`/posts/${postId}/comments`)
         comments.value = res.data
     } catch (error) {
@@ -122,13 +110,10 @@ const deletePost = async () => {
 }
 
 const editPost = () => {
-    // Navigate to write view with ID
     router.push({ name: 'board-edit', params: { id: postId } })
 }
 
 const handleReply = (id) => {
-    // Logic for replying to a comment (e.g. set reply_id and focus input, or open modal)
-    // For now, let's just use a prompt or simple logic
     const content = prompt("Enter your reply:")
     if(content) {
         api.post(`/posts/${postId}/comments`, {
@@ -149,7 +134,6 @@ const handleDelete = async (id) => {
     if(confirm('Delete this comment?')) {
         try {
             await api.delete(`/posts/comments/${id}`)
-            // Reload comments
             const res = await api.get(`/posts/${postId}/comments`)
             comments.value = res.data
         } catch (error) {
@@ -170,28 +154,28 @@ onMounted(() => {
         <!-- Navigation -->
         <button 
             @click="goBack" 
-            class="mb-8 text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors flex items-center gap-2"
+            class="mb-8 text-xs uppercase tracking-widest text-slate-400 hover:text-sky-400 transition-colors flex items-center gap-2 slide-up" style="animation-delay: 0.1s;"
         >
             &larr; Back to Board
         </button>
 
         <div v-if="isLoading" class="py-20 text-center">
-            <div class="w-8 h-8 border-2 border-gray-200 border-t-luxury-gold rounded-full animate-spin mx-auto mb-4"></div>
-            <span class="text-xs text-gray-400 uppercase tracking-widest">Loading Post...</span>
+            <div class="w-8 h-8 border-2 border-white/20 border-t-sky-400 rounded-full animate-spin mx-auto mb-4"></div>
+            <span class="text-xs text-slate-400 uppercase tracking-widest">Loading Post...</span>
         </div>
 
-        <div v-else-if="post" class="bg-white border border-gray-100 shadow-xl overflow-hidden">
+        <div v-else-if="post" class="glass-card overflow-hidden p-0 slide-up" style="animation-delay: 0.2s;">
             <!-- Article Header -->
-            <div class="p-8 md:p-12 border-b border-gray-50 bg-gray-50/30">
-                <span class="block text-xs uppercase tracking-widest text-luxury-gold mb-4 font-medium">Article</span>
-                <h1 class="text-3xl md:text-4xl font-light text-black mb-6 leading-tigher">
+            <div class="p-8 md:p-12 border-b border-white/10 bg-white/5 backdrop-blur-md">
+                <span class="block text-xs uppercase tracking-widest text-sky-400 mb-4 font-medium">Article</span>
+                <h1 class="text-3xl md:text-4xl font-light text-slate-100 mb-6 leading-tigher">
                     {{ post.title }}
                 </h1>
                 
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono text-gray-500">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs font-mono text-slate-400">
                     <div class="flex items-center gap-4">
-                        <span class="text-black font-medium">{{ post.author }}</span>
-                        <span class="w-px h-3 bg-gray-300"></span>
+                        <span class="text-sky-300 font-medium">{{ post.author }}</span>
+                        <span class="w-px h-3 bg-white/20"></span>
                         <span>{{ formatDate(post.created_at) }}</span>
                     </div>
                     <div class="flex items-center gap-4">
@@ -201,14 +185,14 @@ onMounted(() => {
                              <button 
                                 v-if="post.author === authStore.user.nick_name || post.author_id === authStore.user.id" 
                                 @click="editPost" 
-                                class="px-4 py-2 bg-black text-white text-xs uppercase tracking-widest hover:bg-luxury-gold transition-colors rounded-sm"
+                                class="px-4 py-2 bg-sky-500/20 text-sky-400 text-xs uppercase tracking-widest hover:bg-sky-400 hover:text-white border border-sky-400/50 transition-colors rounded-full"
                             >
                                 Edit
                             </button>
                              <button 
                                 v-if="post.author === authStore.user.nick_name || post.author_id === authStore.user.id || authStore.user.check_admin"
                                 @click="deletePost" 
-                                class="px-4 py-2 text-xs text-red-500 uppercase tracking-widest hover:bg-red-50 transition-colors border border-transparent hover:border-red-100 rounded-sm"
+                                class="px-4 py-2 text-xs text-red-400 uppercase tracking-widest hover:bg-red-400/10 transition-colors border border-transparent hover:border-red-400/50 rounded-full"
                             >
                                 Delete
                             </button>
@@ -219,17 +203,17 @@ onMounted(() => {
 
             <!-- Article Body -->
             <div class="p-8 md:p-12 min-h-[300px]">
-                <div v-if="post.image" class="mb-8 flex justify-center bg-gray-50/50 rounded-lg p-4 border border-gray-100">
-                    <img :src="post.image" alt="Post Image" class="max-w-full max-h-[600px] h-auto object-contain shadow-sm" />
+                <div v-if="post.image" class="mb-8 flex justify-center bg-black/20 rounded-lg p-4 border border-white/10">
+                    <img :src="post.image" alt="Post Image" class="max-w-full max-h-[600px] h-auto object-contain shadow-sm rounded-lg" />
                 </div>
                 
-                <div class="prose max-w-none font-light text-gray-800 leading-relaxed whitespace-pre-wrap text-left indent-4">
+                <div class="prose max-w-none font-light text-slate-200 leading-relaxed whitespace-pre-wrap text-left indent-4">
                     <template v-for="(segment, index) in parsedContent" :key="index">
                         <img 
                             v-if="segment.type === 'image'" 
                             :src="segment.src" 
                             :alt="segment.alt" 
-                            class="max-w-full h-auto mx-auto my-4 shadow-sm"
+                            class="max-w-full h-auto mx-auto my-4 shadow-sm rounded-lg"
                         />
                         <span v-else>{{ segment.content }}</span>
                     </template>
@@ -237,25 +221,25 @@ onMounted(() => {
             </div>
 
             <!-- Comments Section -->
-            <div class="bg-gray-50 p-8 md:p-12 border-t border-gray-100">
-                <h3 class="text-sm uppercase tracking-widest text-black mb-8 flex items-center gap-2">
-                    Comments <span class="bg-black text-white text-[10px] px-2 py-0.5 rounded-full">{{ comments.length }}</span>
+            <div class="bg-black/20 p-8 md:p-12 border-t border-white/10">
+                <h3 class="text-sm uppercase tracking-widest text-slate-200 mb-8 flex items-center gap-2">
+                    Comments <span class="bg-sky-500 text-white text-[10px] px-2 py-0.5 rounded-full">{{ comments.length }}</span>
                 </h3>
 
                 <!-- Comment Input -->
                 <div class="mb-10 flex gap-4">
-                    <div class="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0"></div> <!-- Avatar Placeholder -->
+                    <div class="w-10 h-10 bg-white/10 rounded-full flex-shrink-0"></div> <!-- Avatar Placeholder -->
                     <div class="flex-1">
                         <textarea 
                             v-model="newComment"
                             rows="3" 
                             placeholder="Join the discussion..." 
-                            class="w-full border border-gray-200 p-4 focus:border-luxury-gold focus:outline-none bg-white font-light text-sm transition-colors resize-none mb-2"
+                            class="w-full bg-white/5 border border-white/10 text-white p-4 focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none font-light text-sm transition-all resize-none mb-2 rounded-lg"
                         ></textarea>
                         <div class="flex justify-end">
                             <button 
                                 @click="submitComment"
-                                class="px-4 py-1.5 bg-black text-white text-[10px] uppercase tracking-widest hover:bg-luxury-gold transition-colors rounded-sm"
+                                class="px-4 py-1.5 bg-sky-500/20 border border-sky-400/50 text-sky-400 hover:bg-sky-400 hover:text-white text-[10px] uppercase tracking-widest transition-all rounded-full shadow-[0_0_10px_rgba(56,189,248,0.2)]"
                             >
                                 Post Comment
                             </button>

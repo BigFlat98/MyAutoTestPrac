@@ -33,7 +33,6 @@ const yMax = ref(1500);
 const currentRate = ref(null);
 const changeRate = ref(null);
 
-// 1. Main Chart (Scrollable)
 const mainChartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -41,6 +40,11 @@ const mainChartOptions = ref({
   plugins: {
     legend: { display: false },
     tooltip: {
+      backgroundColor: 'rgba(15, 23, 42, 0.9)',
+      titleColor: '#f8fafc',
+      bodyColor: '#cbd5e1',
+      borderColor: 'rgba(255,255,255,0.1)',
+      borderWidth: 1,
       callbacks: { label: (ctx) => ` ₩${ctx.parsed.y.toLocaleString()}` }
     }
   },
@@ -52,6 +56,7 @@ const mainChartOptions = ref({
       ticks: {
         maxTicksLimit: 60,
         maxRotation: 0,
+        color: '#94a3b8',
         callback: function(val) {
           const dateStr = this.getLabelForValue(val);
           const date = new Date(dateStr);
@@ -61,12 +66,12 @@ const mainChartOptions = ref({
       }
     }, 
     y: { 
-      display: true, // Re-enable Y-axis
+      display: true,
       position: 'right', 
       min: 0, 
       max: 1500,
-      grid: { color: '#f3f4f6' },
-      ticks: { font: { family: 'monospace', size: 10 } }
+      grid: { color: 'rgba(255, 255, 255, 0.05)' },
+      ticks: { color: '#94a3b8', font: { family: 'monospace', size: 10 } }
     } 
   }
 });
@@ -76,7 +81,6 @@ const fetchData = async () => {
     const res = await api.get('/dashboard/exchange-rate');
     totalLabels.value = res.data.dates.length;
 
-    // Add 5 months of padding to labels
     if (res.data.dates.length > 0) {
         const lastDate = new Date(res.data.dates[res.data.dates.length - 1]);
         for (let i = 1; i <= 5; i++) {
@@ -86,7 +90,6 @@ const fetchData = async () => {
         }
     }
 
-    // Extract current rate and change
     const validRates = res.data.rates.filter(r => r !== null);
     if (validRates.length >= 2) {
       currentRate.value = validRates[validRates.length - 1];
@@ -96,7 +99,6 @@ const fetchData = async () => {
       currentRate.value = validRates[0];
     }
 
-    // Calculate Min/Max (Keep logic same)
     const rates = res.data.rates.filter(r => r !== null);
     const minVal = Math.min(...rates);
     const maxVal = Math.max(...rates);
@@ -105,7 +107,6 @@ const fetchData = async () => {
     yMin.value = Math.floor(minVal - padding);
     yMax.value = Math.ceil(maxVal + padding);
 
-    // Apply scaling
     mainChartOptions.value.scales.y.min = yMin.value;
     mainChartOptions.value.scales.y.max = yMax.value;
 
@@ -114,9 +115,9 @@ const fetchData = async () => {
       datasets: [
         {
           label: 'USD/KRW',
-          backgroundColor: '#10b981', 
-          borderColor: '#10b981',
-          data: res.data.rates, // Data length will be shorter than labels
+          backgroundColor: '#34d399', 
+          borderColor: '#34d399',
+          data: res.data.rates, 
           borderWidth: 1.5,
           fill: false
         }
@@ -138,36 +139,34 @@ onMounted(fetchData);
 </script>
 
 <template>
-  <div class="h-full flex flex-col p-6 border border-gray-200 bg-white hover:border-luxury-gold transition-colors duration-300">
-    <!-- Header: Title & Current Rate -->
+  <div class="glass-card h-full flex flex-col">
     <div class="flex justify-between items-start mb-4">
       <div>
-        <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-1">Exchange Rate</h3>
+        <h3 class="text-xs uppercase tracking-widest text-slate-400 mb-1">Exchange Rate</h3>
         <div class="flex items-baseline gap-2">
-          <span class="text-2xl font-light text-gray-900 tracking-tight font-mono">
+          <span class="text-2xl font-light text-slate-100 tracking-tight font-mono">
             {{ currentRate ? currentRate.toLocaleString('ko-KR') : '—' }}
           </span>
-          <span class="text-xs text-gray-400">KRW</span>
+          <span class="text-xs text-slate-400">KRW</span>
         </div>
         <div v-if="changeRate !== null" class="flex items-center gap-1 mt-0.5">
-          <span :class="changeRate >= 0 ? 'text-red-500' : 'text-blue-500'" class="text-xs font-mono font-medium">
+          <span :class="changeRate >= 0 ? 'text-red-400' : 'text-blue-400'" class="text-xs font-mono font-medium">
             {{ changeRate >= 0 ? '▲' : '▼' }} {{ Math.abs(changeRate) }}%
           </span>
-          <span class="text-[10px] text-gray-400">vs prev day</span>
+          <span class="text-[10px] text-slate-500">vs prev day</span>
         </div>
       </div>
-      <div class="flex items-center gap-1 text-[10px] font-mono text-gray-400 mt-1">
-        <span class="w-3 h-[2px] bg-[#10b981] inline-block"></span>
+      <div class="flex items-center gap-1 text-[10px] font-mono text-slate-400 mt-1">
+        <span class="w-3 h-[2px] bg-[#34d399] inline-block"></span>
         <span>USD / KRW</span>
       </div>
     </div>
     
-    <!-- Chart Body: Single Scrollable View -->
     <div class="flex-1 min-h-0 flex relative">
       <div ref="chartContainer" class="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar relative z-10">
          <div :style="{ width: Math.max(100, (totalLabels / 500) * 100) + '%' }" class="h-full min-w-full">
             <Line v-if="chartData.datasets.length > 0" :data="chartData" :options="mainChartOptions" />
-            <div v-else class="h-full flex items-center justify-center text-gray-300">Loading Data...</div>
+            <div v-else class="h-full flex items-center justify-center text-slate-500">Loading Data...</div>
          </div>
       </div>
     </div>
@@ -176,7 +175,7 @@ onMounted(fetchData);
 
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar { height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #996515; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 </style>

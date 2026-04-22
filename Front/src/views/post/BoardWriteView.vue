@@ -44,7 +44,6 @@ const parsedContent = computed(() => {
     return segments
 })
 
-// Load Post data if Edit Mode
 const loadPost = async () => {
     if (!isEditMode.value) return
     
@@ -59,10 +58,8 @@ const loadPost = async () => {
             is_public: data.is_public !== undefined ? data.is_public : true
         }
         
-        // If has image
         if (data.image) {
-            imagePreview.value = data.image // Assuming backend returns full URL or path
-            // Note: imageFile logic needs care if not changing image. Backend handles optional image.
+            imagePreview.value = data.image 
         }
 
     } catch (error) {
@@ -78,7 +75,6 @@ const handleFileUpload = (event) => {
     const file = event.target.files[0]
     if (file) {
         imageFile.value = file
-        // Create preview
         const reader = new FileReader()
         reader.onload = (e) => {
             imagePreview.value = e.target.result
@@ -100,11 +96,9 @@ const savePost = async () => {
 
     isLoading.value = true
     try {
-        // Form Data for Multipart
         const formData = new FormData()
         formData.append('title', form.value.title)
         formData.append('description', form.value.content)
-        // formData.append('is_public', form.value.is_public) // Backend might expect string 'true'/'false' or bool handled by FastAPI Form
         formData.append('is_public', String(form.value.is_public)) 
         
         if (imageFile.value) {
@@ -112,13 +106,11 @@ const savePost = async () => {
         }
 
         if (isEditMode.value) {
-            await api.put(`/posts/${postId}`, formData) // PUT strictly expects body, with FormData axios handles content-type
+            await api.put(`/posts/${postId}`, formData)
         } else {
             await api.post('/posts', formData)
         }
         
-        // await new Promise(resolve => setTimeout(resolve, 800)) // Sim delay
-
         alert(isEditMode.value ? 'Post Updated!' : 'Post Created!')
         router.push({ name: 'board-list' })
 
@@ -144,7 +136,6 @@ const cancel = () => {
     router.back()
 }
 
-// Inline Image Upload Logic
 const textareaRef = ref(null)
 
 const handlePaste = (event) => {
@@ -153,14 +144,14 @@ const handlePaste = (event) => {
         if (item.type.indexOf('image') !== -1) {
             const file = item.getAsFile()
             uploadInlineImage(file)
-            event.preventDefault() // Prevent default paste of binary data
+            event.preventDefault() 
         }
     }
 }
 
 const uploadInlineImage = async (file) => {
     const formData = new FormData()
-    formData.append('file', file) // Note: Backend expects 'file'
+    formData.append('file', file) 
 
     try {
         const res = await api.post('/posts/image/upload', formData, {
@@ -185,7 +176,6 @@ const insertAtCursor = (text) => {
     
     form.value.content = before + text + after
     
-    // Restore cursor position
     requestAnimationFrame(() => {
         textarea.selectionStart = textarea.selectionEnd = start + text.length
         textarea.focus()
@@ -200,49 +190,53 @@ onMounted(() => {
 <template>
     <div class="max-w-4xl mx-auto py-12 px-6">
         <!-- Header -->
-        <div class="mb-10 text-center">
-            <h1 class="text-3xl font-light tracking-tight mb-2">
-                {{ isEditMode ? 'EDIT POST' : 'NEW POST' }}
-            </h1>
-            <div class="w-12 h-px bg-luxury-gold mx-auto"></div>
+        <div class="mb-10 flex justify-center">
+            <header class="glass-header slide-up text-center" style="animation-delay: 0.1s; display: block; padding: 20px 48px; border-radius: 20px;">
+                <h1 class="glass-title text-3xl mb-2">
+                    {{ isEditMode ? 'EDIT POST' : 'NEW POST' }}
+                </h1>
+                <p class="glass-subtitle font-mono text-xs tracking-widest uppercase mt-2">
+                    Share your thoughts
+                </p>
+            </header>
         </div>
 
-        <div class="bg-white border border-gray-100 shadow-xl p-8 md:p-12 relative">
-             <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-white/80 z-20">
+        <div class="glass-card p-8 md:p-12 relative slide-up" style="animation-delay: 0.2s;">
+             <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm z-20 rounded-2xl">
                 <div class="flex flex-col items-center gap-3">
-                    <div class="w-8 h-8 border-2 border-gray-200 border-t-luxury-gold rounded-full animate-spin"></div>
+                    <div class="w-8 h-8 border-2 border-white/20 border-t-sky-400 rounded-full animate-spin"></div>
                 </div>
             </div>
 
             <div class="space-y-8">
                 <!-- Title -->
                 <div>
-                    <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Title</label>
+                    <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">Title</label>
                     <input 
                         v-model="form.title"
                         type="text" 
                         placeholder="Enter an engaging title..."
-                        class="w-full h-12 border-b border-gray-200 focus:border-luxury-gold focus:outline-none text-xl font-light transition-colors placeholder-gray-300"
+                        class="w-full h-12 bg-transparent border-b border-white/20 focus:border-sky-400 focus:outline-none text-xl font-light text-white transition-colors placeholder-slate-600"
                     />
                 </div>
 
                 <!-- Content -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs uppercase tracking-widest text-gray-400">Content</label>
+                        <label class="block text-xs uppercase tracking-widest text-slate-400">Content</label>
                         <!-- Tabs -->
                         <div class="flex gap-4 text-xs font-medium">
                             <button 
                                 @click="activeTab = 'write'" 
-                                :class="activeTab === 'write' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-600'"
-                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-gray-200 !border-transparent !shadow-none hover:!shadow-[0_0_10px_rgba(0,0,0,0.15)] hover:!translate-y-0 rounded-sm"
+                                :class="activeTab === 'write' ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-slate-200'"
+                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-white/20 !border-transparent !shadow-none rounded-sm"
                             >
                                 Write
                             </button>
                             <button 
                                 @click="activeTab = 'preview'" 
-                                :class="activeTab === 'preview' ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-600'"
-                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-gray-200 !border-transparent !shadow-none hover:!shadow-[0_0_10px_rgba(0,0,0,0.15)] hover:!translate-y-0 rounded-sm"
+                                :class="activeTab === 'preview' ? 'text-sky-400 border-b-2 border-sky-400' : 'text-slate-400 hover:text-slate-200'"
+                                class="uppercase tracking-widest pb-1 transition-all duration-300 !h-9 !px-4 !py-1 !text-[10px] !min-w-0 !bg-transparent hover:!bg-transparent !border hover:!border-white/20 !border-transparent !shadow-none rounded-sm"
                             >
                                 Preview
                             </button>
@@ -258,23 +252,23 @@ onMounted(() => {
                         @paste="handlePaste"
                         rows="12"
                         placeholder="Share your insights... (Paste images directly!)"
-                        class="w-full border border-gray-200 p-4 focus:border-luxury-gold focus:outline-none font-light text-base leading-relaxed transition-colors placeholder-gray-300 resize-y"
+                        class="w-full bg-white/5 border border-white/10 p-4 focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none font-light text-base text-white leading-relaxed transition-all placeholder-slate-600 resize-y rounded-lg"
                     ></textarea>
 
                     <!-- Preview Mode -->
                     <div 
                         v-else 
-                        class="w-full border border-gray-200 p-4 min-h-[320px] bg-gray-50/30 prose max-w-none font-light text-gray-800 leading-relaxed whitespace-pre-wrap text-left indent-4"
+                        class="w-full border border-white/10 p-4 min-h-[320px] bg-black/20 rounded-lg prose max-w-none font-light text-slate-200 leading-relaxed whitespace-pre-wrap text-left indent-4"
                     >
                          <template v-if="!form.content.trim()">
-                            <span class="text-gray-400 opacity-50">Nothing to preview...</span>
+                            <span class="text-slate-500 opacity-50">Nothing to preview...</span>
                          </template>
                          <template v-else v-for="(segment, index) in parsedContent" :key="index">
                             <img 
                                 v-if="segment.type === 'image'" 
                                 :src="segment.src" 
                                 :alt="segment.alt" 
-                                class="max-w-full h-auto mx-auto my-4 shadow-sm"
+                                class="max-w-full h-auto mx-auto my-4 shadow-sm rounded-lg"
                             />
                             <span v-else>{{ segment.content }}</span>
                         </template>
@@ -283,15 +277,15 @@ onMounted(() => {
 
                 <!-- Image Upload -->
                 <div>
-                    <label class="block text-xs uppercase tracking-widest text-gray-400 mb-2">Featured Image (Optional)</label>
+                    <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2">Featured Image (Optional)</label>
                     
-                    <div v-if="!imagePreview" class="border border-dashed border-gray-300 p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
+                    <div v-if="!imagePreview" class="border border-dashed border-white/20 p-8 text-center hover:bg-white/5 transition-colors cursor-pointer relative rounded-lg">
                         <input type="file" @change="handleFileUpload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" />
-                        <span class="text-gray-400 font-light text-sm pointer-events-none">Click or Drag to Upload Image</span>
+                        <span class="text-slate-500 font-light text-sm pointer-events-none">Click or Drag to Upload Image</span>
                     </div>
 
                     <div v-else class="relative w-fit group">
-                        <img :src="imagePreview" alt="Preview" class="max-h-64 object-cover border border-gray-100 shadow-sm" />
+                        <img :src="imagePreview" alt="Preview" class="max-h-64 object-cover border border-white/10 shadow-sm rounded-lg" />
                         <button 
                             @click="removeImage"
                             class="absolute top-2 right-2 bg-black/70 text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-600 transition-colors"
@@ -303,21 +297,21 @@ onMounted(() => {
 
                 <!-- Options -->
                  <div class="flex items-center gap-2">
-                    <input type="checkbox" id="isPublic" v-model="form.is_public" class="accent-black w-4 h-4" />
-                    <label for="isPublic" class="text-sm text-gray-600 font-light cursor-pointer select-none">Public Post</label>
+                    <input type="checkbox" id="isPublic" v-model="form.is_public" class="accent-sky-500 w-4 h-4" />
+                    <label for="isPublic" class="text-sm text-slate-400 font-light cursor-pointer select-none">Public Post</label>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end gap-4 pt-4 border-t border-gray-50">
+                <div class="flex justify-end gap-4 pt-4 border-t border-white/10">
                     <button 
                         @click="cancel"
-                        class="px-6 py-2 border border-gray-200 text-gray-500 text-xs uppercase tracking-widest transition-all duration-300 hover:border-red-200 hover:text-red-600 hover:bg-red-50 hover:shadow-[0_0_15px_rgba(220,38,38,0.15)] hover:-translate-y-0.5 rounded-sm bg-white"
+                        class="px-6 py-2 border border-white/20 text-slate-400 text-xs uppercase tracking-widest transition-all duration-300 hover:border-red-400/50 hover:text-red-400 hover:bg-red-400/10 rounded-full bg-transparent"
                     >
                         Cancel
                     </button>
                     <button 
                         @click="savePost"
-                        class="px-6 py-2 bg-black text-white text-xs uppercase tracking-widest hover:bg-luxury-gold transition-colors rounded-sm"
+                        class="px-6 py-2 bg-sky-500/20 text-sky-400 border border-sky-400/50 text-xs uppercase tracking-widest hover:bg-sky-400 hover:text-white transition-all rounded-full shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.5)]"
                     >
                         {{ isEditMode ? 'Update Post' : 'Publish Post' }}
                     </button>

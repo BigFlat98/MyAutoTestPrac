@@ -66,13 +66,12 @@ const handleDeleteVideo = (deletedId) => {
     <!-- Header Area -->
     <!-- Header Area -->
     <div class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
-      <div>
-        <h1 class="text-4xl font-light tracking-tight mb-2">VIDEO COMMUNITY</h1>
-        <div class="w-16 h-px bg-luxury-gold mb-4"></div>
-        <p class="text-xs uppercase tracking-widest text-gray-500 font-medium">
+      <header class="glass-header slide-up text-left" style="animation-delay: 0.1s; display: block; text-align: left; padding: 20px 32px; border-radius: 20px;">
+        <h1 class="glass-title text-4xl mb-2">VIDEO COMMUNITY</h1>
+        <p class="glass-subtitle font-mono text-sm">
           Share your favorite moments
         </p>
-      </div>
+      </header>
       <button 
         @click="openModal"
         class="px-6 py-2 bg-black text-white text-xs uppercase tracking-widest hover:bg-luxury-gold transition-colors rounded-sm"

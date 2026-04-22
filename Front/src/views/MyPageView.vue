@@ -153,13 +153,12 @@ onMounted(async () => {
   <div class="max-w-5xl mx-auto py-12 px-6">
 
     <!-- Page Header -->
-    <div class="mb-12 text-left">
-      <h1 class="text-4xl font-light tracking-tight mb-2">MY PAGE</h1>
-      <div class="w-16 h-px mb-4" style="background-color: #C9A227;"></div>
-      <p class="text-xs uppercase tracking-widest text-gray-500 font-medium">
+    <header class="glass-header slide-up mb-12" style="animation-delay: 0.1s; display: block; text-align: left; padding: 20px 32px; border-radius: 20px;">
+      <h1 class="glass-title text-4xl mb-2">MY PAGE</h1>
+      <p class="glass-subtitle font-mono text-sm">
         Profile &amp; Activity
       </p>
-    </div>
+    </header>
 
     <!-- Profile Section -->
     <div class="border border-gray-100 shadow-sm mb-10">

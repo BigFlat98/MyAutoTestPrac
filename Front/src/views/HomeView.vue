@@ -11,11 +11,11 @@ import TreasuryYieldChart from '../components/dashboard/TreasuryYieldChart.vue'
 
 <template>
   <div class="w-full max-w-[1400px] mx-auto px-6 pb-20">
-    <header class="mb-12 text-left">
-      <h1 class="text-4xl font-light tracking-tight text-black mb-2">
+    <header class="glass-header slide-up mb-12" style="animation-delay: 0.2s; display: block; text-align: left; padding: 20px 32px; border-radius: 20px;">
+      <h1 class="glass-title text-4xl mb-2">
         Financial Overview
       </h1>
-      <p class="text-gray-500 font-mono text-sm">
+      <p class="glass-subtitle font-mono text-sm">
         Real-time market insights
       </p>
     </header>

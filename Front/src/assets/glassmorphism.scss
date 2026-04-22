@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+// --- SCSS Variables for Theme ---
+$bg-color-dark: #030712; // 최상단 배경색
+$text-primary: #f8fafc;
+$text-secondary: #94a3b8;
+$text-accent: #38bdf8;
+$accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
+
+// --- SCSS Mixins for Glassmorphism ---
+@mixin glass-panel($bg-alpha: 0.03, $blur: 12px) {
+  background: rgba(255, 255, 255, $bg-alpha);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+@mixin glass-hover($bg-alpha: 0.08) {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 255, 255, $bg-alpha);
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
+}
+
+// --- Global Layout Utilities ---
+.glass-page-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: 'Inter', 'Pretendard', sans-serif;
+  color: $text-primary;
+}
+
+// --- Premium Aurora Background ---
+.todesktop-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10; // 모든 컨텐츠 뒤로
+  background-color: $bg-color-dark; 
+  overflow: hidden;
+
+  // 1. 다이내믹 도트(점선) 패턴 (무한 슬라이딩 애니메이션 추가)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    z-index: 1;
+    animation: gridPan 30s linear infinite;
+  }
+
+  // 2. 비네팅(Vignette) 효과
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.85);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  // 3. 더 역동적인 유동적 오로라(Aurora) 모션
+  .orb {
+    position: absolute;
+    z-index: 0;
+    filter: blur(90px);
+    will-change: transform;
+  }
+
+  .orb-1 {
+    top: -10%;
+    left: -10%;
+    width: 60vw;
+    height: 50vw;
+    background: rgba(16, 185, 129, 0.25); // Emerald
+    border-radius: 40% 60% 60% 40% / 50% 40% 60% 50%;
+    animation: auroraDrift1 18s ease-in-out infinite;
+  }
+
+  .orb-2 {
+    bottom: -10%;
+    right: -10%;
+    width: 50vw;
+    height: 60vw;
+    background: rgba(14, 165, 233, 0.25); // Sky
+    border-radius: 60% 40% 50% 50% / 40% 60% 40% 60%;
+    animation: auroraDrift2 22s ease-in-out infinite;
+  }
+}
+
+// 오로라 유영 모션 1
+@keyframes auroraDrift1 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(12%, 18%) rotate(20deg) scale(1.15); }
+  66% { transform: translate(-8%, 10%) rotate(-10deg) scale(0.85); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+// 오로라 유영 모션 2
+@keyframes auroraDrift2 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(-15%, -12%) rotate(-20deg) scale(1.2); }
+  66% { transform: translate(10%, -15%) rotate(15deg) scale(0.9); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+// 배경 도트 무한 슬라이딩 애니메이션
+@keyframes gridPan {
+  0% { background-position: 0 0; }
+  100% { background-position: 36px 36px; } 
+}
+
+// --- Content Container ---
+.content-overlay {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100vh;
+  // padding은 각 레이아웃이나 NavBar 공간에 맞춰 조절 가능하도록 App.vue 단에서 통제 권장
+  box-sizing: border-box;
+}
+
+// --- Common UI Components ---
+.glass-header {
+  @include glass-panel(0.02, 12px); 
+  text-align: center;
+  padding: 24px 48px;
+  border-radius: 24px;
+  display: inline-block;
+  position: relative;
+  transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    @include glass-hover(0.06);
+    transform: translateY(-5px); 
+  }
+
+  h1, .glass-title {
+    margin: 0 0 8px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: $accent-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  p, .glass-subtitle {
+    margin: 0;
+    color: $text-secondary;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+.glass-card {
+  @include glass-panel();
+  padding: 28px;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.4s ease, border-color 0.4s ease;
+  will-change: transform, box-shadow; 
+
+  &:hover {
+    @include glass-hover();
+  }
+}
+
+// --- Global Animations ---
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.slide-up {
+  opacity: 0; 
+  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 1.2s ease-out forwards;
+}
