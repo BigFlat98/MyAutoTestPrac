@@ -160,18 +160,18 @@ const addReply = async (parentId) => {
     </div>
 
     <!-- Main Input Area -->
-    <div class="p-5 bg-white/5 border-t border-white/5">
-      <div class="relative group">
+    <div class="p-4 bg-white/5 border-t border-white/5 shrink-0">
+      <div class="flex gap-2 items-center bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 focus-within:border-sky-400/50 focus-within:ring-1 focus-within:ring-sky-400/20 transition-all">
         <input 
           v-model="newComment"
           @keyup.enter="addComment"
           type="text" 
           placeholder="Add a comment..."
-          class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/20 transition-all placeholder-slate-600"
+          class="flex-1 min-w-0 bg-transparent border-none px-1 py-2 text-sm text-white focus:outline-none placeholder-slate-600"
         />
         <button 
           @click="addComment"
-          class="absolute right-2 top-1.5 bottom-1.5 px-4 bg-sky-500/20 text-sky-400 text-[10px] font-bold uppercase tracking-widest hover:bg-sky-400 hover:text-white transition-all rounded-lg border border-sky-400/30"
+          class="shrink-0 px-4 py-2 bg-sky-500/20 text-sky-400 text-[10px] font-bold uppercase tracking-widest hover:bg-sky-400 hover:text-white transition-all rounded-lg border border-sky-400/30"
         >
           POST
         </button>

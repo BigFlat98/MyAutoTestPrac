@@ -181,36 +181,31 @@ const thumbnailUrl = computed(() => {
       </div>
 
       <!-- Content -->
-      <div class="flex-1 min-w-0 flex flex-col justify-center space-y-2">
-        <h3 class="text-lg font-light tracking-wide text-slate-200 group-hover:text-white transition-colors truncate pr-8">
+      <div class="flex-1 min-w-0 flex flex-col justify-center items-start text-left space-y-2">
+        <h3 class="text-base font-light tracking-wide text-slate-200 group-hover:text-white transition-colors truncate w-full text-left">
           {{ video.title }}
         </h3>
         
-        <div class="flex items-center flex-wrap gap-x-4 gap-y-2 text-[10px] text-slate-500 uppercase tracking-widest font-mono">
-             <div class="flex items-center space-x-3 bg-white/5 px-2 py-1 rounded-md border border-white/5">
-                 <span class="flex items-center space-x-1" :class="{'text-sky-400': isLiked}">
-                     <span class="text-xs">👍</span>
-                     <span>{{ video.like_count }}</span>
-                 </span>
-                 <span class="w-px h-2 bg-white/10"></span>
-                 <span class="flex items-center space-x-1" :class="{'text-rose-400': isHated}">
-                     <span class="text-xs">👎</span>
-                     <span>{{ video.hate_count }}</span>
-                 </span>
-             </div>
-
+        <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 uppercase tracking-widest font-mono">
+             <span class="flex items-center gap-1" :class="{'text-sky-400': isLiked}">
+                 <span class="text-xs">👍</span>{{ video.like_count }}
+             </span>
+             <span class="flex items-center gap-1" :class="{'text-rose-400': isHated}">
+                 <span class="text-xs">👎</span>{{ video.hate_count }}
+             </span>
+             <span class="w-px h-2 bg-white/10"></span>
              <span class="text-slate-300 font-medium tracking-normal text-xs">{{ video.author }}</span> 
              <span class="text-slate-600 hidden sm:block">•</span> 
              <span class="hidden sm:block">{{ new Date(video.created_at).toLocaleDateString() }}</span>
              <span class="text-slate-600 hidden sm:block">•</span> 
-             <span>{{ video.view_count }} VIEWS</span>
+             <span>{{ video.view_count }} views</span>
              
              <button 
                 v-if="canDelete"
                 @click.stop="deleteVideo"
-                class="ml-2 text-[9px] text-slate-500 hover:text-rose-400 underline underline-offset-4 transition-colors"
+                class="ml-1 px-2 py-0.5 text-[9px] text-rose-400/70 uppercase tracking-widest hover:bg-rose-400/10 hover:text-rose-400 transition-all border border-rose-400/20 hover:border-rose-400/50 rounded-full"
              >
-                DELETE
+                Delete
              </button>
         </div>
       </div>
@@ -298,9 +293,9 @@ const thumbnailUrl = computed(() => {
                   
                   <button 
                     @click="reportVideo"
-                    class="text-[10px] text-slate-600 hover:text-rose-400 uppercase tracking-[0.2em] transition-colors"
+                    class="px-3 py-1 text-[10px] text-slate-500 uppercase tracking-widest hover:bg-rose-400/10 hover:text-rose-400 transition-all border border-white/10 hover:border-rose-400/30 rounded-full"
                   >
-                    Report Video
+                    Report
                   </button>
               </div>
             </div>
