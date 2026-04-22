@@ -42,6 +42,10 @@ export const useAuthStore = defineStore('auth', {
                 await api.post('/auth/logout');
             } catch (error) {
                 console.error('Logout error', error);
+            } finally {
+                this.user = null;
+                this.isAuthenticated = false;
+                this.isAuthChecked = false;
             }
         },
         async checkAuth() {

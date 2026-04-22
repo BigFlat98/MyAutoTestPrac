@@ -15,7 +15,7 @@
         <div class="mb-4 p-3 border border-amber-300 bg-amber-50 text-xs text-amber-800 font-light leading-relaxed">
           이 사이트는 개인적으로 쓰고 싶은 기능 구현 연습을 위한 사이트입니다.<br>
           보안이 취약한 부분이 있을 수 있기 때문에 가입 시 평소에 사용하던 비밀번호는 되도록 <span class="font-medium">지양</span>해 주시기 바랍니다.<br>
-          해킹에 대한 문제 발생은 운영자와 관련이 없음을 알립니다.ㅋㅋ
+          해킹에 대한 문제 발생은 운영자와 관련이 없음을 알립니다.
         </div>
 
         <div class="mb-4">
