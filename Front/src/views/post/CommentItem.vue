@@ -44,7 +44,7 @@ const hasReplies = computed(() => props.comment.replies && props.comment.replies
                          <span class="text-[10px] text-slate-400 font-mono">{{ formatDate(comment.created_at) }}</span>
                          <button 
                             @click="$emit('reply', comment.id)"
-                            class="px-2.5 py-0.5 border border-sky-400/30 text-sky-400/70 hover:bg-sky-400/10 hover:text-sky-400 hover:border-sky-400/50 transition-all text-[9px] uppercase tracking-widest leading-none rounded-full"
+                            class="px-1.5 py-px bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
                         >
                             Reply
                         </button>
@@ -59,14 +59,14 @@ const hasReplies = computed(() => props.comment.replies && props.comment.replies
                         <button 
                             v-if="comment.author === authStore.user.nick_name || comment.user_id === authStore.user.id"
                             @click="$emit('modify', comment.id)"
-                            class="px-2.5 py-0.5 text-sky-400/70 hover:bg-sky-400/10 hover:text-sky-400 transition-all text-[9px] uppercase tracking-widest leading-none rounded-full border border-sky-400/20 hover:border-sky-400/50"
+                            class="px-1.5 py-px bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
                         >
                             Modify
                         </button>
                         <button 
                             v-if="comment.author === authStore.user.nick_name || comment.user_id === authStore.user.id || authStore.user.check_admin"
                             @click="$emit('delete', comment.id)"
-                            class="px-2.5 py-0.5 text-[9px] text-rose-400/70 uppercase tracking-widest leading-none hover:bg-rose-400/10 hover:text-rose-400 transition-all border border-rose-400/20 hover:border-rose-400/50 rounded-full"
+                            class="px-1.5 py-px bg-rose-500 text-white hover:bg-transparent hover:text-rose-400 border border-rose-500 hover:border-rose-400 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
                         >
                             Delete
                         </button>
