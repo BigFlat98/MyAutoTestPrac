@@ -110,20 +110,20 @@ const canDelete = computed(() => {
 const embedUrl = computed(() => {
   if (!props.video || !props.video.url) return '';
   if (props.video.video_key) {
-    return `https://www.youtube.com/embed/${props.video.video_key}`;
+    return `https://www.youtube-nocookie.com/embed/${props.video.video_key}`;
   }
   if (props.video.videoId) {
-    return `https://www.youtube.com/embed/${props.video.videoId}`;
+    return `https://www.youtube-nocookie.com/embed/${props.video.videoId}`;
   }
   // Fallback simple parsing if videoId not provided
   try {
     const url = new URL(props.video.url);
     const v = url.searchParams.get('v');
-    if (v) return `https://www.youtube.com/embed/${v}`;
+    if (v) return `https://www.youtube-nocookie.com/embed/${v}`;
     if (url.pathname.startsWith('/shorts/')) {
-        return `https://www.youtube.com/embed/${url.pathname.split('/shorts/')[1]}`;
+        return `https://www.youtube-nocookie.com/embed/${url.pathname.split('/shorts/')[1]}`;
     }
-    if (url.hostname.includes('youtu.be')) return `https://www.youtube.com/embed${url.pathname}`;
+    if (url.hostname.includes('youtu.be')) return `https://www.youtube-nocookie.com/embed${url.pathname}`;
   } catch (e) {
     return '';
   }

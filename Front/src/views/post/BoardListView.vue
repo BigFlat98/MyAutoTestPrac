@@ -48,7 +48,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="max-w-6xl mx-auto py-12 px-6">
+    <div class="max-w-[1400px] mx-auto py-12 px-6">
         <!-- Header -->
         <div class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
             <header class="glass-header slide-up text-left" style="animation-delay: 0.1s; padding: 20px 32px; border-radius: 20px;">

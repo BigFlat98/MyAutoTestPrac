@@ -149,7 +149,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="max-w-5xl mx-auto py-12 px-6">
+    <div class="max-w-[1400px] mx-auto py-12 px-6">
         
         <!-- Navigation -->
         <button 
