@@ -186,14 +186,14 @@ onMounted(() => {
                              <button 
                                 v-if="post.author === authStore.user.nick_name || post.author_id === authStore.user.id" 
                                 @click="editPost" 
-                                class="px-4 py-2 bg-sky-500/20 text-sky-400 text-xs uppercase tracking-widest hover:bg-sky-400 hover:text-white border border-sky-400/50 transition-colors rounded-full"
+                                class="px-3 py-1 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] uppercase tracking-widest leading-none rounded-full"
                             >
                                 Edit
                             </button>
                              <button 
                                 v-if="post.author === authStore.user.nick_name || post.author_id === authStore.user.id || authStore.user.check_admin"
                                 @click="deletePost" 
-                                class="px-4 py-2 text-xs text-red-400 uppercase tracking-widest hover:bg-red-400/10 transition-colors border border-transparent hover:border-red-400/50 rounded-full"
+                                class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-slate-900 transition-all text-[10px] uppercase tracking-widest leading-none rounded-full"
                             >
                                 Delete
                             </button>
@@ -240,7 +240,7 @@ onMounted(() => {
                         <div class="flex justify-end">
                             <button 
                                 @click="submitComment"
-                                class="px-4 py-1.5 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] uppercase tracking-wider rounded"
+                                class="px-4 py-1.5 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] uppercase tracking-widest leading-none rounded-full"
                             >
                                 Post Comment
                             </button>

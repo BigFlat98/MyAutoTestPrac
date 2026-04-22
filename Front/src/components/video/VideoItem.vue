@@ -203,7 +203,7 @@ const thumbnailUrl = computed(() => {
              <button 
                 v-if="canDelete"
                 @click.stop="deleteVideo"
-                class="ml-1 px-1.5 py-px bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-slate-900 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
+                class="ml-1 px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-slate-900 transition-all text-[10px] uppercase tracking-widest leading-none rounded-full"
              >
                 Delete
              </button>
@@ -293,7 +293,7 @@ const thumbnailUrl = computed(() => {
                   
                   <button 
                     @click="reportVideo"
-                    class="px-1.5 py-px bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-slate-900 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
+                    class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-slate-900 transition-all text-[10px] uppercase tracking-widest leading-none rounded-full"
                   >
                     Report
                   </button>
