@@ -6,6 +6,7 @@ import ExchangeRateChart from '../components/dashboard/ExchangeRateChart.vue'
 import BitcoinChart from '../components/dashboard/BitcoinChart.vue'
 import GoldChart from '../components/dashboard/GoldChart.vue'
 import OilChart from '../components/dashboard/OilChart.vue'
+import TreasuryYieldChart from '../components/dashboard/TreasuryYieldChart.vue'
 </script>
 
 <template>
@@ -43,6 +44,7 @@ import OilChart from '../components/dashboard/OilChart.vue'
       <!-- Crypto Row -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[460px]">
         <BitcoinChart />
+        <TreasuryYieldChart />
       </div>
       
     </div>

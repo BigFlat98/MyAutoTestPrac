@@ -64,6 +64,20 @@ class InterestRateService:
             print(f"Failed to fetch US Data: {e}")
             return pd.DataFrame()
 
+    def get_treasury_yield(self):
+        """미 국채 10년물 수익률 (FRED - DGS10)"""
+        if not self.fred:
+            print("ERROR: Fred instance is None")
+            return pd.DataFrame()
+
+        try:
+            series = self.fred.get_series('DGS10', observation_start=datetime.now() - timedelta(days=365*6))
+            df = pd.DataFrame({'date': series.index, 'yield_rate': series.values})
+            return df
+        except Exception as e:
+            print(f"Failed to fetch Treasury Yield: {e}")
+            return pd.DataFrame()
+
     def get_comparison_data(self):
         # 1. 데이터 가져오기
         kr_df = self.get_korea_rate()
@@ -103,4 +117,22 @@ async def get_comparison_data_from_db():
         "dates": [r["trade_date"].strftime("%Y-%m-%d") for r in rows],
         "kr":    [float(r["kr_rate"]) for r in rows],
         "us":    [float(r["us_rate"]) for r in rows]
+    }
+
+async def get_treasury_yield_from_db():
+    """DB에 저장된 미 국채 10년물 수익률 시계열을 반환합니다."""
+    from database import db
+
+    async with db.pool.acquire() as conn:
+        rows = await conn.fetch(
+            """SELECT trade_date, yield_rate
+               FROM market_treasury_yield
+               WHERE yield_rate IS NOT NULL
+               ORDER BY trade_date"""
+        )
+    if not rows:
+        return None
+    return {
+        "dates": [r["trade_date"].strftime("%Y-%m-%d") for r in rows],
+        "yields": [float(r["yield_rate"]) for r in rows]
     }

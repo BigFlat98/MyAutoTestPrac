@@ -209,6 +209,14 @@ class Database:
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
 
+                    /* 미 국채 10년물 수익률 (DGS10) - trade_date UNIQUE, UPSERT로 중복 방지 */
+                    CREATE TABLE IF NOT EXISTS market_treasury_yield (
+                        id SERIAL PRIMARY KEY,
+                        trade_date DATE UNIQUE NOT NULL,
+                        yield_rate NUMERIC(5,2),
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+
                     /* 암호화폐 현재가 스냅샷 - 수집할 때마다 INSERT, 조회 시 coin별 최신 1건 사용 */
                     CREATE TABLE IF NOT EXISTS market_crypto_price (
                         id SERIAL PRIMARY KEY,

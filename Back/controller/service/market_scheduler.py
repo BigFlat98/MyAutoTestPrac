@@ -161,6 +161,41 @@ async def fetch_and_save_interest_rate():
 
 
 # ──────────────────────────────────────────
+# 미 국채 10년물 수익률 (DGS10)
+# ──────────────────────────────────────────
+async def fetch_and_save_treasury_yield():
+    print("[Scheduler] Fetching Treasury Yield...")
+    try:
+        service = InterestRateService()
+        df = await asyncio.get_event_loop().run_in_executor(
+            None, service.get_treasury_yield
+        )
+        if df is None or df.empty:
+            print("[Scheduler][WARN] Treasury Yield: no data")
+            return
+
+        # 결측치(NaN)가 포함된 날짜 제외
+        df = df.dropna()
+
+        async with db.pool.acquire() as conn:
+            for _, row in df.iterrows():
+                trade_dt = row['date']
+                val = float(row['yield_rate'])
+                await conn.execute(
+                    """INSERT INTO market_treasury_yield (trade_date, yield_rate)
+                       VALUES ($1, $2)
+                       ON CONFLICT (trade_date) DO UPDATE
+                       SET yield_rate = EXCLUDED.yield_rate,
+                           updated_at = CURRENT_TIMESTAMP""",
+                    trade_dt.date(),
+                    val
+                )
+        print(f"[Scheduler] Treasury Yield saved: {len(df)} rows")
+    except Exception as e:
+        print(f"[Scheduler][ERROR] Treasury Yield: {e}")
+
+
+# ──────────────────────────────────────────
 # 암호화폐 (BTC / ETH / XRP)
 # ──────────────────────────────────────────
 async def fetch_and_save_crypto():
@@ -394,6 +429,7 @@ def setup_scheduler():
     scheduler.add_job(fetch_and_save_stocks,       "interval", minutes=10, id="stocks",        next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_exchange_rate,"interval", hours=1,    id="exchange_rate", next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_interest_rate,"interval", hours=24,   id="interest_rate", next_run_time=now, replace_existing=True)
+    scheduler.add_job(fetch_and_save_treasury_yield,"interval", hours=24,  id="treasury_yield",next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_crypto,       "interval", minutes=5,  id="crypto",        next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_gold,         "interval", hours=1,    id="gold",          next_run_time=now, replace_existing=True)
     scheduler.add_job(fetch_and_save_oil,          "interval", minutes=10, id="oil",           next_run_time=now, replace_existing=True)
