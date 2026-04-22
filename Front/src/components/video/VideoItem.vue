@@ -106,17 +106,47 @@ const canDelete = computed(() => {
     return authStore.user.id === props.video.uploader_id || authStore.user.check_admin;
 });
 
+// Helper to get embed URL from youtube link or ID
 const embedUrl = computed(() => {
   if (!props.video || !props.video.url) return '';
   if (props.video.video_key) {
-    return `https://www.youtube.com/embed/${props.video.video_key}?autoplay=0&rel=0&modestbranding=1`;
+    return `https://www.youtube.com/embed/${props.video.video_key}`;
+  }
+  if (props.video.videoId) {
+    return `https://www.youtube.com/embed/${props.video.videoId}`;
+  }
+  // Fallback simple parsing if videoId not provided
+  try {
+    const url = new URL(props.video.url);
+    const v = url.searchParams.get('v');
+    if (v) return `https://www.youtube.com/embed/${v}`;
+    if (url.pathname.startsWith('/shorts/')) {
+        return `https://www.youtube.com/embed/${url.pathname.split('/shorts/')[1]}`;
+    }
+    if (url.hostname.includes('youtu.be')) return `https://www.youtube.com/embed${url.pathname}`;
+  } catch (e) {
+    return '';
   }
   return '';
 });
 
 const thumbnailUrl = computed(() => {
   if (!props.video) return '';
-  let videoId = props.video.video_key;
+  let videoId = props.video.video_key || props.video.videoId;
+  if (!videoId) {
+      try {
+        if (!props.video.url) return '';
+        const url = new URL(props.video.url);
+        videoId = url.searchParams.get('v');
+        if (!videoId && url.pathname.startsWith('/shorts/')) {
+            videoId = url.pathname.split('/shorts/')[1];
+        }
+        if (!videoId && url.hostname.includes('youtu.be')) {
+            videoId = url.pathname.slice(1);
+        }
+      } catch (e) {}
+  }
+  
   if (videoId) {
     return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
   }
@@ -216,9 +246,11 @@ const thumbnailUrl = computed(() => {
                 v-if="embedUrl"
                 class="w-full h-full"
                 :src="embedUrl" 
+                title="YouTube video player"
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"
               ></iframe>
               <div v-else class="w-full h-full flex items-center justify-center text-slate-500 font-mono text-xs uppercase tracking-widest">
                 Video Unavailable

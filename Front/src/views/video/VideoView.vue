@@ -62,8 +62,7 @@ const handleDeleteVideo = (deletedId) => {
 </script>
 
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-5xl">
-    <!-- Header Area -->
+  <div class="w-full max-w-[1400px] mx-auto px-6 py-12">
     <!-- Header Area -->
     <div class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
       <header class="glass-header slide-up text-left" style="animation-delay: 0.1s; display: block; text-align: left; padding: 20px 32px; border-radius: 20px;">
@@ -74,7 +73,7 @@ const handleDeleteVideo = (deletedId) => {
       </header>
       <button 
         @click="openModal"
-        class="px-6 py-2 bg-black text-white text-xs uppercase tracking-widest hover:bg-luxury-gold transition-colors rounded-sm"
+        class="px-6 py-2 bg-sky-500/20 text-sky-400 text-xs uppercase tracking-widest border border-sky-400/50 hover:bg-sky-400 hover:text-white hover:border-sky-400 transition-all rounded-full shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.6)]"
       >
         REGISTER VIDEO
       </button>
@@ -84,11 +83,11 @@ const handleDeleteVideo = (deletedId) => {
     <VideoList :videos="videos" @delete="handleDeleteVideo" />
 
     <!-- Pagination -->
-    <div class="mt-8 flex justify-center gap-2" v-if="totalPages > 1">
+    <div class="mt-8 flex justify-center gap-2 slide-up" style="animation-delay: 0.3s;" v-if="totalPages > 1">
         <button 
             @click="changePage(currentPage - 1)" 
             :disabled="currentPage === 1"
-            class="w-10 h-10 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)] hover:bg-white transition-all duration-300 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-400 disabled:hover:shadow-none bg-white"
+            class="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center text-slate-400 bg-transparent hover:border-sky-400 hover:text-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.3)] transition-all disabled:opacity-30 disabled:hover:border-white/20 disabled:hover:text-slate-400 disabled:hover:shadow-none"
         >
             &lt;
         </button>
@@ -97,8 +96,8 @@ const handleDeleteVideo = (deletedId) => {
             v-for="page in totalPages" 
             :key="page"
             @click="changePage(page)"
-            :class="currentPage === page ? 'bg-black text-white border-black shadow-sm' : 'text-gray-600 border-gray-200 bg-white hover:bg-white hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)]'"
-            class="w-10 h-10 border flex items-center justify-center text-sm font-light transition-all duration-300"
+            :class="currentPage === page ? 'bg-sky-500/20 text-sky-400 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.3)]' : 'text-slate-400 border-white/20 bg-transparent hover:border-sky-400 hover:text-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.3)]'"
+            class="w-10 h-10 border rounded-full flex items-center justify-center text-sm font-light transition-all"
         >
             {{ page }}
         </button>
@@ -106,7 +105,7 @@ const handleDeleteVideo = (deletedId) => {
         <button 
             @click="changePage(currentPage + 1)" 
             :disabled="currentPage === totalPages"
-            class="w-10 h-10 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-sky-300 hover:text-sky-300 hover:shadow-[0_0_8px_rgba(186,230,253,0.5)] hover:bg-white transition-all duration-300 disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-400 disabled:hover:shadow-none bg-white"
+            class="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center text-slate-400 bg-transparent hover:border-sky-400 hover:text-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.3)] transition-all disabled:opacity-30 disabled:hover:border-white/20 disabled:hover:text-slate-400 disabled:hover:shadow-none"
         >
             &gt;
         </button>
