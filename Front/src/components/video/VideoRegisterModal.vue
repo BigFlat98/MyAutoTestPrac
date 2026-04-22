@@ -30,7 +30,6 @@ const validateUrl = () => {
         urlError.value = '';
         return true;
     }
-    // Simple regex for YouTube URLs (includes youtube.com, youtu.be, embed, watch)
     const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
     if (!pattern.test(url.value)) {
         urlError.value = '올바른 YouTube URL 형식이 아닙니다.';
@@ -74,88 +73,93 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
     <!-- Backdrop -->
     <div 
-      class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300"
       @click="$emit('close')"
     ></div>
 
     <!-- Modal Content -->
-    <div class="relative bg-white w-full max-w-lg shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div class="relative w-full max-w-xl glass-card overflow-hidden slide-up" style="animation-delay: 0s;">
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-        <h3 class="text-lg font-bold tracking-tight">VIDEO REGISTRATION</h3>
-        <button @click="$emit('close')" class="text-gray-400 hover:text-black">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      <div class="px-8 py-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+        <div>
+            <h3 class="text-xl font-light text-white tracking-tight">Register Video</h3>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Share your content with community</p>
+        </div>
+        <button @click="$emit('close')" class="text-slate-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
       <!-- Body -->
       <div class="p-8 space-y-6">
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">YouTube URL</label>
-          <input 
-            v-model="url"
-            @blur="validateUrl"
-            type="text" 
-            placeholder="paste your youtube link here..."
-            class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none placeholder-gray-300 bg-transparent"
-            :class="{'border-red-500': urlError}"
-          />
-          <p v-if="urlError" class="text-xs text-red-500 mt-1">{{ urlError }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="block text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase px-1">YouTube URL</label>
+              <input 
+                v-model="url"
+                @blur="validateUrl"
+                type="text" 
+                placeholder="https://youtube.com/..."
+                class="w-full h-12 bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/20 transition-all rounded-xl placeholder-slate-600"
+                :class="{'border-rose-400/50': urlError}"
+              />
+              <p v-if="urlError" class="text-[10px] text-rose-400 px-1">{{ urlError }}</p>
+            </div>
+            
+            <div class="space-y-2">
+               <label class="block text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase px-1">Category / Tag</label>
+               <div class="relative">
+                   <select 
+                    v-model="tag_id"
+                    class="w-full h-12 bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/20 transition-all rounded-xl cursor-pointer appearance-none"
+                   >
+                       <option value="" disabled class="bg-slate-900">Select a tag</option>
+                       <option v-for="tag in tags" :key="tag.id" :value="tag.id" class="bg-slate-900">
+                           {{ tag.name }}
+                       </option>
+                   </select>
+                   <div class="absolute right-4 top-0 h-full flex items-center pointer-events-none text-slate-500">
+                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                   </div>
+               </div>
+            </div>
         </div>
-        
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">Title</label>
+
+        <div class="space-y-2">
+          <label class="block text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase px-1">Display Title</label>
           <input 
             v-model="title"
             type="text" 
-            placeholder="enter video title..."
-            class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none placeholder-gray-300 bg-transparent"
+            placeholder="Give your video a catchy title"
+            class="w-full h-12 bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/20 transition-all rounded-xl placeholder-slate-600"
           />
         </div>
 
-        <div>
-           <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">Tag</label>
-           <div class="relative">
-               <select 
-                v-model="tag_id"
-                class="w-full h-12 border-b border-gray-200 px-0 text-sm focus:outline-none focus:border-luxury-gold transition-colors rounded-none bg-transparent appearance-none cursor-pointer"
-               >
-                   <option value="" disabled selected>Select a tag</option>
-                   <option v-for="tag in tags" :key="tag.id" :value="tag.id">
-                       {{ tag.name }}
-                   </option>
-               </select>
-               <div class="absolute right-0 top-0 h-full flex items-center pointer-events-none text-gray-400">
-                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-               </div>
-           </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 mb-2 tracking-widest uppercase">Description</label>
+        <div class="space-y-2">
+          <label class="block text-[10px] font-bold text-slate-500 tracking-[0.15em] uppercase px-1">Description</label>
           <textarea 
             v-model="description"
             rows="4"
-            placeholder="tell us about this video..."
-            class="w-full border border-gray-200 p-4 text-sm focus:outline-none focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold transition-all rounded-none resize-none placeholder-gray-300 bg-gray-50/30"
+            placeholder="Tell us about this video..."
+            class="w-full bg-white/5 border border-white/10 p-4 text-sm text-white focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/20 transition-all rounded-xl resize-none placeholder-slate-600 custom-scrollbar"
           ></textarea>
         </div>
       </div>
 
       <!-- Footer -->
-      <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-0">
+      <div class="px-8 py-6 border-t border-white/10 bg-white/5 flex justify-end gap-3">
         <button 
           @click="$emit('close')"
-          class="px-8 h-12 border border-gray-200 bg-white text-gray-500 hover:text-black hover:border-gray-400 transition-colors text-xs tracking-[0.2em] font-medium border-r-0"
+          class="px-6 h-12 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs tracking-widest font-medium rounded-xl border border-white/5"
         >
           CANCEL
         </button>
         <button 
           @click="handleSubmit"
-          class="px-8 h-12 bg-black text-white hover:bg-luxury-gold transition-colors text-xs tracking-[0.2em] font-medium"
+          class="px-8 h-12 bg-sky-500/20 text-sky-400 hover:bg-sky-400 hover:text-white transition-all text-xs tracking-widest font-bold rounded-xl border border-sky-400/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]"
         >
           REGISTER
         </button>
@@ -163,3 +167,16 @@ const handleSubmit = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+</style>

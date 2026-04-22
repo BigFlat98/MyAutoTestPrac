@@ -1,25 +1,52 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-white">
-    <div class="w-full max-w-sm bg-white border border-black rounded-none p-6 md:p-8 shadow-lg">
-      <h2 class="text-2xl font-light uppercase tracking-widest text-center mb-6" style="color: #996515;">Login</h2>
-      <form @submit.prevent="handleLogin">
-        <div class="mb-4">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="login_id">Login ID</label>
-          <input v-model="loginId" id="login_id" type="text" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
+  <div class="flex items-center justify-center min-h-[calc(100vh-160px)]">
+    <div class="w-full max-w-md glass-card p-8 md:p-10 slide-up" style="animation-delay: 0.1s;">
+      <h2 class="glass-title text-3xl text-center mb-8">Login</h2>
+      
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="login_id">Login ID</label>
+          <input 
+            v-model="loginId" 
+            id="login_id" 
+            type="text" 
+            required 
+            placeholder="Enter your ID"
+            class="w-full h-[3.2rem] bg-white/5 border border-white/10 px-4 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-all font-light text-white placeholder-slate-500 rounded-lg" 
+          />
         </div>
-        <div class="mb-6">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="login_pw">Password</label>
-          <input v-model="loginPw" id="login_pw" type="password" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
+        
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="login_pw">Password</label>
+          <input 
+            v-model="loginPw" 
+            id="login_pw" 
+            type="password" 
+            required 
+            placeholder="Enter your password"
+            class="w-full h-[3.2rem] bg-white/5 border border-white/10 px-4 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-all font-light text-white placeholder-slate-500 rounded-lg" 
+          />
         </div>
-        <div v-if="errorMsg" class="text-red-600 text-sm mb-4">{{ errorMsg }}</div>
-        <button type="submit" class="w-full h-input bg-[#996515] hover:bg-[#b8860b] text-white font-light uppercase tracking-widest transition-colors duration-200">
+
+        <div v-if="errorMsg" class="text-red-400 text-xs bg-red-400/10 border border-red-400/20 p-3 rounded-lg flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{ errorMsg }}
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full h-[3.2rem] bg-sky-500/20 text-sky-400 text-xs uppercase tracking-widest hover:bg-sky-400 hover:text-white transition-all duration-300 border border-sky-400/50 rounded-lg shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.6)]"
+        >
           Sign In
         </button>
       </form>
-      <div class="mt-4 text-center">
-         <p class="text-sm">
+
+      <div class="mt-8 text-center border-t border-white/10 pt-6">
+         <p class="text-sm text-slate-400 font-light">
            Don't have an account? 
-           <router-link to="/signup" class="text-[#996515] hover:underline">Sign up</router-link>
+           <router-link to="/signup" class="text-sky-400 hover:text-sky-300 transition-colors ml-1 font-medium">Sign up</router-link>
          </p>
       </div>
     </div>
@@ -49,8 +76,4 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-/* Height utility matching design system (3.2rem) */
-.h-input {
-  height: 3.2rem;
-}
 </style>

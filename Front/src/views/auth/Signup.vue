@@ -1,74 +1,112 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-white">
-    <div class="w-full max-w-sm bg-white border border-black rounded-none p-6 md:p-8 shadow-lg">
-      <h2 class="text-2xl font-light uppercase tracking-widest text-center mb-6" style="color: #996515;">Sign Up</h2>
-      <form @submit.prevent="handleSignup">
-        <div class="mb-4">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="login_id">Login ID</label>
-          <input v-model="loginId" id="login_id" type="text" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
+  <div class="flex items-center justify-center min-h-[calc(100vh-160px)] py-12">
+    <div class="w-full max-w-md glass-card p-8 md:p-10 slide-up" style="animation-delay: 0.1s;">
+      <h2 class="glass-title text-3xl text-center mb-8">Sign Up</h2>
+      
+      <form @submit.prevent="handleSignup" class="space-y-5">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="login_id">Login ID</label>
+          <input 
+            v-model="loginId" 
+            id="login_id" 
+            type="text" 
+            required 
+            placeholder="Choose an ID"
+            class="w-full h-[3.2rem] bg-white/5 border border-white/10 px-4 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-all font-light text-white placeholder-slate-500 rounded-lg" 
+          />
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="nick_name">Nickname</label>
-          <input v-model="nickName" id="nick_name" type="text" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" />
-        </div>
-        <!-- 보안 공지 -->
-        <div class="mb-4 p-3 border border-amber-300 bg-amber-50 text-xs text-amber-800 font-light leading-relaxed">
-          이 사이트는 개인적으로 쓰고 싶은 기능 구현 연습을 위한 사이트입니다.<br>
-          보안이 취약한 부분이 있을 수 있기 때문에 가입 시 평소에 사용하던 비밀번호는 되도록 <span class="font-medium">지양</span>해 주시기 바랍니다.<br>
-          해킹에 대한 문제 발생은 운영자와 관련이 없음을 알립니다.
+        
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="nick_name">Nickname</label>
+          <input 
+            v-model="nickName" 
+            id="nick_name" 
+            type="text" 
+            required 
+            placeholder="Your nickname"
+            class="w-full h-[3.2rem] bg-white/5 border border-white/10 px-4 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-all font-light text-white placeholder-slate-500 rounded-lg" 
+          />
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="login_pw">Password</label>
-          <input v-model="loginPw" id="login_pw" type="password" required class="w-full h-input border border-black rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#996515]" placeholder="At least 8 characters" />
+        <!-- 보안 공지 -->
+        <div class="p-4 bg-amber-400/5 border border-amber-400/20 rounded-lg text-[11px] text-amber-200/70 font-light leading-relaxed">
+          <div class="flex items-center gap-2 mb-2 text-amber-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span class="font-medium uppercase tracking-widest">Security Notice</span>
+          </div>
+          이 사이트는 개인적 기능 구현 연습을 위한 공간입니다.<br>
+          가급적 평소 사용하시던 비밀번호는 <span class="text-amber-400 font-medium">사용하지 말아주시기</span> 바랍니다.<br>
+          해킹 등 문제 발생 시 운영자는 책임을 지지 않습니다.
         </div>
-        <div class="mb-5">
-          <label class="block text-sm font-light uppercase tracking-widest mb-1" for="confirm_pw">Confirm Password</label>
+
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="login_pw">Password</label>
+          <input 
+            v-model="loginPw" 
+            id="login_pw" 
+            type="password" 
+            required 
+            placeholder="At least 8 characters"
+            class="w-full h-[3.2rem] bg-white/5 border border-white/10 px-4 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition-all font-light text-white placeholder-slate-500 rounded-lg" 
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-400 mb-2" for="confirm_pw">Confirm Password</label>
           <input 
             v-model="confirmPw" 
             id="confirm_pw" 
             type="password" 
             required 
-            class="w-full h-input border rounded-none px-3 py-2 focus:outline-none focus:ring-2 transition-colors duration-200" 
+            placeholder="Repeat password"
+            class="w-full h-[3.2rem] bg-white/5 border px-4 focus:outline-none focus:ring-1 transition-all font-light text-white rounded-lg" 
             :class="{
-                'border-black focus:ring-[#996515]': !confirmPw,
-                'border-red-500 focus:ring-red-500 text-red-600': isPwMismatch,
-                'border-green-500 focus:ring-green-500 text-green-600': isPwMatch
+                'border-white/10 focus:border-sky-400 focus:ring-sky-400': !confirmPw,
+                'border-red-400 focus:border-red-400 focus:ring-red-400': isPwMismatch,
+                'border-emerald-400 focus:border-emerald-400 focus:ring-emerald-400': isPwMatch
             }"
           />
-          <p v-if="isPwMismatch" class="text-xs text-red-500 mt-1 font-light">Passwords do not match.</p>
-          <p v-if="isPwMatch" class="text-xs text-green-600 mt-1 font-light">Passwords match.</p>
+          <p v-if="isPwMismatch" class="text-[10px] text-red-400 mt-1 font-light tracking-wide">Passwords do not match.</p>
+          <p v-if="isPwMatch" class="text-[10px] text-emerald-400 mt-1 font-light tracking-wide">Passwords match.</p>
         </div>
 
         <!-- 동의 체크박스 -->
-        <div class="mb-5 flex items-start gap-2">
-          <input
-            v-model="agreed"
-            id="agree"
-            type="checkbox"
-            class="mt-0.5 w-4 h-4 accent-[#996515] cursor-pointer shrink-0"
-          />
-          <label for="agree" class="text-xs text-gray-500 font-light leading-relaxed cursor-pointer">
-            위 공지 사항을 확인하였으며 이에 동의합니다.
+        <div class="flex items-start gap-3 py-2">
+          <div class="relative flex items-center">
+            <input
+              v-model="agreed"
+              id="agree"
+              type="checkbox"
+              class="w-4 h-4 rounded border-white/10 bg-white/5 text-sky-400 focus:ring-sky-400 focus:ring-offset-0 transition-all cursor-pointer accent-sky-400"
+            />
+          </div>
+          <label for="agree" class="text-[11px] text-slate-400 font-light leading-relaxed cursor-pointer select-none">
+            위 보안 공지 사항을 확인하였으며 이에 동의합니다.
           </label>
         </div>
 
-        <div v-if="errorMsg" class="text-red-600 text-sm mb-4">{{ errorMsg }}</div>
+        <div v-if="errorMsg" class="text-red-400 text-xs bg-red-400/10 border border-red-400/20 p-3 rounded-lg flex items-center gap-2">
+          {{ errorMsg }}
+        </div>
+
         <button
           type="submit"
           :disabled="!agreed"
-          class="w-full h-input text-white font-light uppercase tracking-widest transition-colors duration-200"
+          class="w-full h-[3.2rem] text-xs uppercase tracking-widest transition-all duration-300 border rounded-lg"
           :class="agreed
-            ? 'bg-[#996515] hover:bg-[#b8860b] cursor-pointer'
-            : 'bg-gray-300 text-gray-400 cursor-not-allowed'"
+            ? 'bg-sky-500/20 text-sky-400 border-sky-400/50 hover:bg-sky-400 hover:text-white shadow-[0_0_15px_rgba(56,189,248,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.6)] cursor-pointer'
+            : 'bg-white/5 text-slate-500 border-white/5 cursor-not-allowed'"
         >
           Create Account
         </button>
       </form>
-      <div class="mt-4 text-center">
-        <p class="text-sm">
+
+      <div class="mt-8 text-center border-t border-white/10 pt-6">
+        <p class="text-sm text-slate-400 font-light">
           Already have an account? 
-          <router-link to="/login" class="text-[#996515] hover:underline">Log in</router-link>
+          <router-link to="/login" class="text-sky-400 hover:text-sky-300 transition-colors ml-1 font-medium">Log in</router-link>
         </p>
       </div>
     </div>
@@ -89,7 +127,6 @@ const confirmPw = ref('');
 const errorMsg = ref('');
 const agreed = ref(false);
 
-// Computed properties for validation feedback
 const isPwMismatch = computed(() => {
     return loginPw.value && confirmPw.value && loginPw.value !== confirmPw.value;
 });
@@ -106,7 +143,6 @@ async function handleSignup() {
     return;
   }
 
-  // Validation
   if (loginPw.value.length < 8) {
       errorMsg.value = "Password must be at least 8 characters long.";
       return;
@@ -132,7 +168,4 @@ async function handleSignup() {
 </script>
 
 <style scoped>
-.h-input {
-  height: 3.2rem;
-}
 </style>

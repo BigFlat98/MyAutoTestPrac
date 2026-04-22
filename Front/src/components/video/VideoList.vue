@@ -11,7 +11,7 @@ const emit = defineEmits(['delete']);
 </script>
 
 <template>
-  <div class="border-t border-black">
+  <div class="border-t border-white/10 space-y-4 pt-4">
     <VideoItem 
       v-for="video in videos" 
       :key="video.id" 

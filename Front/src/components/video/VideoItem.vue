@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import VideoComments from './VideoComments.vue';
 import { api } from '@/api';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
   video: {
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['delete']);
+const authStore = useAuthStore();
 
 const isOpen = ref(false);
 const hasViewed = ref(false);
@@ -29,7 +31,6 @@ const toggleAccordion = async () => {
   }
 };
 
-// Toggle-able state for like/dislike (Visual only for now)
 const isLiked = ref(false);
 const isHated = ref(false);
 
@@ -82,7 +83,7 @@ const reportVideo = async () => {
     try {
         await api.post(`/videos/${props.video.id}/report`);
         alert("신고가 접수되었습니다.");
-        props.video.reported_count++; // Optional: update local state if we want to show it or just ack
+        props.video.reported_count++;
     } catch (error) {
         console.error("Failed to report video:", error);
         alert("신고 처리 중 오류가 발생했습니다.");
@@ -100,60 +101,22 @@ const deleteVideo = async () => {
     }
 }
 
-// Auth Store for permission check
-import { useAuthStore } from '@/stores/auth';
-const authStore = useAuthStore();
-
 const canDelete = computed(() => {
     if (!authStore.user) return false;
-    // Check if user is author OR user is admin
-    // Note: Database schema uses 'uploader_id', frontend video object has 'uploader_id'
     return authStore.user.id === props.video.uploader_id || authStore.user.check_admin;
 });
 
-
-// Helper to get embed URL from youtube link or ID
 const embedUrl = computed(() => {
   if (!props.video || !props.video.url) return '';
   if (props.video.video_key) {
-    return `https://www.youtube.com/embed/${props.video.video_key}`;
+    return `https://www.youtube.com/embed/${props.video.video_key}?autoplay=0&rel=0&modestbranding=1`;
   }
-  if (props.video.videoId) {
-    return `https://www.youtube.com/embed/${props.video.videoId}`;
-  }
-  // Fallback simple parsing if videoId not provided
-  try {
-    const url = new URL(props.video.url);
-    const v = url.searchParams.get('v');
-    if (v) return `https://www.youtube.com/embed/${v}`;
-    if (url.pathname.startsWith('/shorts/')) {
-        return `https://www.youtube.com/embed/${url.pathname.split('/shorts/')[1]}`;
-    }
-    if (url.hostname.includes('youtu.be')) return `https://www.youtube.com/embed${url.pathname}`;
-  } catch (e) {
-    return '';
-  }
-  return '';
   return '';
 });
 
 const thumbnailUrl = computed(() => {
   if (!props.video) return '';
-  let videoId = props.video.video_key || props.video.videoId;
-  if (!videoId) {
-      try {
-        if (!props.video.url) return '';
-        const url = new URL(props.video.url);
-        videoId = url.searchParams.get('v');
-        if (!videoId && url.pathname.startsWith('/shorts/')) {
-            videoId = url.pathname.split('/shorts/')[1];
-        }
-        if (!videoId && url.hostname.includes('youtu.be')) {
-            videoId = url.pathname.slice(1);
-        }
-      } catch (e) {}
-  }
-  
+  let videoId = props.video.video_key;
   if (videoId) {
     return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
   }
@@ -162,174 +125,157 @@ const thumbnailUrl = computed(() => {
 </script>
 
 <template>
-  <div class="border-b border-gray-200 last:border-b-0">
-    <!-- List Item Header (Always Visible) -->
+  <div class="glass-video-item overflow-hidden transition-all duration-500 rounded-2xl mb-4 border border-white/5" :class="{ 'active-item border-sky-400/30 ring-1 ring-sky-400/10': isOpen }">
+    <!-- List Item Header -->
     <div 
       @click="toggleAccordion"
-      class="flex items-center p-5 cursor-pointer hover:bg-gray-50 border-l-4 border-transparent hover:border-luxury-gold transition-all duration-300 group bg-white"
+      class="flex items-center p-5 cursor-pointer bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group relative overflow-hidden"
     >
+      <!-- Background Glow Effect -->
+      <div v-if="isOpen" class="absolute inset-0 bg-gradient-to-r from-sky-400/5 to-transparent pointer-events-none"></div>
+
       <!-- ID -->
-      <div class="text-xs text-gray-300 w-12 text-center font-mono tracking-wider group-hover:text-luxury-gold transition-colors shrink-0">
+      <div class="text-[10px] text-slate-500 w-10 text-center font-mono tracking-wider group-hover:text-sky-400 transition-colors shrink-0">
         {{ String(video.id).padStart(2, '0') }}
       </div>
 
-      <!-- Thumbnail (Left) -->
-      <div v-if="thumbnailUrl" class="mr-4 w-[160px] aspect-video overflow-hidden shadow-sm relative group-hover:shadow-md transition-all shrink-0">
-          <img :src="thumbnailUrl" alt="Video Thumbnail" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
-          <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+      <!-- Thumbnail -->
+      <div v-if="thumbnailUrl" class="mr-6 w-[140px] aspect-video overflow-hidden rounded-lg shadow-lg relative shrink-0 border border-white/10">
+          <img :src="thumbnailUrl" alt="Thumbnail" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+          <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300"></div>
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+             <div class="w-10 h-10 bg-sky-400/80 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <svg class="w-5 h-5 text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+             </div>
+          </div>
       </div>
 
-      <!-- Content (Right) -->
-      <div class="flex-1 min-w-0 flex flex-col justify-center items-start text-left space-y-2">
-        <!-- Row 1: User Title -->
-        <h3 class="text-lg font-light tracking-tight group-hover:text-black transition-colors truncate pr-8 leading-none text-left w-full">
+      <!-- Content -->
+      <div class="flex-1 min-w-0 flex flex-col justify-center space-y-2">
+        <h3 class="text-lg font-light tracking-wide text-slate-200 group-hover:text-white transition-colors truncate pr-8">
           {{ video.title }}
         </h3>
         
-        <!-- Row 2: Original Title -->
-        <a 
-          v-if="video.original_title" 
-          :href="video.url" 
-          target="_blank" 
-          class="text-xs text-gray-400 truncate pr-8 font-light hover:text-luxury-gold hover:underline transition-colors block w-fit text-left"
-          @click.stop
-        >
-           {{ video.original_title }}
-        </a>
-
-        <!-- Row 3: Metrics & Metadata -->
-        <div class="flex items-center text-[10px] text-gray-400 uppercase tracking-wider space-x-3 pt-1 text-left">
-             <!-- Like/Hate Counts -->
-             <div class="flex items-center space-x-2 border-r border-gray-200 pr-3">
-                 <span class="flex items-center space-x-1" :class="{'text-luxury-gold': isLiked}">
-                     <span>👍</span>
+        <div class="flex items-center flex-wrap gap-x-4 gap-y-2 text-[10px] text-slate-500 uppercase tracking-widest font-mono">
+             <div class="flex items-center space-x-3 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                 <span class="flex items-center space-x-1" :class="{'text-sky-400': isLiked}">
+                     <span class="text-xs">👍</span>
                      <span>{{ video.like_count }}</span>
                  </span>
-                 <span class="flex items-center space-x-1" :class="{'text-black': isHated}">
-                     <span>👎</span>
+                 <span class="w-px h-2 bg-white/10"></span>
+                 <span class="flex items-center space-x-1" :class="{'text-rose-400': isHated}">
+                     <span class="text-xs">👎</span>
                      <span>{{ video.hate_count }}</span>
                  </span>
              </div>
 
-             <!-- Metadata -->
-             <span class="font-bold text-gray-800">{{ video.author }}</span> 
-             <span class="text-gray-300">|</span> 
-             <span>{{ new Date(video.created_at).toLocaleString() }}</span>
-             <span class="text-gray-300">|</span> 
-             <span>Views {{ video.view_count }}</span>
+             <span class="text-slate-300 font-medium tracking-normal text-xs">{{ video.author }}</span> 
+             <span class="text-slate-600 hidden sm:block">•</span> 
+             <span class="hidden sm:block">{{ new Date(video.created_at).toLocaleDateString() }}</span>
+             <span class="text-slate-600 hidden sm:block">•</span> 
+             <span>{{ video.view_count }} VIEWS</span>
              
-             <!-- Delete Button -->
              <button 
                 v-if="canDelete"
                 @click.stop="deleteVideo"
-                class="ml-3 px-2 py-0 border border-gray-300 rounded-full flex items-center justify-center text-[10px] leading-tight text-gray-300 hover:text-red-400 hover:border-red-400 transition-all duration-300 bg-white hover:bg-white h-fit mt-0.5"
-                title="Delete Video"
+                class="ml-2 text-[9px] text-slate-500 hover:text-rose-400 underline underline-offset-4 transition-colors"
              >
-                삭제
+                DELETE
              </button>
         </div>
       </div>
       
-      <!-- Arrow Icon -->
-      <div class="text-gray-300 group-hover:text-luxury-gold transition-colors ml-4 mt-1 shrink-0">
+      <!-- Arrow -->
+      <div class="text-slate-500 group-hover:text-sky-400 transition-all duration-300 ml-4 shrink-0">
         <svg 
-          class="w-5 h-5 transform transition-transform duration-500 ease-out"
-          :class="{ 'rotate-180': isOpen }"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+          class="w-6 h-6 transform transition-transform duration-500"
+          :class="{ 'rotate-180 text-sky-400': isOpen }"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
-          <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1" d="M19 9l-7 7-7-7" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
     </div>
 
-    <!-- Accordion Content (Visible when isOpen) -->
+    <!-- Accordion Content -->
     <transition
-      enter-active-class="transition duration-500 ease-out"
-      enter-from-class="transform scale-y-95 opacity-0 max-h-0"
-      enter-to-class="transform scale-y-100 opacity-100 max-h-[1000px]"
-      leave-active-class="transition duration-300 ease-in"
-      leave-from-class="transform scale-y-100 opacity-100 max-h-[1000px]"
-      leave-to-class="transform scale-y-95 opacity-0 max-h-0"
+      enter-active-class="transition-all duration-500 ease-out"
+      enter-from-class="max-h-0 opacity-0"
+      enter-to-class="max-h-[1200px] opacity-100"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="max-h-[1200px] opacity-100"
+      leave-to-class="max-h-0 opacity-0"
     >
-      <div v-if="isOpen" class="bg-gray-50/50 border-t border-gray-100 p-8 shadow-inner">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <!-- Left Column: Video Player & Info -->
-          <div class="lg:col-span-2 space-y-6">
-            <!-- Video Player -->
-            <div class="aspect-video bg-black shadow-2xl ring-1 ring-gray-900/5">
+      <div v-if="isOpen" class="bg-black/20 backdrop-blur-xl border-t border-white/10 overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+          <!-- Left: Video & Info -->
+          <div class="lg:col-span-8 p-6 md:p-8 space-y-8">
+            <!-- Player Wrapper -->
+            <div class="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 group/player relative">
               <iframe 
                 v-if="embedUrl"
                 class="w-full h-full"
                 :src="embedUrl" 
-                title="YouTube video player" 
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen
-                referrerpolicy="strict-origin-when-cross-origin"
               ></iframe>
-              <div v-else class="w-full h-full flex items-center justify-center text-white font-light tracking-widest text-xs">
-                VIDEO URL INVALID
+              <div v-else class="w-full h-full flex items-center justify-center text-slate-500 font-mono text-xs uppercase tracking-widest">
+                Video Unavailable
               </div>
             </div>
 
-            <!-- Title & Description -->
-            <div>
-              <h2 class="text-2xl font-light mb-3 tracking-tight">{{ video.title }}</h2>
-              <p class="text-gray-500 text-sm whitespace-pre-line leading-loose font-light">
-                {{ video.description }}
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-4">
+                <h2 class="text-2xl font-light text-white tracking-tight leading-tight">{{ video.title }}</h2>
+                
+                <!-- Social Actions -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <button 
+                      @click="toggleLike"
+                      class="flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300"
+                      :class="isLiked ? 'bg-sky-400/20 border-sky-400 text-sky-400' : 'bg-white/5 border-white/10 text-slate-400 hover:border-sky-400/50 hover:text-sky-300'"
+                    >
+                      <span class="text-sm">👍</span>
+                      <span class="text-xs font-mono">{{ video.like_count }}</span>
+                    </button>
+                    <button 
+                      @click="toggleHate"
+                      class="flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300"
+                      :class="isHated ? 'bg-rose-400/20 border-rose-400 text-rose-400' : 'bg-white/5 border-white/10 text-slate-400 hover:border-rose-400/50 hover:text-rose-300'"
+                    >
+                      <span class="text-sm">👎</span>
+                      <span class="text-xs font-mono">{{ video.hate_count }}</span>
+                    </button>
+                </div>
+              </div>
+
+              <p class="text-slate-400 text-sm whitespace-pre-line leading-relaxed font-light bg-white/5 p-5 rounded-xl border border-white/5">
+                {{ video.description || 'No description provided.' }}
               </p>
-            </div>
 
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2">
-              <span 
-                v-if="video.tag_name"
-                class="text-[10px] px-3 py-1 bg-white border border-gray-200 text-gray-400 uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors cursor-default"
-              >
-                #{{ video.tag_name }}
-              </span>
-              <!-- Fallback to older array tags if present -->
-               <span 
-                v-else-if="video.tags && video.tags.length"
-                v-for="tag in video.tags"
-                :key="tag"
-                class="text-[10px] px-3 py-1 bg-white border border-gray-200 text-gray-400 uppercase tracking-widest hover:border-luxury-gold hover:text-luxury-gold transition-colors cursor-default"
-              >
-                #{{ tag }}
-              </span>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center space-x-0 pt-6 border-t border-gray-200">
-              <button 
-                @click="toggleLike"
-                class="flex items-center space-x-3 px-6 py-3 border border-r-0 border-gray-300 transition-all duration-300 group hover:bg-gray-50"
-                :class="isLiked ? 'bg-luxury-gold/5 border-luxury-gold text-luxury-gold' : 'text-gray-500'"
-              >
-                <span class="group-hover:scale-110 transition-transform duration-300">👍</span>
-                <span class="font-medium text-xs tracking-widest">{{ video.like_count }}</span>
-              </button>
-              <button 
-                @click="toggleHate"
-                class="flex items-center space-x-3 px-6 py-3 border border-gray-300 transition-all duration-300 group hover:bg-gray-50"
-                :class="isHated ? 'bg-gray-800 text-white border-gray-800' : 'text-gray-500'"
-              >
-                <span class="group-hover:scale-110 transition-transform duration-300">👎</span>
-                <span class="font-medium text-xs tracking-widest">{{ video.hate_count }}</span>
-              </button>
-              
-              <button 
-                @click="reportVideo"
-                class="ml-auto text-xs text-gray-300 hover:text-red-500 transition-colors tracking-widest px-4 border-none bg-transparent hover:bg-transparent shadow-none hover:shadow-none h-auto hover:translate-y-0 hover:tracking-widest">
-                REPORT
-              </button>
+              <div class="flex flex-wrap items-center justify-between gap-4 pt-4">
+                  <div class="flex flex-wrap gap-2">
+                    <span 
+                        v-if="video.tag_name"
+                        class="text-[10px] px-3 py-1 bg-sky-400/10 border border-sky-400/20 text-sky-400 uppercase tracking-widest rounded-full"
+                    >
+                        #{{ video.tag_name }}
+                    </span>
+                  </div>
+                  
+                  <button 
+                    @click="reportVideo"
+                    class="text-[10px] text-slate-600 hover:text-rose-400 uppercase tracking-[0.2em] transition-colors"
+                  >
+                    Report Video
+                  </button>
+              </div>
             </div>
           </div>
 
-          <!-- Right Column: Comments -->
-          <div class="lg:col-span-1">
+          <!-- Right: Comments Section -->
+          <div class="lg:col-span-4 border-l border-white/10 flex flex-col h-[600px] lg:h-auto">
             <VideoComments :comments="video.comments" :videoId="video.id" />
           </div>
         </div>
@@ -337,3 +283,17 @@ const thumbnailUrl = computed(() => {
     </transition>
   </div>
 </template>
+
+<style scoped>
+.glass-video-item {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.active-item {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Scrollbar for comments handled in child but good to keep in mind */
+</style>
