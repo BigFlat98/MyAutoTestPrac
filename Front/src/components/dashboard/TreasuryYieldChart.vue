@@ -33,6 +33,7 @@ const yMin = ref(0);
 const yMax = ref(10);
 
 const currentYield = ref(null);
+const changeRate = ref(null);
 
 const mainChartOptions = ref({
   responsive: true,
@@ -95,9 +96,21 @@ const setupChart = (data) => {
         }
     }
     
-    // Extract latest value
+    // Extract latest value and calculate change rate
     const validYields = data.yields.filter(r => r !== null);
-    if (validYields.length) currentYield.value = validYields[validYields.length - 1];
+    if (validYields.length > 0) {
+        currentYield.value = validYields[validYields.length - 1];
+    }
+    
+    if (validYields.length >= 2) {
+        const lastVal = validYields[validYields.length - 1];
+        const prevVal = validYields[validYields.length - 2];
+        if (prevVal !== 0) {
+            changeRate.value = ((lastVal - prevVal) / prevVal) * 100;
+        } else {
+            changeRate.value = 0;
+        }
+    }
 
     // Calculate Min/Max
     if (validYields.length > 0) {
@@ -150,6 +163,13 @@ onMounted(fetchData);
               {{ currentYield !== null ? currentYield.toFixed(3) : '—' }}
             </span>
             <span class="text-xs text-gray-400">%</span>
+          </div>
+          <div v-if="changeRate !== null" :class="[
+            'text-sm font-mono flex items-center',
+            changeRate > 0 ? 'text-red-500' : changeRate < 0 ? 'text-blue-500' : 'text-gray-400'
+          ]">
+            <span>{{ changeRate > 0 ? '▲ ' : changeRate < 0 ? '▼ ' : '' }}</span>
+            <span>{{ Math.abs(changeRate).toFixed(2) }}%</span>
           </div>
         </div>
       </div>
