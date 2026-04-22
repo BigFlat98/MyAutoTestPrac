@@ -112,32 +112,6 @@ $accent-gradient: linear-gradient(135deg, #ffffff, #7dd3fc, #34d399);
     animation: auroraDrift2 22s ease-in-out infinite;
   }
 
-  // ─── Firefox 전용: 오로라 애니메이션 정지 ───────────────────────────────────
-  // backdrop-filter 뒤의 요소가 움직일 때마다 Firefox는 blur를 CPU로 재계산함.
-  // 애니메이션을 멈추면 재계산이 사라져 버벅임이 근본적으로 해소됨.
-  // orb는 키프레임 중간값 위치에 정적으로 고정하여 분위기는 그대로 유지.
-  @supports (-moz-appearance: none) {
-    &::before {
-      animation: none; // gridPan 정지
-      will-change: auto;
-    }
-
-    .orb {
-      will-change: auto; // 애니메이션 없으면 will-change는 오히려 메모리 낭비
-    }
-
-    .orb-1 {
-      animation: none;
-      // auroraDrift1 33%~66% 사이 중간값 위치에 자연스럽게 고정
-      transform: translate(4%, 12%) rotate(8deg) scale(1.0);
-    }
-
-    .orb-2 {
-      animation: none;
-      // auroraDrift2 33%~66% 사이 중간값 위치에 자연스럽게 고정
-      transform: translate(-8%, -10%) rotate(-8deg) scale(1.05);
-    }
-  }
   // ─────────────────────────────────────────────────────────────────────────
 }
 
