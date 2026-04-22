@@ -188,7 +188,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="max-w-[1400px] mx-auto py-12 px-6">
+    <div class="w-full max-w-[1400px] mx-auto py-12 px-6">
         <!-- Header -->
         <div class="mb-10 flex justify-center">
             <header class="glass-header slide-up text-center" style="animation-delay: 0.1s; display: block; padding: 20px 48px; border-radius: 20px;">
