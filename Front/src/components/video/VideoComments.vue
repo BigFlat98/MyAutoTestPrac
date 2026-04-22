@@ -111,7 +111,7 @@ const addReply = async (parentId) => {
               <span class="text-[9px] font-mono text-slate-600 uppercase">{{ new Date(comment.created_at).toLocaleDateString() }}</span>
               <button 
                 @click="toggleReplyForm(comment.id)"
-                class="px-1.5 py-px bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
+                class="px-1.5 py-px bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[9px] uppercase tracking-wider leading-tight rounded"
               >
                 Reply
               </button>
@@ -136,7 +136,7 @@ const addReply = async (parentId) => {
               />
               <button 
                 @click="addReply(comment.id)"
-                class="shrink-0 px-2 py-1.5 bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[10px] font-bold uppercase tracking-wider rounded-md"
+                class="shrink-0 px-2 py-1.5 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] font-bold uppercase tracking-wider rounded-md"
               >
                 Add
               </button>
@@ -171,7 +171,7 @@ const addReply = async (parentId) => {
         />
         <button 
           @click="addComment"
-          class="shrink-0 px-3 py-1.5 bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[10px] font-bold uppercase tracking-wider rounded-md"
+          class="shrink-0 px-3 py-1.5 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] font-bold uppercase tracking-wider rounded-md"
         >
           POST
         </button>

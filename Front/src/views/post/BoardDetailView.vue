@@ -154,7 +154,7 @@ onMounted(() => {
         <!-- Navigation -->
         <button 
             @click="goBack" 
-            class="mb-8 px-3 py-1 bg-sky-400 text-white hover:bg-transparent hover:text-sky-400 border border-sky-400 transition-all text-[10px] uppercase tracking-wider rounded flex items-center gap-2 slide-up" style="animation-delay: 0.1s;"
+            class="mb-8 px-3 py-1 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] uppercase tracking-wider rounded flex items-center gap-2 slide-up" style="animation-delay: 0.1s;"
         >
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Back to Board
@@ -240,7 +240,7 @@ onMounted(() => {
                         <div class="flex justify-end">
                             <button 
                                 @click="submitComment"
-                                class="px-4 py-1.5 bg-sky-500/20 border border-sky-400/50 text-sky-400 hover:bg-sky-400 hover:text-white text-[10px] uppercase tracking-widest transition-all rounded-full shadow-[0_0_10px_rgba(56,189,248,0.2)]"
+                                class="px-4 py-1.5 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all text-[10px] uppercase tracking-wider rounded"
                             >
                                 Post Comment
                             </button>

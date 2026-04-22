@@ -60,12 +60,12 @@ async function handleLogout() {
       <!-- Auth Button -->
       <div>
         <template v-if="authStore.isAuthenticated">
-            <button @click="handleLogout" class="px-3 md:px-4 py-0.5 rounded-full border border-sky-400/50 text-sky-400 text-[9px] uppercase tracking-widest transition-all duration-300 hover:bg-sky-400/20 hover:text-white hover:border-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] font-medium leading-none flex items-center h-6">
+            <button @click="handleLogout" class="px-3 md:px-4 py-1 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all duration-300 text-[9px] uppercase tracking-widest font-bold leading-none rounded flex items-center h-6">
               Logout
             </button>
         </template>
         <template v-else>
-            <router-link to="/login" class="px-3 md:px-4 py-0.5 rounded-full border border-sky-400/50 text-sky-400 text-[9px] uppercase tracking-widest transition-all duration-300 hover:bg-sky-400/20 hover:text-white hover:border-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] font-medium leading-none flex items-center h-6">
+            <router-link to="/login" class="px-3 md:px-4 py-1 bg-sky-400/10 text-sky-400 border border-sky-400/20 hover:bg-sky-400 hover:text-slate-900 transition-all duration-300 text-[9px] uppercase tracking-widest font-bold leading-none rounded flex items-center h-6">
               Login
             </router-link>
         </template>
