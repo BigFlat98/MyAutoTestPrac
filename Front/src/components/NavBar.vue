@@ -103,13 +103,18 @@ async function handleLogout() {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/glassmorphism.scss';
+@use '@/assets/glassmorphism.scss' as *;
 
 .glass-nav {
   @include glass-panel(0.02, 16px);
+  position: fixed;
+  top: 0;
+  left: 4.5rem;
+  right: 4.5rem;
   border-radius: 0 0 24px 24px; // 네비게이션은 아래쪽만 둥글게
   border-top: none;
-  margin-bottom: 20px;
+  margin-bottom: 0;
+  z-index: 100;
 }
 
 .glass-mobile-menu {
