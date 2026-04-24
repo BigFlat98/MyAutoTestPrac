@@ -38,3 +38,6 @@ Chat/target/
 
 # SSL/TLS 인증서 (Cloudflare Origin Certificate)
 certs/
+
+# Project Planning
+plan/
