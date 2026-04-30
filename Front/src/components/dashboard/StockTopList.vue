@@ -135,12 +135,13 @@ const formatPrice = (price, market) => {
           <tr
             v-for="stock in stocks"
             :key="stock.symbol"
-            class="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors group"
+            @click="$emit('select', stock)"
+            class="border-b border-white/5 last:border-0 hover:bg-white/10 transition-colors group cursor-pointer"
           >
-            <td class="py-3 font-mono text-slate-400 group-hover:text-sky-300">{{ stock.rank }}</td>
+            <td class="py-3 font-mono text-slate-400 group-hover:text-sky-300 px-2">{{ stock.rank }}</td>
             <td class="py-3 font-medium text-slate-100">{{ stock.name }} <span class="text-xs text-slate-500 block font-normal">{{ stock.symbol }}</span></td>
             <td class="py-3 text-right font-mono text-slate-200">{{ formatPrice(stock.price, activeTab) }}</td>
-            <td class="py-3 text-right font-mono font-medium" :class="stock.change >= 0 ? 'text-red-400' : 'text-blue-400'">
+            <td class="py-3 text-right font-mono font-medium px-2" :class="stock.change >= 0 ? 'text-red-400' : 'text-blue-400'">
               {{ stock.change > 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
             </td>
           </tr>

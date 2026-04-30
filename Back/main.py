@@ -32,6 +32,7 @@ from router import dashboard
 from router import todo
 from router import board
 from router import video
+from router import stock_detail
 from router.auth import router as auth_router
 from fastapi.staticfiles import StaticFiles
 
@@ -48,6 +49,7 @@ app.include_router(todo.router)
 app.include_router(auth_router)
 app.include_router(board.router)
 app.include_router(video.router)
+app.include_router(stock_detail.router)
 
 
 # CORS definition

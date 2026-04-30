@@ -275,6 +275,22 @@ class Database:
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         UNIQUE (grade, trade_date)
                     );
+
+                    /* 주식 재무 지표 캐싱용 테이블 */
+                    CREATE TABLE IF NOT EXISTS market_stock_fundamental (
+                        id          SERIAL PRIMARY KEY,
+                        symbol      VARCHAR(20) UNIQUE NOT NULL,
+                        per         NUMERIC(8,2),
+                        pbr         NUMERIC(8,2),
+                        eps         NUMERIC(12,2),
+                        market_cap  NUMERIC(20,2),
+                        w52_high    NUMERIC(15,2),
+                        w52_low     NUMERIC(15,2),
+                        frgn_ratio  NUMERIC(6,2),
+                        operating_profit NUMERIC(20,2), -- 영업이익 (단위: 억 등, 크기가 클 수 있으므로 20,2)
+                        debt_ratio  NUMERIC(10,2),      -- 부채비율(%)
+                        updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
                  ''')
                  
         except Exception as e:

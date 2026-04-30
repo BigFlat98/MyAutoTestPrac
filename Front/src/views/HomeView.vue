@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import FearGreedIndex from '../components/dashboard/FearGreedIndex.vue'
 import StockTopList from '../components/dashboard/StockTopList.vue'
 import InterestRateChart from '../components/dashboard/InterestRateChart.vue'
@@ -7,6 +8,9 @@ import BitcoinChart from '../components/dashboard/BitcoinChart.vue'
 import GoldChart from '../components/dashboard/GoldChart.vue'
 import OilChart from '../components/dashboard/OilChart.vue'
 import TreasuryYieldChart from '../components/dashboard/TreasuryYieldChart.vue'
+import StockDetailModal from '../components/stock/StockDetailModal.vue'
+
+const selectedStock = ref(null)
 </script>
 
 <template>
@@ -26,7 +30,7 @@ import TreasuryYieldChart from '../components/dashboard/TreasuryYieldChart.vue'
       <!-- Top Row: 1:2 Ratio -->
       <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 h-[460px]">
         <FearGreedIndex />
-        <StockTopList />
+        <StockTopList @select="selectedStock = $event" />
       </div>
 
       <!-- Middle Row: 1:1 Ratio -->
@@ -48,5 +52,12 @@ import TreasuryYieldChart from '../components/dashboard/TreasuryYieldChart.vue'
       </div>
       
     </div>
+
+    <!-- Stock Detail Modal -->
+    <StockDetailModal 
+      v-if="selectedStock" 
+      :stockInfo="selectedStock" 
+      @close="selectedStock = null" 
+    />
   </div>
 </template>

@@ -1,0 +1,152 @@
+import os
+import requests
+import urllib.parse
+from fastapi import HTTPException
+from database import db
+from controller.service.stock_service import get_kis_auth_token, KIS_AppKey, KIS_AppSecret, KIS_BASE_URL
+
+NAVER_CLIENT_ID = os.getenv("NAVER_STOCKNEWS_CLIENTID")
+NAVER_CLIENT_SECRET = os.getenv("NAVER_STOCKNEWS_CLIENTSECRET")
+
+async def fetch_stock_overview(symbol: str):
+    # 1. DB에서 캐시된 데이터 조회 (당일 갱신된 데이터가 있는지 확인)
+    async with db.pool.acquire() as conn:
+        cached = await conn.fetchrow(
+            """SELECT * FROM market_stock_fundamental 
+               WHERE symbol = $1 AND updated_at >= CURRENT_DATE""",
+            symbol
+        )
+        if cached:
+            return dict(cached)
+
+    # 2. 캐시가 없으면 KIS API 호출
+    access_token = get_kis_auth_token()
+    if not access_token:
+        raise HTTPException(status_code=500, detail="Failed to get KIS access token")
+
+    # API 1: 주식현재가 체결 (FHKST01010100)
+    url_1 = f"{KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price"
+    headers_1 = {
+        "content-type": "application/json; charset=utf-8",
+        "authorization": f"Bearer {access_token}",
+        "appkey": KIS_AppKey,
+        "appsecret": KIS_AppSecret,
+        "tr_id": "FHKST01010100"
+    }
+    params_1 = {
+        "fid_cond_mrkt_div_code": "J",
+        "fid_input_iscd": symbol
+    }
+
+    try:
+        res_1 = requests.get(url_1, headers=headers_1, params=params_1, timeout=5)
+        data_1 = res_1.json()
+        output_1 = data_1.get("output", {})
+        
+        per = float(output_1.get("per", 0) or 0)
+        pbr = float(output_1.get("pbr", 0) or 0)
+        eps = float(output_1.get("eps", 0) or 0)
+        market_cap = float(output_1.get("hts_avls", 0) or 0) # 억 단위
+        w52_high = float(output_1.get("w52_hgpr", 0) or 0)
+        w52_low = float(output_1.get("w52_lwpr", 0) or 0)
+        frgn_ratio = float(output_1.get("frgn_hld_vol_rate", 0) or 0)
+        
+        # API 2: 영업이익, 부채비율 조회를 위한 추가 API (예: FHKST10400000 등)
+        # TODO: 실제 사용 가능한 재무 API 규격 확인 후 로직 보완 (임시로 0 처리)
+        operating_profit = 0.0
+        debt_ratio = 0.0
+
+        # DB 저장 (UPSERT)
+        async with db.pool.acquire() as conn:
+            await conn.execute(
+                """INSERT INTO market_stock_fundamental 
+                   (symbol, per, pbr, eps, market_cap, w52_high, w52_low, frgn_ratio, operating_profit, debt_ratio, updated_at)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
+                   ON CONFLICT (symbol) DO UPDATE SET
+                   per = EXCLUDED.per,
+                   pbr = EXCLUDED.pbr,
+                   eps = EXCLUDED.eps,
+                   market_cap = EXCLUDED.market_cap,
+                   w52_high = EXCLUDED.w52_high,
+                   w52_low = EXCLUDED.w52_low,
+                   frgn_ratio = EXCLUDED.frgn_ratio,
+                   operating_profit = EXCLUDED.operating_profit,
+                   debt_ratio = EXCLUDED.debt_ratio,
+                   updated_at = CURRENT_TIMESTAMP""",
+                symbol, per, pbr, eps, market_cap, w52_high, w52_low, frgn_ratio, operating_profit, debt_ratio
+            )
+        
+        return {
+            "symbol": symbol,
+            "per": per,
+            "pbr": pbr,
+            "eps": eps,
+            "market_cap": market_cap,
+            "w52_high": w52_high,
+            "w52_low": w52_low,
+            "frgn_ratio": frgn_ratio,
+            "operating_profit": operating_profit,
+            "debt_ratio": debt_ratio
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def fetch_stock_investors(symbol: str):
+    access_token = get_kis_auth_token()
+    if not access_token:
+        raise HTTPException(status_code=500, detail="Failed to get KIS access token")
+
+    url = f"{KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-investor"
+    headers = {
+        "content-type": "application/json; charset=utf-8",
+        "authorization": f"Bearer {access_token}",
+        "appkey": KIS_AppKey,
+        "appsecret": KIS_AppSecret,
+        "tr_id": "FHKST01010900"
+    }
+    params = {
+        "fid_cond_mrkt_div_code": "J",
+        "fid_input_iscd": symbol
+    }
+
+    try:
+        res = requests.get(url, headers=headers, params=params, timeout=5)
+        data = res.json()
+        
+        if data.get("rt_cd") != "0":
+            return {"error": data.get("msg1")}
+            
+        output = data.get("output", [])
+        if not output:
+            return {"retail": 0, "institutional": 0, "foreign": 0}
+            
+        today_data = output[0]
+        
+        return {
+            "retail": float(today_data.get("prsn_ntby_qty", 0)),
+            "institutional": float(today_data.get("orgn_ntby_qty", 0)),
+            "foreign": float(today_data.get("frgn_ntby_qty", 0))
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def fetch_stock_news(symbol_name: str):
+    if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
+        raise HTTPException(status_code=500, detail="Naver API credentials missing")
+
+    query = urllib.parse.quote(f"{symbol_name} 주가")
+    url = f"https://openapi.naver.com/v1/search/news.json?query={query}&display=5&sort=date"
+    
+    headers = {
+        "X-Naver-Client-Id": NAVER_CLIENT_ID,
+        "X-Naver-Client-Secret": NAVER_CLIENT_SECRET
+    }
+
+    try:
+        res = requests.get(url, headers=headers, timeout=5)
+        res.raise_for_status()
+        return res.json().get("items", [])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
