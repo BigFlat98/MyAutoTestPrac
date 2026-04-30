@@ -4,7 +4,7 @@ FROM node:22-alpine as build-stage
 WORKDIR /app
 # 패키지 매니저 파일 복사 및 설치
 COPY package*.json ./
-RUN npm install
+RUN npm install -g npm@11.13.0 && npm install
 # 소스 코드 복사 및 빌드
 COPY . .
 RUN npm run build

@@ -48,6 +48,16 @@ const formatPrice = (price) => {
         <div 
           class="glass-card relative w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col shadow-2xl border border-white/20"
         >
+          <!-- Close Button (Absolute Top Right) -->
+          <button 
+            @click="emit('close')" 
+            class="absolute top-4 right-4 z-50 text-red-300 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-all p-2 rounded-full backdrop-blur-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           <!-- Header -->
           <div class="glass-header flex justify-between items-start sticky top-0 z-10 p-6 border-b border-white/10 bg-black/50 backdrop-blur-md">
             <div>
@@ -65,14 +75,6 @@ const formatPrice = (price) => {
                 </span>
               </div>
             </div>
-            <button 
-              @click="emit('close')" 
-              class="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
 
           <!-- Body -->

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from controller.service.stock_detail_service import fetch_stock_overview, fetch_stock_investors, fetch_stock_news
 
 router = APIRouter(
-    prefix="/api/stock",
+    prefix="/stock",
     tags=["StockDetail"]
 )
 
