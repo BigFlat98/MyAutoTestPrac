@@ -50,16 +50,6 @@ const formatPrice = (price) => {
           <div 
             class="glass-card w-full max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col shadow-2xl border border-white/20 relative"
           >
-            <!-- Close Button (Inside Top Right) -->
-            <button 
-              @click="emit('close')" 
-              class="absolute top-4 right-4 z-50 text-red-300 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-all w-8 h-8 flex items-center justify-center rounded-md backdrop-blur-md"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
           <!-- Header -->
           <div class="glass-header flex justify-between items-start sticky top-0 z-10 p-6 border-b border-white/10 bg-black/50 backdrop-blur-md">
             <div>
@@ -77,6 +67,15 @@ const formatPrice = (price) => {
                 </span>
               </div>
             </div>
+            <!-- Close Button (Flex right aligned) -->
+            <button 
+              @click="emit('close')" 
+              class="text-red-400 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-colors w-8 h-8 flex shrink-0 items-center justify-center rounded-md backdrop-blur-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           <!-- Body -->

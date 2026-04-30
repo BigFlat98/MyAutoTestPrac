@@ -23,16 +23,18 @@ def crawl_naver_financials(symbol: str):
                 th = tr.th.text.strip() if tr.th else ""
                 if th == "영업이익":
                     tds = tr.select("td")
-                    if len(tds) >= 4:
-                        val = tds[3].text.strip().replace(",", "")
+                    for i in range(min(3, len(tds)-1), -1, -1):
+                        val = tds[i].text.strip().replace(",", "")
                         if val and val != "-":
                             op = float(val)
+                            break
                 elif th == "부채비율":
                     tds = tr.select("td")
-                    if len(tds) >= 4:
-                        val = tds[3].text.strip().replace(",", "")
+                    for i in range(min(3, len(tds)-1), -1, -1):
+                        val = tds[i].text.strip().replace(",", "")
                         if val and val != "-":
                             debt = float(val)
+                            break
     except Exception as e:
         print(f"Crawling failed for {symbol}: {e}")
     return op, debt
