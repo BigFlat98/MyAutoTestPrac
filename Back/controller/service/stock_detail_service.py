@@ -2,11 +2,40 @@ import os
 import requests
 import urllib.parse
 from fastapi import HTTPException
+from bs4 import BeautifulSoup
 from database import db
 from controller.service.stock_service import get_kis_auth_token, KIS_AppKey, KIS_AppSecret, KIS_BASE_URL
 
 NAVER_CLIENT_ID = os.getenv("NAVER_STOCKNEWS_CLIENTID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_STOCKNEWS_CLIENTSECRET")
+
+def crawl_naver_financials(symbol: str):
+    """네이버 금융에서 영업이익(억)과 부채비율(%)을 크롤링합니다."""
+    url = f"https://finance.naver.com/item/main.naver?code={symbol}"
+    op = 0.0
+    debt = 0.0
+    try:
+        res = requests.get(url, timeout=5)
+        soup = BeautifulSoup(res.text, "html.parser")
+        table = soup.select_one("table.tb_type1_ifrs")
+        if table:
+            for tr in table.select("tbody tr"):
+                th = tr.th.text.strip() if tr.th else ""
+                if th == "영업이익":
+                    tds = tr.select("td")
+                    if len(tds) >= 4:
+                        val = tds[3].text.strip().replace(",", "")
+                        if val and val != "-":
+                            op = float(val)
+                elif th == "부채비율":
+                    tds = tr.select("td")
+                    if len(tds) >= 4:
+                        val = tds[3].text.strip().replace(",", "")
+                        if val and val != "-":
+                            debt = float(val)
+    except Exception as e:
+        print(f"Crawling failed for {symbol}: {e}")
+    return op, debt
 
 async def fetch_stock_overview(symbol: str):
     # 1. DB에서 캐시된 데이터 조회 (당일 갱신된 데이터가 있는지 확인)
@@ -41,6 +70,11 @@ async def fetch_stock_overview(symbol: str):
     try:
         res_1 = requests.get(url_1, headers=headers_1, params=params_1, timeout=5)
         data_1 = res_1.json()
+        
+        # API Limit 등 정상 응답이 아닐 경우 에러 발생 (DB 0 덮어쓰기 방지)
+        if data_1.get("rt_cd") != "0":
+            raise HTTPException(status_code=500, detail=data_1.get("msg1", "KIS API Error"))
+            
         output_1 = data_1.get("output", {})
         
         per = float(output_1.get("per", 0) or 0)
@@ -49,12 +83,10 @@ async def fetch_stock_overview(symbol: str):
         market_cap = float(output_1.get("hts_avls", 0) or 0) # 억 단위
         w52_high = float(output_1.get("w52_hgpr", 0) or 0)
         w52_low = float(output_1.get("w52_lwpr", 0) or 0)
-        frgn_ratio = float(output_1.get("frgn_hld_vol_rate", 0) or 0)
+        frgn_ratio = float(output_1.get("hts_frgn_ehrt", 0) or 0) # 외국인 지분율 올바른 키값 매핑
         
-        # API 2: 영업이익, 부채비율 조회를 위한 추가 API (예: FHKST10400000 등)
-        # TODO: 실제 사용 가능한 재무 API 규격 확인 후 로직 보완 (임시로 0 처리)
-        operating_profit = 0.0
-        debt_ratio = 0.0
+        # 크롤링을 통해 영업이익과 부채비율 가져오기
+        operating_profit, debt_ratio = crawl_naver_financials(symbol)
 
         # DB 저장 (UPSERT)
         async with db.pool.acquire() as conn:

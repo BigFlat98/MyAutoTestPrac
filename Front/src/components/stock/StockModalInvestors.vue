@@ -16,14 +16,20 @@ const loading = ref(true);
 const fetchInvestors = async () => {
   loading.value = true;
   try {
-    // 병렬로 API 두 개 호출 (투자자 동향 + 재무지표에 포함된 외국인 지분율)
-    const [invRes, overRes] = await Promise.all([
-      api.get(`/stock/${props.symbol}/investors`),
-      api.get(`/stock/${props.symbol}/overview`)
-    ]);
-    
+    // 병렬 호출 시 KIS API Rate Limit 충돌 방지를 위해 순차 호출 및 약간의 딜레이 추가
+    const invRes = await api.get(`/stock/${props.symbol}/investors`);
     investors.value = invRes.data;
-    frgnRatio.value = overRes.data?.frgn_ratio || 0;
+    
+    // Fundamental 컴포넌트의 DB 캐싱이 완료되기를 기다림 (0.5초)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    try {
+      const overRes = await api.get(`/stock/${props.symbol}/overview`);
+      frgnRatio.value = overRes.data?.frgn_ratio || 0;
+    } catch (e) {
+      console.error("Overview fetch skipped or failed", e);
+      frgnRatio.value = 0;
+    }
   } catch (error) {
     console.error("Failed to fetch investor data:", error);
   } finally {
