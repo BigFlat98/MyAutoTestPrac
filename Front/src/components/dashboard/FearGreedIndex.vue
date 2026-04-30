@@ -47,10 +47,6 @@ const colorClass = computed(() => {
 
 <template>
   <div class="glass-card h-full flex flex-col relative overflow-hidden group">
-    <div class="absolute top-0 right-0 p-4 opacity-10 font-[Pinyon_Script] text-6xl pointer-events-none select-none text-white">
-      F&G
-    </div>
-    
     <h3 class="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Market Sentiment</h3>
     <h2 class="text-xl font-light text-slate-100 mb-8">Fear & Greed Index</h2>
     

@@ -44,20 +44,22 @@ const formatPrice = (price) => {
           @click="emit('close')"
         ></div>
 
-        <!-- Modal Content -->
-        <div 
-          class="glass-card relative w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col shadow-2xl border border-white/20"
-        >
-          <!-- Close Button (Absolute Top Right) -->
+        <!-- Relative Wrapper for Floating Button -->
+        <div class="relative w-full max-w-2xl">
+          <!-- Floating Close Button -->
           <button 
             @click="emit('close')" 
-            class="absolute top-4 right-4 z-50 text-red-300 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-all p-2 rounded-full backdrop-blur-md"
+            class="absolute -top-12 right-0 z-50 text-red-300 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-all w-10 h-10 flex items-center justify-center rounded-md backdrop-blur-md"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
+          <!-- Modal Content -->
+          <div 
+            class="glass-card w-full max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col shadow-2xl border border-white/20"
+          >
           <!-- Header -->
           <div class="glass-header flex justify-between items-start sticky top-0 z-10 p-6 border-b border-white/10 bg-black/50 backdrop-blur-md">
             <div>
@@ -101,6 +103,7 @@ const formatPrice = (price) => {
               </a>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </Transition>
