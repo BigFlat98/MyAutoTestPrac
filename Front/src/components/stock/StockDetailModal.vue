@@ -52,7 +52,7 @@ const formatPrice = (price) => {
           >
           
           <!-- Header (Sticky) -->
-          <div class="glass-header flex justify-between items-start sticky top-0 z-10 p-6 border-b border-white/10 bg-black/50 backdrop-blur-md">
+          <div class="glass-header relative sticky top-0 z-10 p-6 border-b border-white/10 bg-black/50 backdrop-blur-md">
             <!-- 왼쪽: 제목 및 가격 정보 -->
             <div>
               <div class="flex items-center gap-3">
@@ -70,12 +70,12 @@ const formatPrice = (price) => {
               </div>
             </div>
 
-            <!-- 오른쪽: X 닫기 버튼 (Flex 영역으로 분리되어 텍스트와 겹치지 않음) -->
+            <!-- 오른쪽: X 닫기 버튼 (헤더 내부 우측 상단 절대 위치 고정) -->
             <button 
               @click="emit('close')" 
-              class="text-red-400 bg-red-500/20 hover:bg-red-500/40 hover:text-white border border-red-500/30 transition-colors w-8 h-8 flex shrink-0 items-center justify-center rounded-md backdrop-blur-md ml-4"
+              class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-md bg-red-500/20 hover:bg-red-500/40 text-red-200 hover:text-white border border-red-500/30 transition-all backdrop-blur-md z-20"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
