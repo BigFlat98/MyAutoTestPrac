@@ -54,6 +54,12 @@ async def fetch_and_save_fear_greed():
     print("[Scheduler] Fetching Fear & Greed Index...")
     try:
         data = fetch_fear_and_greed_from_api()
+
+        # API 호출 실패 시 Mock 데이터(랜덤값)는 DB에 저장하지 않음
+        if data.get("status") == "error":
+            print(f"[Scheduler][WARN] Fear & Greed: API 호출 실패 - Mock 데이터는 저장하지 않음 (이전 값 유지)")
+            return
+
         async with db.pool.acquire() as conn:
             await conn.execute(
                 "INSERT INTO market_fear_greed (score, rating) VALUES ($1, $2)",
