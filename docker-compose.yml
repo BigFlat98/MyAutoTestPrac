@@ -70,9 +70,6 @@ services:
       # 업로드 파일을 호스트에 영구 보존 (컨테이너 재빌드 시에도 유지)
       - ./Back/uploads:/app/uploads
       - ./Back/profile_uploads:/app/profile_uploads
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     networks:
       - frontend_net
       - backend_net
