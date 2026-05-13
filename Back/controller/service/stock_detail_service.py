@@ -39,17 +39,6 @@ def crawl_naver_financials(symbol: str):
         print(f"Crawling failed for {symbol}: {e}")
     return op, debt
 
-async def _get_fallback_overview(symbol: str):
-    """KIS API 실패 시 날짜 무관하게 DB에 저장된 과거 데이터를 반환"""
-    async with db.pool.acquire() as conn:
-        old = await conn.fetchrow(
-            "SELECT * FROM market_stock_fundamental WHERE symbol = $1",
-            symbol
-        )
-        if old:
-            return dict(old)
-    return None
-
 async def fetch_stock_overview(symbol: str):
     # 1. DB에서 캐시된 데이터 조회 (당일 갱신된 데이터가 있는지 확인)
     async with db.pool.acquire() as conn:
@@ -64,10 +53,7 @@ async def fetch_stock_overview(symbol: str):
     # 2. 캐시가 없으면 KIS API 호출
     access_token = get_kis_auth_token()
     if not access_token:
-        fallback = await _get_fallback_overview(symbol)
-        if fallback:
-            return fallback
-        raise HTTPException(status_code=503, detail="KIS API unavailable and no cached data")
+        raise HTTPException(status_code=500, detail="Failed to get KIS access token")
 
     # API 1: 주식현재가 체결 (FHKST01010100)
     url_1 = f"{KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price"
@@ -89,9 +75,6 @@ async def fetch_stock_overview(symbol: str):
         
         # API Limit 등 정상 응답이 아닐 경우 에러 발생 (DB 0 덮어쓰기 방지)
         if data_1.get("rt_cd") != "0":
-            fallback = await _get_fallback_overview(symbol)
-            if fallback:
-                return fallback
             raise HTTPException(status_code=500, detail=data_1.get("msg1", "KIS API Error"))
             
         output_1 = data_1.get("output", {})
@@ -141,16 +124,12 @@ async def fetch_stock_overview(symbol: str):
         }
 
     except Exception as e:
-        print(f"KIS API error for {symbol}: {e}")
-        fallback = await _get_fallback_overview(symbol)
-        if fallback:
-            return fallback
         raise HTTPException(status_code=500, detail=str(e))
 
 async def fetch_stock_investors(symbol: str):
     access_token = get_kis_auth_token()
     if not access_token:
-        return {"retail": 0, "institutional": 0, "foreign": 0, "error": "KIS token unavailable"}
+        raise HTTPException(status_code=500, detail="Failed to get KIS access token")
 
     url = f"{KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-investor"
     headers = {
@@ -185,13 +164,11 @@ async def fetch_stock_investors(symbol: str):
         }
 
     except Exception as e:
-        print(f"Error fetching investors for {symbol}: {e}")
-        return {"retail": 0, "institutional": 0, "foreign": 0, "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 async def fetch_stock_news(symbol_name: str):
     if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
-        print("Naver API credentials missing")
-        return []
+        raise HTTPException(status_code=500, detail="Naver API credentials missing")
 
     query = urllib.parse.quote(f"{symbol_name} 주가")
     url = f"https://openapi.naver.com/v1/search/news.json?query={query}&display=5&sort=date"
@@ -206,5 +183,4 @@ async def fetch_stock_news(symbol_name: str):
         res.raise_for_status()
         return res.json().get("items", [])
     except Exception as e:
-        print(f"Error fetching news for {symbol_name}: {e}")
-        return []
+        raise HTTPException(status_code=500, detail=str(e))
