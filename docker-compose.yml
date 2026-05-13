@@ -111,6 +111,9 @@ services:
       - KSTOCK_PORT=4000
       - KIS_MOCK=true
       - BACKEND_URL=http://backend:8000
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - frontend_net
     deploy:
