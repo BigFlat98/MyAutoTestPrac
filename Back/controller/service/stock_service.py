@@ -176,30 +176,39 @@ def get_kospi_data_from_kis():
             "fid_input_iscd": symbol
         }
         
-        try:
-            res = requests.get(url, headers=headers, params=params, timeout=5)
-            res.raise_for_status()
-            data = res.json()
-            
-            # Response structure check
-            # output: { stck_prpr (price), prdy_ctrt (change rate), ... }
-            if data.get("rt_cd") == "0":
-                output = data.get("output", {})
-                price = float(output.get("stck_prpr", 0))
-                change = float(output.get("prdy_ctrt", 0))
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                res = requests.get(url, headers=headers, params=params, timeout=5)
+                res.raise_for_status()
+                data = res.json()
                 
-                result.append({
-                    "rank": i + 1,
-                    "symbol": symbol,
-                    "name": name_map.get(symbol, symbol),
-                    "price": price,
-                    "change": change,
-                    "currency": "KRW"
-                })
-            else:
-                print(f"KIS API Error for {symbol}: {data.get('msg1')}")
-        except Exception as e:
-            print(f"Error fetching {symbol} from KIS: {e}")
+                # Response structure check
+                # output: { stck_prpr (price), prdy_ctrt (change rate), ... }
+                if data.get("rt_cd") == "0":
+                    output = data.get("output", {})
+                    price = float(output.get("stck_prpr", 0))
+                    change = float(output.get("prdy_ctrt", 0))
+                    
+                    result.append({
+                        "rank": i + 1,
+                        "symbol": symbol,
+                        "name": name_map.get(symbol, symbol),
+                        "price": price,
+                        "change": change,
+                        "currency": "KRW"
+                    })
+                    break  # 성공 시 재시도 루프 탈출
+                else:
+                    # KIS API 자체 에러 메시지(예: 잘못된 키 등)인 경우 재시도 의미가 없으므로 중단
+                    print(f"KIS API Error for {symbol}: {data.get('msg1')}")
+                    break
+            except Exception as e:
+                print(f"Error fetching {symbol} from KIS (Attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2.0)  # 재시도 전 대기 시간 추가
+                else:
+                    print(f"Failed to fetch {symbol} after {max_retries} attempts.")
             
     return {"market": "kospi", "stocks": result, "status": "success"}
 
